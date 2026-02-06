@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Road Runner - Car</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <style>
+    :root {
+      --bg: #87ceeb;
+      --road: #4a4a4a;
+      --center-line: #ffd54f;
+      --car-body: #1976d2;
+      --car-glass: #64b5f6;
+      --wheel: #212121;
+      --sign-bg: #fff;
+      --sign-border: #d32f2f;
+      --sign-text: #d32f2f;
+      --accent: #ff5722;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: #333;
+      line-height: 1.5;
+    }
+
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      position: relative;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    header h1 {
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      margin-bottom: 10px;
+      color: #1565c0;
+    }
+    header p {
+      font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+      color: #666;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Car interactive styles */
+    #car {
+      cursor: pointer;
+    }
+
+    /* Control button */
+
+    /* SVG scene */
+    .scene {
+      width: 100%;
+      height: auto;
+      max-height: 70vh;
+      border: 3px solid #1976d2;
+      border-radius: 12px;
+      background: linear-gradient(to bottom, #87ceeb 0%, #98d8e8 100%);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      overflow: hidden;
+      perspective: 100px;
+    }
+
+    /* Road styles */
+    #roadPath {
+      stroke: var(--road);
+      stroke-width: 80;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+    .center-line {
+      stroke: var(--center-line);
+      stroke-width: 6;
+      stroke-dasharray: 26 18;
+      stroke-linecap: round;
+      fill: none;
+      opacity: 0.9;
+    }
+
+    /* Car styles - more realistic */
+    #car {
+      filter: drop-shadow(0 6px 12px rgba(0,0,0,0.3));
+    }
+    .wheel {
+      fill: var(--wheel);
+      stroke: #333;
+      stroke-width: 2;
+    }
+    .tire {
+      fill: #1a1a1a;
+      stroke: #333;
+      stroke-width: 1;
+    }
+    .rim {
+      fill: #c0c0c0;
+      stroke: #999;
+      stroke-width: 1;
+    }
+    .car-body {
+      fill: var(--car-body);
+      stroke: #115ca3;
+      stroke-width: 2;
+    }
+    .car-roof {
+      fill: #1565c0;
+      stroke: #0d47a1;
+      stroke-width: 1;
+    }
+    .glass {
+      fill: var(--car-glass);
+      stroke: #42a5f5;
+      stroke-width: 1;
+      opacity: 0.8;
+    }
+    .driver {
+      fill: #f4b183;
+      stroke: #b3744a;
+      stroke-width: 1;
+    }
+    .driver-body {
+      fill: #2196f3;
+      stroke: #1976d2;
+      stroke-width: 1;
+    }
+    .shadow {
+      fill: rgba(0,0,0,0.25);
+    }
+    .headlight {
+      fill: #fff9c4;
+      stroke: #ffc107;
+      stroke-width: 1;
+    }
+    .grille {
+      fill: #333;
+      stroke: #555;
+      stroke-width: 1;
+    }
+
+    /* Signboard */
+    #signGroup {
+      cursor: pointer;
+      user-select: none;
+    }
+    .sign-pole {
+      fill: #8d6e63;
+    }
+    .sign-plate {
+      fill: var(--sign-bg);
+      stroke: var(--sign-border);
+      stroke-width: 3;
+      rx: 8;
+      ry: 8;
+    }
+    .sign-text {
+      font: 700 20px/1.1 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      fill: var(--sign-text);
+      pointer-events: none;
+    }
+
+    /* Mobile and Tablet Responsive Design */
+    @media (max-width: 768px) {
+      .wrap {
+        padding: 10px;
+      }
+      
+      header {
+        margin-bottom: 15px;
+      }
+      
+      .scene {
+        height: 60vh;
+        min-height: 400px;
+        border-width: 2px;
+      }
+    }
+
+    /* Mobile Portrait */
+    @media (max-width: 480px) and (orientation: portrait) {
+      .wrap {
+        padding: 5px;
+      }
+      
+      header h1 {
+        font-size: 1.8rem;
+      }
+      
+      header p {
+        font-size: 0.9rem;
+        padding: 0 10px;
+      }
+      
+      .scene {
+        height: 50vh;
+        min-height: 350px;
+      }
+    }
+
+    /* Mobile Landscape */
+    @media (max-width: 768px) and (orientation: landscape) {
+      .wrap {
+        padding: 8px;
+      }
+      
+      header {
+        margin-bottom: 10px;
+      }
+      
+      header h1 {
+        font-size: 1.5rem;
+        margin-bottom: 5px;
+      }
+      
+      header p {
+        font-size: 0.8rem;
+      }
+      
+      .scene {
+        height: 70vh;
+        min-height: 300px;
+      }
+    }
+
+    /* iPad Portrait */
+    @media (min-width: 481px) and (max-width: 768px) and (orientation: portrait) {
+      .wrap {
+        padding: 15px;
+      }
+      
+      .scene {
+        height: 65vh;
+        min-height: 450px;
+      }
+    }
+
+    /* iPad Landscape */
+    @media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape) {
+      .wrap {
+        padding: 18px;
+      }
+      
+      .scene {
+        height: 75vh;
+        min-height: 500px;
+      }
+    }
+
+    /* Large tablets and small desktops */
+    @media (min-width: 1025px) and (max-width: 1200px) {
+      .scene {
+        height: 70vh;
+        max-height: 600px;
+      }
+    }
+
+    /* Touch-friendly interactions */
+    @media (hover: none) and (pointer: coarse) {
+      #car {
+        cursor: pointer;
+      }
+      
+      .quiz-banner {
+        cursor: pointer;
+      }
+      
+      .quiz-banner:hover {
+        opacity: 0.8;
+      }
+    }
+
+    /* High DPI displays */
+    @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+      .scene {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+      }
+    }
+
+    /* Quiz Popup Styles */
+    .popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    
+    .popup {
+      background: white;
+      border-radius: 12px;
+      padding: 0;
+      max-width: 600px;
+      width: 90%;
+      max-height: 85vh;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      position: relative;
+    }
+    
+    .popup-close {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #666;
+      z-index: 1001;
+    }
+    
+    .popup-close:hover {
+      color: #333;
+    }
+    
+    #popupContent {
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    
+    .quiz-header {
+      background: linear-gradient(135deg, #1976d2, #42a5f5);
+      color: white;
+      padding: 30px;
+      text-align: center;
+      position: relative;
+    }
+    
+    .quiz-header h2 {
+      margin: 0 0 10px 0;
+      font-size: 1.8rem;
+    }
+    
+    .quiz-icon {
+      font-size: 3rem;
+      margin-top: 10px;
+    }
+    
+    .quiz-body {
+      padding: 30px;
+    }
+    
+    .quiz-body > p {
+      font-size: 1.1rem;
+      margin-bottom: 25px;
+      color: #555;
+      text-align: center;
+    }
+    
+    .topics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    
+    .topic-card, .info-card {
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      padding: 20px;
+      transition: transform 0.2s ease;
+    }
+    
+    .topic-card:hover, .info-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .topic-card h4, .info-card h4 {
+      margin: 0 0 10px 0;
+      color: #1976d2;
+      font-size: 1rem;
+    }
+    
+    .topic-card p, .info-card p {
+      margin: 0;
+      color: #666;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+    
+    .assessment-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    
+    .quiz-footer {
+      text-align: center;
+      padding-top: 20px;
+      border-top: 1px solid #e9ecef;
+    }
+    
+    .start-quiz-btn {
+      background: #1976d2;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    
+    .start-quiz-btn:hover {
+      background: #1565c0;
+    }
+    
+    .start-quiz-btn.final {
+      background: #4caf50;
+      font-size: 1.2rem;
+      padding: 18px 35px;
+    }
+    
+    .start-quiz-btn.final:hover {
+      background: #45a049;
+    }
+    
+    .quiz-content {
+      display: none;
+    }
+    
+    @media (max-width: 768px) {
+      .popup {
+        width: 95%;
+        max-height: 90vh;
+      }
+      
+      .quiz-header {
+        padding: 20px;
+      }
+      
+      .quiz-header h2 {
+        font-size: 1.5rem;
+      }
+      
+      .quiz-body {
+        padding: 20px;
+      }
+      
+      .topics-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .assessment-info {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>EHS Safety</h1>
+      <p>Hold down the car to drive. Use A/D or Left/Right arrows to change lanes.</p>
+      <div id="scoreBoard" style="margin-top: 10px; font-size: 1.2rem; font-weight: bold; color: #1976d2;">Score: <span id="score">100</span></div>
+    </header>
+
+    <!-- Responsive SVG scene -->
+    <svg id="scene" class="scene" viewBox="0 0 1000 600" role="img" aria-label="Third person racing view">
+      <defs>
+        <linearGradient id="hill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#87ceeb"/>
+          <stop offset="50%" stop-color="#c8e6c9"/>
+          <stop offset="100%" stop-color="#a5d6a7"/>
+        </linearGradient>
+        <linearGradient id="roadGradient" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#666"/>
+          <stop offset="100%" stop-color="#333"/>
+        </linearGradient>
+      </defs>
+      
+      <!-- Sky and horizon -->
+      <rect x="0" y="0" width="1000" height="300" fill="url(#hill)"/>
+      
+      <!-- Ground/landscape -->
+      <rect x="0" y="300" width="1000" height="300" fill="#4a7c59" opacity="0.8"/>
+
+      <!-- Moving road group with perspective -->
+      <g id="movingRoad">
+        <!-- Realistic road with gentle curves -->
+        <path d="M 500,1800 Q 480,1700 490,1600 Q 510,1500 495,1400 Q 480,1300 500,1200 Q 520,1100 510,1000 Q 490,900 505,800 Q 520,700 510,600 Q 490,500 500,400 Q 510,300 505,200 Q 490,100 500,0 Q 510,-100 505,-200 Q 490,-300 500,-400 Q 510,-500 505,-600 Q 490,-700 500,-800 Q 510,-900 505,-1000 Q 490,-1100 500,-1200 Q 510,-1300 505,-1400 Q 490,-1500 500,-1600" 
+              stroke="url(#roadGradient)" stroke-width="200" fill="none" stroke-linecap="round"/>
+        
+        <!-- Center line -->
+        <path d="M 500,1800 Q 480,1700 490,1600 Q 510,1500 495,1400 Q 480,1300 500,1200 Q 520,1100 510,1000 Q 490,900 505,800 Q 520,700 510,600 Q 490,500 500,400 Q 510,300 505,200 Q 490,100 500,0 Q 510,-100 505,-200 Q 490,-300 500,-400 Q 510,-500 505,-600 Q 490,-700 500,-800 Q 510,-900 505,-1000 Q 490,-1100 500,-1200 Q 510,-1300 505,-1400 Q 490,-1500 500,-1600" 
+              class="center-line"/>
+        
+        <!-- Extended road for seamless loop -->
+        <path d="M 500,2400 Q 480,2300 490,2200 Q 510,2100 495,2000 Q 480,1900 500,1800" 
+              stroke="url(#roadGradient)" stroke-width="200" fill="none" stroke-linecap="round"/>
+        
+        <!-- Potholes -->
+        <g id="potholes">
+          <ellipse class="pothole" cx="450" cy="200" rx="15" ry="8" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="2"/>
+          <ellipse class="pothole" cx="550" cy="-100" rx="12" ry="6" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="2"/>
+          <ellipse class="pothole" cx="480" cy="-400" rx="18" ry="10" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="2"/>
+          <ellipse class="pothole" cx="520" cy="-700" rx="14" ry="7" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="2"/>
+          <ellipse class="pothole" cx="460" cy="-1000" rx="16" ry="9" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="2"/>
+        </g>
+        
+        <!-- Quiz banners positioned alternating left/right of road -->
+        <g class="quiz-banner" transform="translate(360, 180)">
+          <rect class="sign-pole" x="-5" y="0" width="10" height="50" rx="3" ry="3"></rect>
+          <rect class="sign-plate" x="-40" y="-35" width="80" height="40"></rect>
+          <text class="sign-text" x="0" y="-18" text-anchor="middle" font-size="14">QUIZ 1</text>
+          <text class="sign-text" x="0" y="-5" text-anchor="middle" font-size="9" opacity="0.8">Safety</text>
+        </g>
+        
+        <g class="quiz-banner" transform="translate(640, -120)">
+          <rect class="sign-pole" x="-5" y="0" width="10" height="50" rx="3" ry="3"></rect>
+          <rect class="sign-plate" x="-40" y="-35" width="80" height="40"></rect>
+          <text class="sign-text" x="0" y="-18" text-anchor="middle" font-size="14">QUIZ 2</text>
+          <text class="sign-text" x="0" y="-5" text-anchor="middle" font-size="9" opacity="0.8">Health</text>
+        </g>
+        
+        <g class="quiz-banner" transform="translate(360, -420)">
+          <rect class="sign-pole" x="-5" y="0" width="10" height="50" rx="3" ry="3"></rect>
+          <rect class="sign-plate" x="-40" y="-35" width="80" height="40"></rect>
+          <text class="sign-text" x="0" y="-18" text-anchor="middle" font-size="14">QUIZ 3</text>
+          <text class="sign-text" x="0" y="-5" text-anchor="middle" font-size="9" opacity="0.8">Environment</text>
+        </g>
+        
+        <g class="quiz-banner" transform="translate(640, -720)">
+          <rect class="sign-pole" x="-5" y="0" width="10" height="50" rx="3" ry="3"></rect>
+          <rect class="sign-plate" x="-40" y="-35" width="80" height="40"></rect>
+          <text class="sign-text" x="0" y="-18" text-anchor="middle" font-size="14">QUIZ 4</text>
+          <text class="sign-text" x="0" y="-5" text-anchor="middle" font-size="9" opacity="0.8">Emergency</text>
+        </g>
+        
+        <g class="quiz-banner" transform="translate(360, -1020)">
+          <rect class="sign-pole" x="-5" y="0" width="10" height="50" rx="3" ry="3"></rect>
+          <rect class="sign-plate" x="-40" y="-35" width="80" height="40"></rect>
+          <text class="sign-text" x="0" y="-18" text-anchor="middle" font-size="14">QUIZ 5</text>
+          <text class="sign-text" x="0" y="-5" text-anchor="middle" font-size="9" opacity="0.8">Final</text>
+        </g>
+      </g>
+
+      <!-- Top-view racing car -->
+      <g id="car" transform="translate(500,480)" aria-label="Racing car top view">
+        <!-- Shadow -->
+        <ellipse class="shadow" cx="0" cy="25" rx="45" ry="80" opacity="0.3"/>
+
+        <!-- Main car body -->
+        <rect class="car-body" x="-35" y="-70" width="70" height="140" rx="15" ry="15"/>
+        
+        <!-- Front bumper -->
+        <rect fill="#333" x="-30" y="-75" width="60" height="8" rx="4" ry="4"/>
+        
+        <!-- Windshield -->
+        <rect class="glass" x="-25" y="-55" width="50" height="25" rx="3" ry="3"/>
+        
+        <!-- Rear window -->
+        <rect class="glass" x="-25" y="30" width="50" height="25" rx="3" ry="3"/>
+        
+        <!-- Side windows -->
+        <rect class="glass" x="-30" y="-25" width="12" height="50" rx="2" ry="2"/>
+        <rect class="glass" x="18" y="-25" width="12" height="50" rx="2" ry="2"/>
+        
+        <!-- Wheels (all 4 visible from top) -->
+        <rect class="tire" x="-40" y="-50" width="12" height="20" rx="6" ry="6"/>
+        <rect class="tire" x="28" y="-50" width="12" height="20" rx="6" ry="6"/>
+        <rect class="tire" x="-40" y="30" width="12" height="20" rx="6" ry="6"/>
+        <rect class="tire" x="28" y="30" width="12" height="20" rx="6" ry="6"/>
+        
+        <!-- Wheel rims -->
+        <rect class="rim" x="-38" y="-48" width="8" height="16" rx="4" ry="4"/>
+        <rect class="rim" x="30" y="-48" width="8" height="16" rx="4" ry="4"/>
+        <rect class="rim" x="-38" y="32" width="8" height="16" rx="4" ry="4"/>
+        <rect class="rim" x="30" y="32" width="8" height="16" rx="4" ry="4"/>
+
+        <!-- Headlights -->
+        <circle fill="#ffffcc" cx="-20" cy="-68" r="6"/>
+        <circle fill="#ffffcc" cx="20" cy="-68" r="6"/>
+        
+        <!-- Taillights -->
+        <circle fill="#ff4444" cx="-20" cy="62" r="5"/>
+        <circle fill="#ff4444" cx="20" cy="62" r="5"/>
+        
+        <!-- Hood details -->
+        <rect fill="#555" x="-15" y="-50" width="30" height="3" rx="1" ry="1"/>
+        <rect fill="#555" x="-10" y="-45" width="20" height="2" rx="1" ry="1"/>
+        
+        <!-- Roof details -->
+        <rect fill="#333" x="-20" y="-10" width="40" height="20" rx="8" ry="8" opacity="0.3"/>
+      </g>
+    </svg>
+  </div>
+
+  <!-- Quiz Popups -->
+  <div class="popup-overlay" id="popupOverlay">
+    <div class="popup" id="popup">
+      <button class="popup-close" id="popupClose">&times;</button>
+      <div id="popupContent"></div>
+    </div>
+  </div>
+
+  <!-- Quiz Content Templates -->
+  <div id="quiz1Content" class="quiz-content">
+    <div class="quiz-header">
+      <h2>Safety Quiz</h2>
+      <div class="quiz-icon">🛡️</div>
+    </div>
+    <div class="quiz-body">
+      <p>Welcome to the Safety Quiz! This section covers workplace safety protocols and procedures.</p>
+      <div class="topics-grid">
+        <div class="topic-card">
+          <h4>🦺 Personal Protective Equipment</h4>
+          <p>Learn about proper PPE usage and maintenance</p>
+        </div>
+        <div class="topic-card">
+          <h4>🚨 Emergency Procedures</h4>
+          <p>Evacuation routes and emergency protocols</p>
+        </div>
+        <div class="topic-card">
+          <h4>⚠️ Hazard Identification</h4>
+          <p>Recognize and report workplace hazards</p>
+        </div>
+        <div class="topic-card">
+          <h4>📋 Safety Reporting</h4>
+          <p>Incident reporting and safety systems</p>
+        </div>
+      </div>
+      <div class="quiz-footer">
+        <button class="start-quiz-btn" onclick="startQuiz(1)">Start Safety Quiz</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="quiz2Content" class="quiz-content">
+    <div class="quiz-header">
+      <h2>Health Quiz</h2>
+      <div class="quiz-icon">💚</div>
+    </div>
+    <div class="quiz-body">
+      <p>Test your knowledge about workplace health and wellness!</p>
+      <div class="topics-grid">
+        <div class="topic-card">
+          <h4>🪑 Ergonomics</h4>
+          <p>Proper posture and workspace setup</p>
+        </div>
+        <div class="topic-card">
+          <h4>🧘 Stress Management</h4>
+          <p>Mental health and stress reduction</p>
+        </div>
+        <div class="topic-card">
+          <h4>🏥 Health Risks</h4>
+          <p>Occupational health hazards</p>
+        </div>
+        <div class="topic-card">
+          <h4>🧠 Mental Wellness</h4>
+          <p>Mental health awareness programs</p>
+        </div>
+      </div>
+      <div class="quiz-footer">
+        <button class="start-quiz-btn" onclick="startQuiz(2)">Start Health Quiz</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="quiz3Content" class="quiz-content">
+    <div class="quiz-header">
+      <h2>Environment Quiz</h2>
+      <div class="quiz-icon">🌍</div>
+    </div>
+    <div class="quiz-body">
+      <p>Environmental responsibility is everyone's duty!</p>
+      <div class="topics-grid">
+        <div class="topic-card">
+          <h4>♻️ Waste Reduction</h4>
+          <p>Recycling and waste management</p>
+        </div>
+        <div class="topic-card">
+          <h4>⚡ Energy Conservation</h4>
+          <p>Sustainable energy practices</p>
+        </div>
+        <div class="topic-card">
+          <h4>📋 Compliance</h4>
+          <p>Environmental regulations</p>
+        </div>
+        <div class="topic-card">
+          <h4>🌱 Sustainability</h4>
+          <p>Green workplace initiatives</p>
+        </div>
+      </div>
+      <div class="quiz-footer">
+        <button class="start-quiz-btn" onclick="startQuiz(3)">Start Environment Quiz</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="quiz4Content" class="quiz-content">
+    <div class="quiz-header">
+      <h2>Emergency Quiz</h2>
+      <div class="quiz-icon">🚨</div>
+    </div>
+    <div class="quiz-body">
+      <p>Emergency preparedness can save lives!</p>
+      <div class="topics-grid">
+        <div class="topic-card">
+          <h4>🔥 Fire Safety</h4>
+          <p>Fire prevention and response</p>
+        </div>
+        <div class="topic-card">
+          <h4>🩹 First Aid</h4>
+          <p>Basic first aid procedures</p>
+        </div>
+        <div class="topic-card">
+          <h4>📞 Emergency Contacts</h4>
+          <p>Contact protocols and procedures</p>
+        </div>
+        <div class="topic-card">
+          <h4>🚪 Evacuation</h4>
+          <p>Emergency evacuation routes</p>
+        </div>
+      </div>
+      <div class="quiz-footer">
+        <button class="start-quiz-btn" onclick="startQuiz(4)">Start Emergency Quiz</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="quiz5Content" class="quiz-content">
+    <div class="quiz-header">
+      <h2>Final Assessment</h2>
+      <div class="quiz-icon">🏆</div>
+    </div>
+    <div class="quiz-body">
+      <p>Congratulations! You've reached the final assessment.</p>
+      <div class="assessment-info">
+        <div class="info-card">
+          <h4>📚 Comprehensive Review</h4>
+          <p>All previous topics combined</p>
+        </div>
+        <div class="info-card">
+          <h4>🎯 Real Scenarios</h4>
+          <p>Practical workplace situations</p>
+        </div>
+        <div class="info-card">
+          <h4>✅ Best Practices</h4>
+          <p>Industry standard procedures</p>
+        </div>
+        <div class="info-card">
+          <h4>🎓 Certification</h4>
+          <p>Earn your EHS certificate</p>
+        </div>
+      </div>
+      <div class="quiz-footer">
+        <button class="start-quiz-btn final" onclick="startQuiz(5)">Start Final Assessment</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const movingRoad = document.getElementById('movingRoad');
+      const car = document.getElementById('car');
+      const quizBanners = document.querySelectorAll('.quiz-banner');
+
+      // Quiz content mapping
+      const quizContentIds = ['quiz1Content', 'quiz2Content', 'quiz3Content', 'quiz4Content', 'quiz5Content'];
+
+      function showPopup(index) {
+        const contentId = quizContentIds[index];
+        const content = document.getElementById(contentId);
+        if (content) {
+          document.getElementById('popupContent').innerHTML = content.innerHTML;
+        }
+        document.getElementById('popupOverlay').style.display = 'flex';
+      }
+
+      function startQuiz(quizNumber) {
+        hidePopup();
+        // Simulate quiz completion after 3 seconds (replace with actual quiz logic)
+        setTimeout(() => {
+          alert(`Quiz ${quizNumber} completed!`);
+        }, 3000);
+        // window.location.href = `quiz${quizNumber}.html`;
+      }
+
+      function hidePopup() {
+        document.getElementById('popupOverlay').style.display = 'none';
+      }
+
+      // Motion configuration
+      const SPEED = 100;
+      let roadOffset = 0;
+      let isMoving = false;
+      let lastTs = null;
+      let rafId = null;
+      let distance = 0;
+      let carTilt = 0;
+      let roadCurve = 0;
+      let carBounce = 0;
+      let engineVibration = 0;
+      let nearBanner = false;
+      let currentBannerIndex = 0;
+      let hasPassedBanner = false;
+      
+      // Game variables
+      let score = 100;
+      let lanes = [420, 500, 580]; // Left, center, right lane positions
+      let currentLane = 1; // Start in center lane
+      let potholes = [
+        {x: 450, y: 200}, {x: 550, y: -100}, {x: 480, y: -400}, 
+        {x: 520, y: -700}, {x: 460, y: -1000}
+      ];
+      
+      function updateScore(points) {
+        score += points;
+        document.getElementById('score').textContent = score;
+      }
+      
+      function checkPotholeCollision() {
+        const carX = currentCarX;
+        const carY = 480;
+        
+        potholes.forEach(pothole => {
+          const potholeScreenY = pothole.y + roadOffset;
+          const distanceX = Math.abs(carX - pothole.x);
+          const distanceY = Math.abs(carY - potholeScreenY);
+          
+          if (distanceX < 25 && distanceY < 25) {
+            updateScore(-10);
+            pothole.y -= 2000;
+          }
+        });
+      }
+
+      // Banner positions (Y coordinates) and their X positions - closer to banners
+      const bannerPositions = [180, -120, -420, -720, -1020];
+      const bannerXPositions = [460, 540, 460, 540, 460]; // Closer to banners
+      
+      // Road curve calculation for realistic movement
+      function getRoadX(distance) {
+        const phase = (distance * 0.003) % (Math.PI * 8);
+        return 500 + Math.sin(phase) * 10; // Gentle curves
+      }
+      
+      let targetCarX = 500; // Target X position for car
+      let currentCarX = 500; // Current X position for smooth movement
+
+      // Check if car is near any banner and update target position
+      function checkBannerProximity() {
+        const carY = 480;
+        
+        // Update target car position based on upcoming banner
+        if (currentBannerIndex < bannerPositions.length) {
+          const bannerY = bannerPositions[currentBannerIndex];
+          const bannerScreenY = bannerY + roadOffset;
+          const distance = Math.abs(carY - bannerScreenY);
+          
+          // Start steering towards banner when it's 200px away
+          if (distance < 200) {
+            targetCarX = bannerXPositions[currentBannerIndex];
+          } else {
+            // Return to road center when not near banner
+            targetCarX = 500;
+          }
+          
+          if (distance < 60 && !hasPassedBanner) {
+            // Stop at current banner and auto-open popup
+            isMoving = false;
+            hasPassedBanner = true;
+            showPopup(currentBannerIndex);
+            // Move to next banner for next click
+            currentBannerIndex++;
+          }
+        } else {
+          // No more banners, stay on road center
+          targetCarX = 500;
+        }
+      }
+
+      // Update car steering with lane changes
+      function updateCarSteering() {
+        // Set target based on current lane
+        targetCarX = lanes[currentLane];
+        
+        // Smooth movement towards target lane
+        const diff = targetCarX - currentCarX;
+        if (Math.abs(diff) > 1) {
+          currentCarX += diff * 0.1;
+        }
+        
+        // Tilt effect for lane changes
+        const tiltAmount = diff * 0.05;
+        carTilt = Math.max(-5, Math.min(5, tiltAmount));
+      }
+
+      // Update road position with curves
+      function updateRoadPosition() {
+        // Calculate realistic road curve
+        const curvePhase = (distance * 0.003) % (Math.PI * 8);
+        roadCurve = Math.sin(curvePhase) * 8; // Reduced curve intensity
+        
+        // Apply road movement with gentle curve
+        movingRoad.setAttribute('transform', `translate(${roadCurve * 0.5}, ${roadOffset})`);
+        
+        // Update car steering towards banners
+        updateCarSteering();
+        
+        // Keep car mostly centered with minimal deviation
+        const roadX = 500 + roadCurve * 0.1; // Follow road curve very gently
+        
+        // Blend road following with banner steering (more steering influence)
+        const finalCarX = (currentCarX * 0.6) + (roadX * 0.4);
+        
+        // Align car with road and steering
+        if (isMoving) {
+          // Engine vibration
+          engineVibration = Math.sin(distance * 0.3) * 0.1;
+          
+          // Car bounce from road bumps
+          carBounce = Math.sin(distance * 0.2) * 0.3;
+        } else {
+          // Gradual stop
+          engineVibration *= 0.9;
+          carBounce *= 0.9;
+          carTilt *= 0.95;
+        }
+        
+        const car = document.getElementById('car');
+        car.setAttribute('transform', 
+          `translate(${finalCarX + engineVibration},${480 + carBounce}) rotate(${carTilt})`);
+      }
+
+      // Animation loop
+      function tick(ts) {
+        if (lastTs == null) lastTs = ts;
+        const dt = Math.min((ts - lastTs) / 1000, 0.05);
+        lastTs = ts;
+
+        if (isMoving) {
+          roadOffset += SPEED * dt;
+          distance += SPEED * dt;
+          
+          // Check if near banner and auto-stop
+          checkBannerProximity();
+          
+          // Check pothole collisions
+          checkPotholeCollision();
+          
+          // Reset for infinite seamless loop
+          if (roadOffset > 1800) {
+            roadOffset = 0;
+          }
+          
+          updateRoadPosition();
+          
+          // Show banners based on distance traveled
+          quizBanners.forEach((banner, index) => {
+            const showDistance = (index + 1) * 150;
+            if (distance >= showDistance && distance < showDistance + 100) {
+              // Banner is active but no pulse effect
+            } else {
+              banner.classList.remove('pulse');
+            }
+          });
+        } else {
+          updateRoadPosition();
+        }
+
+        rafId = requestAnimationFrame(tick);
+      }
+
+      // Mouse and touch hold controls
+      car.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        if (currentBannerIndex < bannerPositions.length) {
+          isMoving = true;
+          hasPassedBanner = false;
+        }
+      });
+      
+      document.addEventListener('mouseup', () => {
+        isMoving = false;
+      });
+      
+      car.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        if (currentBannerIndex < bannerPositions.length) {
+          isMoving = true;
+          hasPassedBanner = false;
+        }
+      });
+      
+      document.addEventListener('touchend', () => {
+        isMoving = false;
+      });
+      
+      // Lane changing and movement controls
+      let keysPressed = new Set();
+      
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') {
+          e.preventDefault();
+          if (currentLane > 0) currentLane--;
+        }
+        if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') {
+          e.preventDefault();
+          if (currentLane < 2) currentLane++;
+        }
+        if (['ArrowUp', 'ArrowDown', 'w', 's'].includes(e.key.toLowerCase())) {
+          e.preventDefault();
+          keysPressed.add(e.key.toLowerCase());
+          if (currentBannerIndex < bannerPositions.length) {
+            isMoving = true;
+            hasPassedBanner = false;
+          }
+        }
+      });
+      
+      document.addEventListener('keyup', (e) => {
+        if (['ArrowUp', 'ArrowDown', 'w', 's'].includes(e.key.toLowerCase())) {
+          e.preventDefault();
+          keysPressed.delete(e.key.toLowerCase());
+          if (keysPressed.size === 0) {
+            isMoving = false;
+          }
+        }
+      });
+
+      // Initialize
+      updateRoadPosition();
+      rafId = requestAnimationFrame(tick);
+
+      // Quiz banner click handlers
+      quizBanners.forEach((banner, index) => {
+        banner.addEventListener('click', (e) => {
+          e.stopPropagation();
+          showPopup(index);
+        });
+        banner.style.cursor = 'pointer';
+      });
+
+      // Popup close handlers
+      document.getElementById('popupClose').addEventListener('click', hidePopup);
+      document.getElementById('popupOverlay').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('popupOverlay')) {
+          hidePopup();
+        }
+      });
+      
+      // ESC key to close popup
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          hidePopup();
+        }
+      });
+
+      // Handle page visibility
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          if (rafId) cancelAnimationFrame(rafId);
+          rafId = null;
+        } else {
+          lastTs = null;
+          rafId = requestAnimationFrame(tick);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

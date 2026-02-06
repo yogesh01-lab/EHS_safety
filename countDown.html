@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>EHS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <style>
+
+@font-face {
+    font-family: 'Brandon Grotesque';
+    src: url('fonts/BrandonGrotesque-Light.woff2') format('woff2'),
+        url('fonts/BrandonGrotesque-Light.woff') format('woff');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Brandon Grotesque';
+    src: url('fonts/BrandonGrotesque-Bold.woff2') format('woff2'),
+        url('fonts/BrandonGrotesque-Bold.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+    *{
+      margin: 0;
+      padding: 0;
+      scroll-behavior: smooth;
+    }
+body{
+  background-image: url("gradient-bg.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+  min-height: 100dvh;
+
+}
+.coundown_sec{
+  position: relative;
+  height: 100dvh;
+}
+.countDown_card{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.heading{
+  text-align: center;
+  font-family: 'Brandon Grotesque'; 
+  font-weight: 300;
+  margin-bottom: 40px;
+  letter-spacing: 9px;
+  font-size: 50px;
+  color: #ffffff;
+}
+.countDownBox{
+  width: 100px;
+  height: 100px;
+  background-color: #4dbedc;
+  border-radius: 20px;
+  box-shadow: 3px 10px 27px -5px rgba(0,0,0,0.55);
+  -webkit-box-shadow: 3px 10px 27px -5px rgba(0,0,0,0.55);
+  -moz-box-shadow: 3px 10px 27px -5px rgba(0,0,0,0.55);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  
+}
+.count_heading{
+  text-align: center;
+  color: #ffffff;
+  font-family: 'Brandon Grotesque';
+  font-weight: bold;
+  font-size: 30px;
+}
+.count_para{
+  text-align: center;
+  color: #000000;
+  font-family: 'Brandon Grotesque';
+  font-weight: bold;
+  font-size: 10px;
+}
+.countBox_sec{
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+}
+.logo_img{
+  width: 260px;
+  margin-top: 40px;
+  text-align: center;
+}
+.logo_img img{
+  width: 100%;
+}
+
+@media (max-width: 550px) {
+  .heading{
+    font-size: 28px;
+    letter-spacing: 5px;
+    margin-bottom: 30px;
+  }
+  .countBox_sec{
+    gap: 5px;
+  }
+  .countBox_sec > div{
+    font-size: 24px;
+  }
+  .countDownBox{
+    width: 65px;
+    height: 65px;
+  }
+  .count_heading{
+    font-size: 19px;
+  }
+  .count_para{
+    font-size: 7px;
+  }
+  .logo_img{
+    width: 180px;
+    margin-top: 30px;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <div class="coundown_sec">
+    <div class="countDown_card">
+    <p class="heading">COMING SOON</p>
+    <div class="countBox_sec">
+      <div class="countDownBox">
+        <h3 class="count_heading" id="days">06</h3>
+        <p class="count_para" >DAYS</p>
+      </div>
+      <div style="color: #4dbedc; vertical-align: middle;font-size: 38px; ">:</div>
+      <div class="countDownBox">
+        <h3 class="count_heading" id="hours">15</h3>
+        <p class="count_para">HOURS</p>
+      </div>
+      <div style="color: #4dbedc; vertical-align: middle; font-size: 38px;">:</div>
+      <div class="countDownBox">
+        <h3 class="count_heading" id="minutes">48</h3>
+        <p class="count_para">MINUTES</p>
+      </div>
+      <div style="color: #4dbedc; vertical-align: middle; font-size: 38px;">:</div>
+      <div class="countDownBox">
+        <h3 class="count_heading" id="seconds">48</h3>
+        <p class="count_para">SECONDS</p>
+      </div>
+    </div>
+    <div class="logo_img">
+      <img src="logo.png" alt="EHS_logo"/>
+    </div>
+  </div>
+  </div>
+</body>
+<script>
+  const targetDate = new Date('2026-03-09T00:00:00').getTime(); 
+  
+  function updateCountdown() {
+    const now = new Date().getTime();
+    const distance = targetDate - now;
+    
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+    
+    document.getElementById('days').innerHTML = days.toString().padStart(2, '0');
+    document.getElementById('hours').innerHTML = hours.toString().padStart(2, '0');
+    document.getElementById('minutes').innerHTML = minutes.toString().padStart(2, '0');
+    document.getElementById('seconds').innerHTML = seconds.toString().padStart(2, '0');
+    
+    if (distance < 0) {
+      document.getElementById('days').innerHTML = '00';
+      document.getElementById('hours').innerHTML = '00';
+      document.getElementById('minutes').innerHTML = '00';
+      document.getElementById('seconds').innerHTML = '00';
+    }
+  }
+  
+  updateCountdown();
+  setInterval(updateCountdown, 1000); 
+</script>
+</body>
+</html>
