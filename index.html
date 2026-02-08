@@ -470,11 +470,47 @@
   </style>
 </head>
 <body>
+  <!-- Vehicle Selection Overlay -->
+  <div id="vehicleSelectOverlay" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);z-index:2000;display:flex;align-items:center;justify-content:center;">
+    <div style="background:white;padding:40px 30px 30px 30px;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.25);text-align:center;max-width:90vw;">
+      <h2 style="margin-bottom:24px;color:#1976d2;font-size:2rem;">Choose Your Vehicle</h2>
+      <div style="display:flex;gap:40px;justify-content:center;align-items:center;">
+        <button id="selectCarBtn" style="background:none;border:none;cursor:pointer;outline:none;">
+          <svg width="90" height="120" viewBox="0 0 90 120" aria-label="Car" style="display:block;margin:0 auto;">
+            <!-- Improved Car SVG (top view) -->
+            <rect x="20" y="30" width="50" height="60" rx="14" fill="#1976d2" stroke="#115ca3" stroke-width="3"/>
+            <rect x="28" y="40" width="34" height="20" rx="5" fill="#64b5f6" stroke="#42a5f5" stroke-width="2"/>
+            <ellipse cx="45" cy="90" rx="22" ry="10" fill="#333" opacity="0.2"/>
+            <circle cx="30" cy="90" r="10" fill="#212121" stroke="#333" stroke-width="2"/>
+            <circle cx="60" cy="90" r="10" fill="#212121" stroke="#333" stroke-width="2"/>
+            <rect x="35" y="70" width="20" height="8" rx="3" fill="#555" opacity="0.5"/>
+            <rect x="40" y="35" width="10" height="5" rx="2" fill="#fff" opacity="0.7"/>
+          </svg>
+          <div style="margin-top:8px;font-weight:bold;color:#1976d2;">Car</div>
+        </button>
+        <button id="selectBikeBtn" style="background:none;border:none;cursor:pointer;outline:none;">
+          <svg width="90" height="120" viewBox="0 0 90 120" aria-label="Bike" style="display:block;margin:0 auto;">
+            <!-- Improved Bike SVG (top view) -->
+            <circle cx="30" cy="100" r="12" fill="#212121" stroke="#333" stroke-width="2"/>
+            <circle cx="60" cy="100" r="12" fill="#212121" stroke="#333" stroke-width="2"/>
+            <rect x="43" y="50" width="4" height="40" rx="2" fill="#43a047"/>
+            <rect x="35" y="80" width="20" height="8" rx="4" fill="#757575"/>
+            <rect x="44" y="40" width="2" height="12" fill="#757575"/>
+            <rect x="44" y="108" width="2" height="8" fill="#757575"/>
+            <rect x="25" y="60" width="40" height="4" rx="2" fill="#757575"/>
+            <rect x="40" y="70" width="10" height="6" rx="3" fill="#555"/>
+          </svg>
+          <div style="margin-top:8px;font-weight:bold;color:#43a047;">Bike</div>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div class="wrap">
     <header>
       <h1>EHS Safety</h1>
       <p>Hold down the car to drive. Use A/D or Left/Right arrows to change lanes.</p>
-      <div id="scoreBoard" style="margin-top: 10px; font-size: 1.2rem; font-weight: bold; color: #1976d2;">Score: <span id="score">100</span></div>
+      <div id="scoreBoard" style="margin-top: 10px; font-size: 1.2rem; font-weight: bold; color: #1976d2;">Score: <span id="score">0</span></div>
     </header>
 
     <!-- Responsive SVG scene -->
@@ -513,11 +549,11 @@
         
         <!-- Potholes -->
         <g id="potholes">
-          <ellipse class="pothole" cx="450" cy="200" rx="15" ry="8" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="2"/>
-          <ellipse class="pothole" cx="550" cy="-100" rx="12" ry="6" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="2"/>
-          <ellipse class="pothole" cx="480" cy="-400" rx="18" ry="10" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="2"/>
-          <ellipse class="pothole" cx="520" cy="-700" rx="14" ry="7" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="2"/>
-          <ellipse class="pothole" cx="460" cy="-1000" rx="16" ry="9" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="2"/>
+          <ellipse class="pothole" cx="450" cy="350" rx="15" ry="8" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="2"/>
+          <ellipse class="pothole" cx="550" cy="0" rx="12" ry="6" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="2"/>
+          <ellipse class="pothole" cx="480" cy="-250" rx="18" ry="10" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="2"/>
+          <ellipse class="pothole" cx="520" cy="-570" rx="14" ry="7" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="2"/>
+          <ellipse class="pothole" cx="460" cy="-850" rx="16" ry="9" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="2"/>
         </g>
         
         <!-- Quiz banners positioned alternating left/right of road -->
@@ -604,6 +640,23 @@
         
         <!-- Roof details -->
         <rect fill="#333" x="-20" y="-10" width="40" height="20" rx="8" ry="8" opacity="0.3"/>
+      </g>
+      <!-- Bike SVG, hidden by default -->
+      <g id="bike" transform="translate(500,480)" aria-label="Bike top view" style="display:none;">
+        <!-- Bike shadow -->
+        <ellipse class="shadow" cx="0" cy="25" rx="30" ry="60" opacity="0.25"/>
+        <!-- Bike body -->
+        <rect x="-8" y="-40" width="16" height="80" rx="8" fill="#43a047" stroke="#2e7031" stroke-width="3"/>
+        <!-- Handlebar -->
+        <rect x="-20" y="-50" width="40" height="8" rx="4" fill="#757575"/>
+        <!-- Seat -->
+        <rect x="-10" y="35" width="20" height="10" rx="5" fill="#757575"/>
+        <!-- Wheels -->
+        <circle cx="0" cy="-40" r="14" fill="#212121" stroke="#333" stroke-width="3"/>
+        <circle cx="0" cy="40" r="14" fill="#212121" stroke="#333" stroke-width="3"/>
+        <!-- Wheel hubs -->
+        <circle cx="0" cy="-40" r="4" fill="#c0c0c0"/>
+        <circle cx="0" cy="40" r="4" fill="#c0c0c0"/>
       </g>
     </svg>
   </div>
@@ -781,22 +834,101 @@
       // Quiz content mapping
       const quizContentIds = ['quiz1Content', 'quiz2Content', 'quiz3Content', 'quiz4Content', 'quiz5Content'];
 
+      let score = 0; // Start score at 0
+      document.getElementById('score').textContent = score;
+
+      function updateScore(points) {
+        score += points;
+        if (score < 0) score = 0;
+        document.getElementById('score').textContent = score;
+      }
+
       function showPopup(index) {
         const contentId = quizContentIds[index];
         const content = document.getElementById(contentId);
         if (content) {
           document.getElementById('popupContent').innerHTML = content.innerHTML;
+          // Re-attach event handler for Start Quiz button after setting innerHTML
+          const startBtn = document.querySelector('#popupContent .start-quiz-btn');
+          if (startBtn) {
+            startBtn.onclick = function() { startQuiz(index + 1); };
+          }
         }
         document.getElementById('popupOverlay').style.display = 'flex';
       }
 
+      // Quiz logic with dummy questions
       function startQuiz(quizNumber) {
+        // Hide popup and show quiz questions
         hidePopup();
-        // Simulate quiz completion after 3 seconds (replace with actual quiz logic)
-        setTimeout(() => {
-          alert(`Quiz ${quizNumber} completed!`);
-        }, 3000);
-        // window.location.href = `quiz${quizNumber}.html`;
+        showQuizQuestions(quizNumber);
+      }
+
+      function showQuizQuestions(quizNumber) {
+        // Dummy questions for demonstration
+        const questions = [
+          {
+            q: 'What is the safest way to cross the road?',
+            a: ['Run quickly', 'Use a crosswalk', 'Ignore traffic'],
+            correct: 1
+          },
+          {
+            q: 'What should you wear for safety?',
+            a: ['Helmet', 'Sandals', 'Nothing'],
+            correct: 0
+          },
+          {
+            q: 'What do you do in an emergency?',
+            a: ['Panic', 'Follow procedures', 'Hide'],
+            correct: 1
+          }
+        ];
+        // Create quiz modal
+        const quizModal = document.createElement('div');
+        quizModal.style.position = 'fixed';
+        quizModal.style.top = '0';
+        quizModal.style.left = '0';
+        quizModal.style.width = '100vw';
+        quizModal.style.height = '100vh';
+        quizModal.style.background = 'rgba(0,0,0,0.7)';
+        quizModal.style.display = 'flex';
+        quizModal.style.justifyContent = 'center';
+        quizModal.style.alignItems = 'center';
+        quizModal.style.zIndex = '2001';
+        quizModal.innerHTML = `
+          <div style="background:white;padding:30px;border-radius:12px;max-width:500px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.25);">
+            <h2 style="color:#1976d2;text-align:center;margin-bottom:20px;">Quiz ${quizNumber}</h2>
+            <form id="quizForm">
+              ${questions.map((q, i) => `
+                <div style='margin-bottom:18px;'>
+                  <div style='font-weight:bold;margin-bottom:8px;'>${i+1}. ${q.q}</div>
+                  ${q.a.map((ans, j) => `
+                    <label style='display:block;margin-bottom:4px;'>
+                      <input type='radio' name='q${i}' value='${j}' required> ${ans}
+                    </label>
+                  `).join('')}
+                </div>
+              `).join('')}
+              <button type='submit' style='background:#1976d2;color:white;padding:12px 24px;border:none;border-radius:8px;font-size:1rem;font-weight:bold;cursor:pointer;'>Submit Answers</button>
+            </form>
+          </div>
+        `;
+        document.body.appendChild(quizModal);
+        // Handle quiz submission
+        quizModal.querySelector('#quizForm').addEventListener('submit', function(e) {
+          e.preventDefault();
+          let correct = 0;
+          questions.forEach((q, i) => {
+            const val = quizModal.querySelector(`input[name='q${i}']:checked`);
+            if (val && parseInt(val.value) === q.correct) correct++;
+          });
+          // Award points for quiz completion
+          updateScore(30); // Add 30 points for quiz
+          quizModal.remove();
+          // Resume car/bike movement after quiz
+          hasPassedBanner = false; // <-- Reset so car stops at next banner
+          isMoving = true;
+        });
       }
 
       function hidePopup() {
@@ -819,18 +951,16 @@
       let hasPassedBanner = false;
       
       // Game variables
-      let score = 100;
       let lanes = [420, 500, 580]; // Left, center, right lane positions
       let currentLane = 1; // Start in center lane
+      // Move potholes farther from banners
       let potholes = [
-        {x: 450, y: 200}, {x: 550, y: -100}, {x: 480, y: -400}, 
-        {x: 520, y: -700}, {x: 460, y: -1000}
+        {x: 450, y: 350}, // Farther from banner 1 (was 200)
+        {x: 550, y: 0},   // Farther from banner 2 (was -100)
+        {x: 480, y: -250},// Farther from banner 3 (was -400)
+        {x: 520, y: -570},// Farther from banner 4 (was -700)
+        {x: 460, y: -850} // Farther from banner 5 (was -1000)
       ];
-      
-      function updateScore(points) {
-        score += points;
-        document.getElementById('score').textContent = score;
-      }
       
       function checkPotholeCollision() {
         const carX = currentCarX;
@@ -985,34 +1115,75 @@
         rafId = requestAnimationFrame(tick);
       }
 
-      // Mouse and touch hold controls
-      car.addEventListener('mousedown', (e) => {
-        e.preventDefault();
-        if (currentBannerIndex < bannerPositions.length) {
-          isMoving = true;
-          hasPassedBanner = false;
+      // Remove tap/hold to move logic and add countdown before auto-move
+      // Remove car.addEventListener('mousedown', ...) and car.addEventListener('touchstart', ...)
+      // Remove document.addEventListener('mouseup', ...) and document.addEventListener('touchend', ...)
+
+      // Add countdown and auto-move logic
+      function startCountdownAndMove() {
+        let count = 3;
+        const overlay = document.createElement('div');
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100vw';
+        overlay.style.height = '100vh';
+        overlay.style.background = 'rgba(0,0,0,0.7)';
+        overlay.style.display = 'flex';
+        overlay.style.justifyContent = 'center';
+        overlay.style.alignItems = 'center';
+        overlay.style.zIndex = '3000';
+        overlay.innerHTML = `<div id="countdownText" style="color:#fff;font-size:5rem;font-weight:bold;">${count}</div>`;
+        document.body.appendChild(overlay);
+        const countdownText = overlay.querySelector('#countdownText');
+        const interval = setInterval(() => {
+          count--;
+          if (count > 0) {
+            countdownText.textContent = count;
+          } else {
+            clearInterval(interval);
+            overlay.remove();
+            isMoving = true;
+          }
+        }, 1000);
+      }
+
+      // Update vehicle selection logic to start countdown after selection
+      function handleVehicleSelect(vehicle) {
+        selectedVehicle = vehicle;
+        vehicleOverlay.style.display = 'none';
+        showVehicle(vehicle);
+        setTimeout(() => {
+          startCountdownAndMove();
+        }, 300); // Small delay for smooth transition
+      }
+
+      // Swipe left/right for mobile/tablet
+      let touchStartX = null;
+      let touchEndX = null;
+      const minSwipeDistance = 40;
+      document.addEventListener('touchstart', function(e) {
+        if (e.touches.length === 1) {
+          touchStartX = e.touches[0].clientX;
         }
       });
-      
-      document.addEventListener('mouseup', () => {
-        isMoving = false;
-      });
-      
-      car.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        if (currentBannerIndex < bannerPositions.length) {
-          isMoving = true;
-          hasPassedBanner = false;
+      document.addEventListener('touchend', function(e) {
+        if (touchStartX !== null && e.changedTouches.length === 1) {
+          touchEndX = e.changedTouches[0].clientX;
+          const dx = touchEndX - touchStartX;
+          if (Math.abs(dx) > minSwipeDistance) {
+            if (dx < 0 && currentLane < 2) {
+              currentLane++;
+            } else if (dx > 0 && currentLane > 0) {
+              currentLane--;
+            }
+          }
         }
+        touchStartX = null;
+        touchEndX = null;
       });
-      
-      document.addEventListener('touchend', () => {
-        isMoving = false;
-      });
-      
-      // Lane changing and movement controls
-      let keysPressed = new Set();
-      
+
+      // Remove all isMoving toggles from keydown/up except for quiz and banner logic
       document.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') {
           e.preventDefault();
@@ -1022,25 +1193,8 @@
           e.preventDefault();
           if (currentLane < 2) currentLane++;
         }
-        if (['ArrowUp', 'ArrowDown', 'w', 's'].includes(e.key.toLowerCase())) {
-          e.preventDefault();
-          keysPressed.add(e.key.toLowerCase());
-          if (currentBannerIndex < bannerPositions.length) {
-            isMoving = true;
-            hasPassedBanner = false;
-          }
-        }
       });
-      
-      document.addEventListener('keyup', (e) => {
-        if (['ArrowUp', 'ArrowDown', 'w', 's'].includes(e.key.toLowerCase())) {
-          e.preventDefault();
-          keysPressed.delete(e.key.toLowerCase());
-          if (keysPressed.size === 0) {
-            isMoving = false;
-          }
-        }
-      });
+      // Remove up/down/w/s for movement
 
       // Initialize
       updateRoadPosition();
@@ -1079,6 +1233,34 @@
           lastTs = null;
           rafId = requestAnimationFrame(tick);
         }
+      });
+
+      // Vehicle selection logic
+      const vehicleOverlay = document.getElementById('vehicleSelectOverlay');
+      const carSVG = document.getElementById('car');
+      const bikeSVG = document.getElementById('bike');
+      const selectCarBtn = document.getElementById('selectCarBtn');
+      const selectBikeBtn = document.getElementById('selectBikeBtn');
+      let selectedVehicle = null;
+
+      function showVehicle(vehicle) {
+        if (vehicle === 'car') {
+          carSVG.style.display = '';
+          bikeSVG.style.display = 'none';
+        } else if (vehicle === 'bike') {
+          carSVG.style.display = 'none';
+          bikeSVG.style.display = '';
+        }
+      }
+
+      selectCarBtn.addEventListener('click', () => handleVehicleSelect('car'));
+      selectBikeBtn.addEventListener('click', () => handleVehicleSelect('bike'));
+
+      // On load, show overlay and hide both vehicles
+      window.addEventListener('DOMContentLoaded', () => {
+        vehicleOverlay.style.display = 'flex';
+        carSVG.style.display = 'none';
+        bikeSVG.style.display = 'none';
       });
     })();
   </script>
