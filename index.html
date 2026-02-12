@@ -8,7 +8,7 @@
     :root {
       --bg: #87ceeb;
       --road: #4a4a4a;
-      --center-line: #ffd54f;
+      --center-line: #fff;
       --car-body: #1976d2;
       --car-glass: #64b5f6;
       --wheel: #212121;
@@ -88,7 +88,7 @@
     .center-line {
       stroke: var(--center-line);
       stroke-width: 6;
-      stroke-dasharray: 26 18;
+      stroke-dasharray: 29 50;
       stroke-linecap: round;
       fill: none;
       opacity: 0.9;
@@ -181,6 +181,51 @@
         padding: 8px 16px;
         top: 10px;
         right: 10px;
+      }
+      
+      /* Increase banner text size for mobile */
+      .quiz-banner text {
+        font-size: 80px !important;
+      }
+      
+      .quiz-banner text[font-size="36"] {
+        font-size: 50px !important;
+      }
+    }
+
+    /* iPad and Tablet Landscape */
+    @media (min-width: 769px) and (max-width: 1024px) {
+      #scoreBoard {
+        font-size: 1.4rem;
+        padding: 12px 20px;
+      }
+      
+      .popup {
+        max-width: 700px;
+      }
+      
+      #vehicleSelectOverlay > div {
+        max-width: 600px;
+      }
+    }
+
+    /* Laptop and Desktop */
+    @media (min-width: 1025px) {
+      #scoreBoard {
+        font-size: 1.6rem;
+        padding: 15px 25px;
+      }
+      
+      .popup {
+        max-width: 800px;
+      }
+      
+      #vehicleSelectOverlay > div {
+        max-width: 700px;
+      }
+      
+      .scene {
+        cursor: crosshair;
       }
     }
 
@@ -394,11 +439,11 @@
       <h2 style="margin-bottom:24px;color:#1976d2;font-size:2rem;">Choose Your Vehicle</h2>
       <div style="display:flex;gap:40px;justify-content:center;align-items:center;">
         <button id="selectCarBtn" style="background:none;border:none;cursor:pointer;outline:none;">
-          <img src="/SVG/car.svg" width="120" height="120" alt="Car" style="display:block;margin:0 auto;">
+          <img src="SVG/car.svg" width="120" height="120" alt="Car" style="display:block;margin:0 auto;">
           <div style="margin-top:8px;font-weight:bold;color:#1976d2;">Car</div>
         </button>
         <button id="selectBikeBtn" style="background:none;border:none;cursor:pointer;outline:none;">
-          <img src="/SVG/bike-icon.svg" width="120" height="120" alt="Bike" style="display:block;margin:0 auto;">
+          <img src="SVG/bike-icon.svg" width="120" height="120" alt="Bike" style="display:block;margin:0 auto;">
           <div style="margin-top:8px;font-weight:bold;color:#43a047;">Bike</div>
         </button>
       </div>
@@ -409,10 +454,10 @@
     <div id="scoreBoard">Score: <span id="score">0</span></div>
 
     <!-- Responsive SVG scene -->
-    <svg id="scene" class="scene" viewBox="0 0 1000 1000" role="img" aria-label="Third person racing view">
+    <svg id="scene" class="scene" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Third person racing view">
       <defs>
         <linearGradient id="hill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#87ceeb"/>
+          <stop offset="0%" stop-color="#5bc2e7"/>
           <stop offset="50%" stop-color="#c8e6c9"/>
           <stop offset="100%" stop-color="#a5d6a7"/>
         </linearGradient>
@@ -423,15 +468,18 @@
       </defs>
       
       <!-- Buildings background replacing sky -->
-      <image href="/SVG/bldgs.svg" x="0" y="0" width="1000" height="300" preserveAspectRatio="xMidYMid slice"/>
+      <image id="buildingsImg" href="SVG/bldgs.svg" x="0" y="500" width="1000" height="300" preserveAspectRatio="xMidYMid slice"/>
+      
+      <!-- Greenery stretch for iPad (between buildings and ground) -->
+      <rect id="greeneryStretch" x="0" y="650" width="1000" height="0" fill="#00b140" opacity="0.8" style="display:none;"/>
       
       <!-- Ground/landscape -->
-      <rect x="0" y="300" width="1000" height="700" fill="#4a7c59" opacity="0.8"/>
+      <rect id="groundRect" x="0" y="800" width="1000" height="700" fill="#00b140" opacity="0.8"/>
 
       <!-- Moving road group with perspective -->
       <g id="movingRoad">
         <!-- Smooth perspective road: 260px at top, 660px at bottom -->
-        <polygon id="mainRoad" points="370,300 630,300 800,3000 200,3000" fill="#555" stroke="none"/>
+        <polygon id="mainRoad" points="370,300 630,300 800,3000 200,3000" fill="#63666a" stroke="none"/>
         
         <!-- Road edges -->
         <line x1="370" y1="300" x2="200" y2="3000" stroke="#222" stroke-width="2"/>
@@ -440,59 +488,59 @@
         <!-- Center dashed line -->
         <line id="centerLine" x1="500" y1="300" x2="500" y2="3000" class="center-line"/>
         
-        <!-- Potholes -->
-        <g id="potholes">
-          <ellipse class="pothole" cx="450" cy="350" rx="15" ry="8" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="2"/>
-          <ellipse class="pothole" cx="550" cy="0" rx="12" ry="6" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="2"/>
-          <ellipse class="pothole" cx="480" cy="-250" rx="18" ry="10" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="2"/>
-          <ellipse class="pothole" cx="520" cy="-570" rx="14" ry="7" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="2"/>
-          <ellipse class="pothole" cx="460" cy="-850" rx="16" ry="9" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="2"/>
+        <!-- Road obstacles (cars and potholes) -->
+        <g id="obstacles">
+          <image class="obstacle" href="SVG/car1.svg" x="0" y="0" width="80" height="120" style="display:none;"/>
+          <image class="obstacle" href="SVG/potholes.svg" x="0" y="0" width="60" height="60" style="display:none;"/>
+          <image class="obstacle" href="SVG/car2.svg" x="0" y="0" width="80" height="120" style="display:none;"/>
+          <image class="obstacle" href="SVG/car3.svg" x="0" y="0" width="80" height="120" style="display:none;"/>
+          <image class="obstacle" href="SVG/car1.svg" x="0" y="0" width="80" height="120" style="display:none;"/>
         </g>
         
         <!-- Quiz banners positioned alternating left/right of road -->
         <g class="quiz-banner" transform="translate(360, 180)">
-          <rect class="sign-pole" x="-5" y="0" width="10" height="50" rx="3" ry="3"></rect>
-          <rect class="sign-plate" x="-40" y="-35" width="80" height="40"></rect>
-          <text class="sign-text" x="0" y="-18" text-anchor="middle" font-size="14">QUIZ 1</text>
-          <text class="sign-text" x="0" y="-5" text-anchor="middle" font-size="9" opacity="0.8">Safety</text>
+          <rect class="sign-pole" x="-20" y="0" width="40" height="200" rx="10" ry="10"></rect>
+          <rect class="sign-plate" x="-180" y="-160" width="360" height="180"></rect>
+          <text class="sign-text" x="0" y="-80" text-anchor="middle" font-size="60">QUIZ 1</text>
+          <text class="sign-text" x="0" y="-24" text-anchor="middle" font-size="36" opacity="0.8">Safety</text>
         </g>
         
         <g class="quiz-banner" transform="translate(640, -420)">
-          <rect class="sign-pole" x="-5" y="0" width="10" height="50" rx="3" ry="3"></rect>
-          <rect class="sign-plate" x="-40" y="-35" width="80" height="40"></rect>
-          <text class="sign-text" x="0" y="-18" text-anchor="middle" font-size="14">QUIZ 2</text>
-          <text class="sign-text" x="0" y="-5" text-anchor="middle" font-size="9" opacity="0.8">Health</text>
+          <rect class="sign-pole" x="-20" y="0" width="40" height="200" rx="10" ry="10"></rect>
+          <rect class="sign-plate" x="-180" y="-160" width="360" height="180"></rect>
+          <text class="sign-text" x="0" y="-80" text-anchor="middle" font-size="60">QUIZ 2</text>
+          <text class="sign-text" x="0" y="-24" text-anchor="middle" font-size="36" opacity="0.8">Health</text>
         </g>
         
         <g class="quiz-banner" transform="translate(360, -1020)">
-          <rect class="sign-pole" x="-5" y="0" width="10" height="50" rx="3" ry="3"></rect>
-          <rect class="sign-plate" x="-40" y="-35" width="80" height="40"></rect>
-          <text class="sign-text" x="0" y="-18" text-anchor="middle" font-size="14">QUIZ 3</text>
-          <text class="sign-text" x="0" y="-5" text-anchor="middle" font-size="9" opacity="0.8">Environment</text>
+          <rect class="sign-pole" x="-20" y="0" width="40" height="200" rx="10" ry="10"></rect>
+          <rect class="sign-plate" x="-180" y="-160" width="360" height="180"></rect>
+          <text class="sign-text" x="0" y="-80" text-anchor="middle" font-size="60">QUIZ 3</text>
+          <text class="sign-text" x="0" y="-24" text-anchor="middle" font-size="36" opacity="0.8">Environment</text>
         </g>
         
         <g class="quiz-banner" transform="translate(640, -1620)">
-          <rect class="sign-pole" x="-5" y="0" width="10" height="50" rx="3" ry="3"></rect>
-          <rect class="sign-plate" x="-40" y="-35" width="80" height="40"></rect>
-          <text class="sign-text" x="0" y="-18" text-anchor="middle" font-size="14">QUIZ 4</text>
-          <text class="sign-text" x="0" y="-5" text-anchor="middle" font-size="9" opacity="0.8">Emergency</text>
+          <rect class="sign-pole" x="-20" y="0" width="40" height="200" rx="10" ry="10"></rect>
+          <rect class="sign-plate" x="-180" y="-160" width="360" height="180"></rect>
+          <text class="sign-text" x="0" y="-80" text-anchor="middle" font-size="60">QUIZ 4</text>
+          <text class="sign-text" x="0" y="-24" text-anchor="middle" font-size="36" opacity="0.8">Emergency</text>
         </g>
         
         <g class="quiz-banner" transform="translate(360, -2220)">
-          <rect class="sign-pole" x="-5" y="0" width="10" height="50" rx="3" ry="3"></rect>
-          <rect class="sign-plate" x="-40" y="-35" width="80" height="40"></rect>
-          <text class="sign-text" x="0" y="-18" text-anchor="middle" font-size="14">QUIZ 5</text>
-          <text class="sign-text" x="0" y="-5" text-anchor="middle" font-size="9" opacity="0.8">Final</text>
+          <rect class="sign-pole" x="-20" y="0" width="40" height="200" rx="10" ry="10"></rect>
+          <rect class="sign-plate" x="-180" y="-160" width="360" height="180"></rect>
+          <text class="sign-text" x="0" y="-80" text-anchor="middle" font-size="60">QUIZ 5</text>
+          <text class="sign-text" x="0" y="-24" text-anchor="middle" font-size="36" opacity="0.8">Final</text>
         </g>
       </g>
 
       <!-- Top-view racing car -->
       <g id="car" transform="translate(500,480)" aria-label="Racing car top view">
-        <image href="/SVG/maincar.svg" x="-65" y="-105" width="130" height="210"/>
+        <image href="SVG/maincar.svg" x="-65" y="-105" width="130" height="210"/>
       </g>
       <!-- Bike SVG, hidden by default -->
       <g id="bike" transform="translate(500,480)" aria-label="Bike top view" style="display:none;">
-        <image href="/SVG/bike.svg" x="-65" y="-105" width="130" height="210"/>
+        <image href="SVG/bike.svg" x="-65" y="-105" width="130" height="210"/>
       </g>
     </svg>
   </div>
@@ -663,13 +711,55 @@
 
   <script>
     (() => {
+      // Dynamically adjust viewBox for mobile screens
+      const scene = document.getElementById('scene');
+      
+      // Detect iPad first before any usage
+      const isIPad = /iPad|Macintosh/.test(navigator.userAgent) && 'ontouchend' in document;
+      
+      const adjustViewBox = () => {
+        const aspectRatio = window.innerHeight / window.innerWidth;
+        const viewBoxHeight = Math.max(1000, 1000 * aspectRatio);
+        scene.setAttribute('viewBox', `0 0 1000 ${viewBoxHeight}`);
+        
+        // Update ground height to always touch bottom
+        const ground = document.getElementById('groundRect');
+        if (ground) {
+          const isMobile = window.innerWidth <= 768 && !isIPad;
+          const groundY = isIPad ? 650 : (isMobile ? 900 : 800);
+          ground.setAttribute('y', groundY);
+          ground.setAttribute('height', viewBoxHeight - groundY);
+        }
+        
+        // Update road config
+        ROAD_CONFIG.endY = viewBoxHeight;
+        updateRoadGeometry();
+      };
+      
+      // Function to update road geometry
+      function updateRoadGeometry() {
+        const roadLeftTop = ROAD_CONFIG.centerX - (ROAD_CONFIG.startWidth / 2);
+        const roadRightTop = ROAD_CONFIG.centerX + (ROAD_CONFIG.startWidth / 2);
+        const roadLeftBottom = ROAD_CONFIG.centerX - (ROAD_CONFIG.endWidth / 2);
+        const roadRightBottom = ROAD_CONFIG.centerX + (ROAD_CONFIG.endWidth / 2);
+        
+        roadPolygon.setAttribute('points', 
+          `${roadLeftTop},${ROAD_CONFIG.startY} ${roadRightTop},${ROAD_CONFIG.startY} ${roadRightBottom},${ROAD_CONFIG.endY} ${roadLeftBottom},${ROAD_CONFIG.endY}`);
+        roadLeftEdge.setAttribute('x2', roadLeftBottom);
+        roadLeftEdge.setAttribute('y2', ROAD_CONFIG.endY);
+        roadRightEdge.setAttribute('x2', roadRightBottom);
+        roadRightEdge.setAttribute('y2', ROAD_CONFIG.endY);
+        centerLine.setAttribute('y2', ROAD_CONFIG.endY);
+      }
+      
       // ===== ROAD CONFIGURATION =====
       // Adjust these values to customize the road perspective
+      const isMobile = window.innerWidth <= 768 && !isIPad;
       const ROAD_CONFIG = {
         centerX: 500,
-        startY: 0,
+        startY: isIPad ? 650 : (isMobile ? 900 : 800),
         endY: 1000,
-        startWidth: 200,
+        startWidth: 260,
         endWidth: 1000,
         initialOffset: -100
       };
@@ -806,7 +896,8 @@
             // Show final score screen
             showFinalScore();
           } else {
-            // Resume car/bike movement after quiz
+            // Move to next banner and resume movement
+            currentBannerIndex++;
             hasPassedBanner = false;
             isMoving = true;
           }
@@ -842,11 +933,13 @@
 
       function hidePopup() {
         document.getElementById('popupOverlay').style.display = 'none';
+        isDragging = false;
       }
 
       // Motion configuration
-      const SPEED = 80;
-      let selectedVehicle = null; // Declare early
+      const SPEED = 200;
+      const effectiveSpeed = isIPad ? SPEED * 0.6 : SPEED;
+      let selectedVehicle = null;
       let roadOffset = ROAD_CONFIG.initialOffset;
       let isMoving = false;
       let lastTs = null;
@@ -862,48 +955,58 @@
       let hasPassedBanner = false;
       
       // Game variables
-      let lanes = [380, 500, 620]; // Left, center, right lane positions (increased spacing)
+      // Calculate lane positions based on road width at car position
+      const carYPos = ROAD_CONFIG.endY - 200;
+      const progress = (carYPos - ROAD_CONFIG.startY) / (ROAD_CONFIG.endY - ROAD_CONFIG.startY);
+      const roadWidthAtCar = ROAD_CONFIG.startWidth + (ROAD_CONFIG.endWidth - ROAD_CONFIG.startWidth) * progress;
+      const laneSpacing = roadWidthAtCar / 3;
+      let lanes = [
+        ROAD_CONFIG.centerX - laneSpacing,  // Left lane
+        ROAD_CONFIG.centerX,                 // Center lane
+        ROAD_CONFIG.centerX + laneSpacing    // Right lane
+      ];
       let currentLane = 1; // Start in center lane
-      // Potholes - place before quiz banners on opposite side
-      // Banners at: 250, -250, -600, -950, -1300
-      // Banner sides: [0, 1, 0, 1, 0] (0=left, 1=right)
-      let potholes = [
-        {hit: false, initialY: 150, side: 1},    // Before quiz 1 (banner on left, pothole on right)
-        {hit: false, initialY: -350, side: 0},   // Before quiz 2 (banner on right, pothole on left)
-        {hit: false, initialY: -700, side: 1},   // Before quiz 3 (banner on left, pothole on right)
-        {hit: false, initialY: -1050, side: 0},  // Before quiz 4 (banner on right, pothole on left)
-        {hit: false, initialY: -1400, side: 1}   // Before quiz 5 (banner on left, pothole on right)
+      // Obstacles - place one before each quiz banner (5 obstacles total)
+      // Banner positions: 180, -420, -1020, -1620, -2220
+      let obstacles = [
+        {hit: false, initialY: 240, side: 1, type: 'car1', maxScale: 0.3},       // Before quiz 1 (banner at 180)
+        {hit: false, initialY: -360, side: 0, type: 'pothole', maxScale: 0.3},   // Before quiz 2 (banner at -420)
+        {hit: false, initialY: -960, side: 1, type: 'car2', maxScale: 0.3},      // Before quiz 3 (banner at -1020)
+        {hit: false, initialY: -1560, side: 0, type: 'car3', maxScale: 0.3},     // Before quiz 4 (banner at -1620)
+        {hit: false, initialY: -2160, side: 1, type: 'car1', maxScale: 0.3}      // Before quiz 5 (banner at -2220)
       ];
       
-      // Calculate pothole X position based on road width at given Y
-      function getPotholeX(y, side) {
-        const progress = (y - ROAD_CONFIG.startY) / (ROAD_CONFIG.endY - ROAD_CONFIG.startY);
+      // Calculate obstacle X position based on road width at given Y
+      function getObstacleX(y, side) {
+        const progress = Math.max(0, Math.min(1, (y - ROAD_CONFIG.startY) / (ROAD_CONFIG.endY - ROAD_CONFIG.startY)));
         const roadWidth = ROAD_CONFIG.startWidth + (ROAD_CONFIG.endWidth - ROAD_CONFIG.startWidth) * progress;
-        const laneOffset = roadWidth / 4;
+        const laneOffset = roadWidth / 3;
         return side === 0 ? ROAD_CONFIG.centerX - laneOffset : ROAD_CONFIG.centerX + laneOffset;
       }
       
-      function checkPotholeCollision() {
-        if (!gameStarted) return; // Don't check collisions before game starts
+      function checkObstacleCollision() {
+        if (!gameStarted) return;
         
+        const isMobile = window.innerWidth <= 768 && !isIPad;
         const carX = currentCarX;
-        const carY = 480;
+        const carY = ROAD_CONFIG.endY - (isIPad ? 300 : (isMobile ? 300 : 400));
+        const collisionBuffer = isMobile ? 80 : (isIPad ? 50 : 40);
         
-        potholes.forEach(pothole => {
-          pothole.y = pothole.initialY + roadOffset;
-          pothole.x = getPotholeX(pothole.y, pothole.side);
+        obstacles.forEach(obstacle => {
+          obstacle.y = obstacle.initialY + roadOffset;
+          obstacle.x = getObstacleX(obstacle.y, obstacle.side);
           
-          const distanceX = Math.abs(carX - pothole.x);
-          const distanceY = Math.abs(carY - pothole.y);
+          const distanceX = Math.abs(carX - obstacle.x);
+          const distanceY = Math.abs(carY - obstacle.y);
           
-          if (distanceX < 30 && distanceY < 30 && !pothole.hit && pothole.y > 300 && pothole.y < 600) {
+          if (distanceX < collisionBuffer && distanceY < collisionBuffer && !obstacle.hit && obstacle.y > 800 && obstacle.y < ROAD_CONFIG.endY) {
             updateScore(-10);
             potholeImpact = 15;
             carTilt += (Math.random() - 0.5) * 10;
-            pothole.hit = true;
+            obstacle.hit = true;
             
             setTimeout(() => {
-              pothole.hit = false;
+              obstacle.hit = false;
             }, 1000);
           }
         });
@@ -912,21 +1015,49 @@
           potholeImpact *= 0.85;
         }
         
-        const potholeElements = document.querySelectorAll('.pothole');
-        potholes.forEach((pothole, i) => {
-          if (potholeElements[i]) {
-            potholeElements[i].setAttribute('cx', pothole.x);
-            potholeElements[i].setAttribute('cy', pothole.y);
-            potholeElements[i].style.display = (gameStarted && pothole.y > 300) ? '' : 'none';
+        const obstacleElements = document.querySelectorAll('.obstacle');
+        obstacles.forEach((obstacle, i) => {
+          if (obstacleElements[i]) {
+            // Calculate distance from car for perspective scaling
+            const distanceFromCar = Math.abs(carY - obstacle.y);
+            
+            // Base sizes for different devices
+            let baseSize;
+            if (isMobile) {
+              baseSize = obstacle.type === 'pothole' ? 60 : 130;
+            } else if (isIPad) {
+              baseSize = obstacle.type === 'pothole' ? 50 : 70;
+            } else {
+              baseSize = obstacle.type === 'pothole' ? 40 : 60;
+            }
+            
+            // Apply perspective scaling - smaller when far, larger when close
+            const minScale = 0.3;
+            const maxScaleLimit = (isMobile && obstacle.type !== 'pothole') ? 2.8 : 2;
+            const maxDistance = 400;
+            const distanceRatio = Math.max(0, Math.min(1, distanceFromCar / maxDistance));
+            const currentScale = maxScaleLimit - (distanceRatio * (maxScaleLimit - minScale));
+            
+            // Track maximum scale reached - never reduce size once it grows
+            obstacle.maxScale = Math.max(obstacle.maxScale, currentScale);
+            const scaledSize = baseSize * obstacle.maxScale;
+            
+            const width = obstacle.type === 'pothole' ? scaledSize : scaledSize;
+            const height = obstacle.type === 'pothole' ? scaledSize : scaledSize * 1.615; // Match car aspect ratio
+            
+            obstacleElements[i].setAttribute('x', obstacle.x - width / 2);
+            obstacleElements[i].setAttribute('y', obstacle.y - height / 2);
+            obstacleElements[i].setAttribute('width', width);
+            obstacleElements[i].setAttribute('height', height);
+            obstacleElements[i].style.display = (gameStarted && obstacle.y > 800 && obstacle.y < ROAD_CONFIG.endY) ? '' : 'none';
           }
         });
       }
 
       // Banner positions - start off-screen and move down
       // Side: 0 = left, 1 = right
-      // Buildings end at y=300, so start banners after that
-      // Increased spacing between banners
-      const bannerInitialY = [250, -250, -700, -1050, -1400];
+      // Buildings end at y=800, so start banners after that
+      const bannerInitialY = isIPad ? [700, -300, -1500, -2700, -3900] : (isMobile ? [1000, -200, -1400, -2600, -3800] : [900, -300, -1500, -2700, -3900]);
       const bannerSide = [0, 1, 0, 1, 0]; // Alternating left/right
       
       // Hide banners and potholes initially
@@ -934,10 +1065,9 @@
       
       // Calculate banner X position based on road width at given Y
       function getBannerX(y, side) {
-        // Road width changes from 80px at top (y=100) to 500px at bottom (y=600)
-        const progress = (y - ROAD_CONFIG.startY) / (ROAD_CONFIG.endY - ROAD_CONFIG.startY);
+        const progress = Math.max(0, Math.min(1, (y - ROAD_CONFIG.startY) / (ROAD_CONFIG.endY - ROAD_CONFIG.startY)));
         const roadWidth = ROAD_CONFIG.startWidth + (ROAD_CONFIG.endWidth - ROAD_CONFIG.startWidth) * progress;
-        const offset = roadWidth / 2 + 60; // 60px outside road edge
+        const offset = (roadWidth / 2) + (isIPad ? 80 : 40);
         return side === 0 ? ROAD_CONFIG.centerX - offset : ROAD_CONFIG.centerX + offset;
       }
       
@@ -947,12 +1077,12 @@
         return 500 + Math.sin(phase) * 10; // Gentle curves
       }
       
-      let targetCarX = 500; // Target X position for car
       let currentCarX = 500; // Current X position for smooth movement
 
       // Check if car is near any banner and update target position
       function checkBannerProximity() {
-        const carY = 480;
+        const isMobile = window.innerWidth <= 768 && !isIPad;
+        const carY = ROAD_CONFIG.endY - (isIPad ? 300 : (isMobile ? 300 : 400));
         
         // Update banner positions based on distance
         quizBanners.forEach((banner, index) => {
@@ -961,43 +1091,40 @@
           
           // Calculate scale based on distance (perspective effect)
           const distanceToCar = carY - bannerY;
-          const scale = Math.max(0.3, Math.min(1, 1 - (distanceToCar / 300)));
+          const baseScale = Math.max(0.5, Math.min(1.5, 1 - (distanceToCar / 400)));
+          const scale = isIPad ? baseScale * 0.6 : baseScale;
           
-          // Only show banner if game started and it's below buildings (y > 300)
-          if (gameStarted && bannerY > 300) {
+          // Show only current banner when it's in visible range (800 to endY)
+          if (gameStarted && index === currentBannerIndex && bannerY > 800 && bannerY < ROAD_CONFIG.endY) {
             banner.setAttribute('transform', `translate(${bannerX}, ${bannerY}) scale(${scale})`);
             banner.style.display = '';
-          } else {
-            banner.style.display = 'none';
-          }
-          
-          // Check if near current banner
-          if (index === currentBannerIndex) {
-            const distance = Math.abs(carY - bannerY);
             
-            if (distance < 60 && !hasPassedBanner && bannerY > 300 && bannerY < 600) {
+            // Check if car is approaching banner
+            const distance = carY - bannerY;
+            const triggerDistance = isIPad ? 50 : 200;
+            if (distance > 0 && distance < triggerDistance && !hasPassedBanner) {
               isMoving = false;
               hasPassedBanner = true;
-              showPopup(currentBannerIndex);
-              currentBannerIndex++;
+              setTimeout(() => {
+                showPopup(currentBannerIndex);
+              }, 100);
             }
+          } else {
+            banner.style.display = 'none';
           }
         });
       }
 
-      // Update car steering with lane changes
+      // Update car steering with smooth movement
       function updateCarSteering() {
-        // Set target based on current lane
-        targetCarX = lanes[currentLane];
-        
-        // Smooth movement towards target lane
+        // Smooth interpolation towards target position
         const diff = targetCarX - currentCarX;
-        if (Math.abs(diff) > 1) {
-          currentCarX += diff * 0.1;
+        if (Math.abs(diff) > 0.5) {
+          currentCarX += diff * 0.15; // Smooth interpolation factor
         }
         
-        // Tilt effect for lane changes
-        const tiltAmount = diff * 0.05;
+        // Smooth tilt effect based on movement
+        const tiltAmount = (currentCarX - 500) * 0.01;
         carTilt = Math.max(-5, Math.min(5, tiltAmount));
       }
 
@@ -1020,8 +1147,8 @@
         // Keep car mostly centered with minimal deviation
         const roadX = 500 + roadCurve * 0.1; // Follow road curve very gently
         
-        // Blend road following with banner steering (more steering influence)
-        const finalCarX = (currentCarX * 0.6) + (roadX * 0.4);
+        // Blend road following with drag position
+        const finalCarX = (currentCarX * 0.9) + (roadX * 0.1);
         
         // Align car with road and steering
         if (isMoving) {
@@ -1040,8 +1167,11 @@
         // Update the active vehicle (car or bike)
         const activeVehicle = document.getElementById(selectedVehicle);
         if (activeVehicle) {
+          const isMobile = window.innerWidth <= 768 && !isIPad;
+          const carY = ROAD_CONFIG.endY - (isIPad ? 300 : (isMobile ? 300 : 400));
+          const vehicleScale = isIPad ? 1.5 : 2.5;
           activeVehicle.setAttribute('transform', 
-            `translate(${finalCarX + engineVibration + (Math.sin(potholeImpact) * 2)},${480 + carBounce + potholeImpact}) rotate(${carTilt})`);
+            `translate(${finalCarX + engineVibration + (Math.sin(potholeImpact) * 2)},${carY + carBounce + potholeImpact}) rotate(${carTilt}) scale(${vehicleScale})`);
         }
       }
 
@@ -1052,13 +1182,13 @@
         lastTs = ts;
 
         if (isMoving) {
-          roadOffset += SPEED * dt;
-          distance += SPEED * dt;
+          roadOffset += effectiveSpeed * dt;
+          distance += effectiveSpeed * dt;
           
           // Check if near banner and auto-stop
           if (gameStarted) {
             checkBannerProximity();
-            checkPotholeCollision();
+            checkObstacleCollision();
           }
           
           updateRoadPosition();
@@ -1129,43 +1259,85 @@
         }, 200); // Small delay for smooth transition
       }
 
-      // Swipe left/right for mobile/tablet
-      let touchStartX = null;
-      let touchEndX = null;
-      const minSwipeDistance = 50;
+      // Touch and Mouse drag for all devices - drag car left/right within road bounds
+      let isDragging = false;
+      let targetCarX = 500; // Target position for smooth interpolation
+      
+      // Helper function to handle position update
+      function updateCarPosition(clientX) {
+        const screenWidth = window.innerWidth;
+        
+        // Map position to road bounds
+        const carYPos = ROAD_CONFIG.endY - 400;
+        const progress = (carYPos - ROAD_CONFIG.startY) / (ROAD_CONFIG.endY - ROAD_CONFIG.startY);
+        const roadWidthAtCar = ROAD_CONFIG.startWidth + (ROAD_CONFIG.endWidth - ROAD_CONFIG.startWidth) * progress;
+        
+        const roadLeft = ROAD_CONFIG.centerX - roadWidthAtCar / 2;
+        const roadRight = ROAD_CONFIG.centerX + roadWidthAtCar / 2;
+        
+        // Convert screen X to SVG X coordinate
+        const svgX = (clientX / screenWidth) * 1000;
+        
+        // Set target position constrained to road bounds
+        targetCarX = Math.max(roadLeft, Math.min(roadRight, svgX));
+      }
+      
+      // Touch events for mobile/tablet
       document.addEventListener('touchstart', function(e) {
-        if (e.touches.length === 1) {
-          touchStartX = e.touches[0].clientX;
+        if (e.touches.length === 1 && gameStarted && !e.target.closest('.popup-overlay')) {
+          isDragging = true;
         }
       }, {passive: true});
+      
+      document.addEventListener('touchmove', function(e) {
+        if (isDragging && e.touches.length === 1) {
+          updateCarPosition(e.touches[0].clientX);
+        }
+      }, {passive: true});
+      
       document.addEventListener('touchend', function(e) {
-        if (touchStartX !== null && e.changedTouches.length === 1) {
-          touchEndX = e.changedTouches[0].clientX;
-          const dx = touchEndX - touchStartX;
-          if (Math.abs(dx) > minSwipeDistance) {
-            if (dx > 0 && currentLane < 2) {
-              currentLane++;
-            } else if (dx < 0 && currentLane > 0) {
-              currentLane--;
-            }
-          }
-        }
-        touchStartX = null;
-        touchEndX = null;
+        isDragging = false;
       }, {passive: true});
+      
+      // Mouse events for desktop/laptop
+      document.addEventListener('mousedown', function(e) {
+        if (gameStarted && !e.target.closest('.popup-overlay')) {
+          isDragging = true;
+          updateCarPosition(e.clientX);
+        }
+      });
+      
+      document.addEventListener('mousemove', function(e) {
+        if (isDragging) {
+          updateCarPosition(e.clientX);
+        }
+      });
+      
+      document.addEventListener('mouseup', function(e) {
+        isDragging = false;
+      });
 
-      // Remove all isMoving toggles from keydown/up except for quiz and banner logic
+      // Keyboard controls for desktop - arrow keys to move car
       document.addEventListener('keydown', (e) => {
+        if (!gameStarted) return;
+        
         if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') {
           e.preventDefault();
-          if (currentLane > 0) currentLane--;
+          const carYPos = ROAD_CONFIG.endY - 400;
+          const progress = (carYPos - ROAD_CONFIG.startY) / (ROAD_CONFIG.endY - ROAD_CONFIG.startY);
+          const roadWidthAtCar = ROAD_CONFIG.startWidth + (ROAD_CONFIG.endWidth - ROAD_CONFIG.startWidth) * progress;
+          const roadLeft = ROAD_CONFIG.centerX - roadWidthAtCar / 2;
+          targetCarX = Math.max(roadLeft, targetCarX - 30);
         }
         if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') {
           e.preventDefault();
-          if (currentLane < 2) currentLane++;
+          const carYPos = ROAD_CONFIG.endY - 400;
+          const progress = (carYPos - ROAD_CONFIG.startY) / (ROAD_CONFIG.endY - ROAD_CONFIG.startY);
+          const roadWidthAtCar = ROAD_CONFIG.startWidth + (ROAD_CONFIG.endWidth - ROAD_CONFIG.startWidth) * progress;
+          const roadRight = ROAD_CONFIG.centerX + roadWidthAtCar / 2;
+          targetCarX = Math.min(roadRight, targetCarX + 30);
         }
       });
-      // Remove up/down/w/s for movement
 
       // Initialize
       updateRoadPosition();
@@ -1181,7 +1353,10 @@
       });
 
       // Popup close handlers
-      document.getElementById('popupClose').addEventListener('click', hidePopup);
+      document.getElementById('popupClose').addEventListener('click', (e) => {
+        e.stopPropagation();
+        hidePopup();
+      });
       document.getElementById('popupOverlay').addEventListener('click', (e) => {
         if (e.target === document.getElementById('popupOverlay')) {
           hidePopup();
@@ -1228,10 +1403,49 @@
 
       // On load, show overlay and hide both vehicles
       window.addEventListener('DOMContentLoaded', () => {
+        adjustViewBox();
         vehicleOverlay.style.display = 'flex';
         carSVG.style.display = 'none';
         bikeSVG.style.display = 'none';
+        
+        // Mobile detection
+        const isMobile = window.innerWidth <= 768 && !isIPad;
+        
+        // Move buildings and ground for mobile (100px down)
+        if (isMobile) {
+          const buildings = document.getElementById('buildingsImg');
+          if (buildings) {
+            buildings.setAttribute('y', '600');
+          }
+          const ground = document.getElementById('groundRect');
+          if (ground) {
+            ground.setAttribute('y', '900');
+          }
+        }
+        
+        // Move buildings and ground up for iPad
+        if (isIPad) {
+          const buildings = document.querySelector('image[href="SVG/bldgs.svg"]');
+          if (buildings) {
+            buildings.setAttribute('y', '350');
+          }
+          // Show and stretch greenery fill for iPad
+          const greeneryStretch = document.getElementById('greeneryStretch');
+          if (greeneryStretch) {
+            greeneryStretch.setAttribute('y', '650');
+            greeneryStretch.setAttribute('height', '150');
+            greeneryStretch.style.display = '';
+          }
+          // Increase banner font size for iPad
+          document.querySelectorAll('.quiz-banner text').forEach(text => {
+            const currentSize = parseFloat(text.getAttribute('font-size'));
+            text.setAttribute('font-size', currentSize * 1.5);
+          });
+        }
       });
+      
+      // Adjust on window resize
+      window.addEventListener('resize', adjustViewBox);
     })();
   </script>
 </body>
