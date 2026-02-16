@@ -252,6 +252,39 @@
       }
     }
 
+    /* Cloud animation */
+    @keyframes cloudMove {
+      0% { transform: translateX(-600px); }
+      /* 70% { transform: translateX(-2000px); } */
+      100% { transform: translateX(-2000px); }
+    }
+    #cloud1 {
+      animation: cloudMove 45s linear infinite;
+    }
+    #cloud2 {
+      animation: cloudMove 45s linear infinite 5s;
+    }
+    #cloud3 {
+      animation: cloudMove 45s linear infinite 9s;
+    }
+
+    /* Clip obstacles to appear from behind buildings */
+    #obstacles {
+      clip-path: none;
+    }
+    
+    @media (min-width: 769px) and (max-width: 1024px) {
+      #obstacles {
+        clip-path: inset(350px 0 0 0);
+      }
+    }
+    
+    @media (min-width: 1025px) {
+      #obstacles {
+        clip-path: inset(500px 0 0 0);
+      }
+    }
+
     /* Quiz Popup Styles */
     .popup-overlay {
       position: fixed;
@@ -491,6 +524,11 @@
         </pattern>
       </defs>
       
+      <!-- Clouds -->
+      <image class="cloud" id="cloud1" href="SVG/cloud1.svg" x="1200" y="80" width="250" height="130" opacity="0.9"/>
+      <image class="cloud" id="cloud2" href="SVG/cloud2.svg" x="1400" y="150" width="280" height="145" opacity="0.85"/>
+      <image class="cloud" id="cloud3" href="SVG/cloud3.svg" x="1600" y="250" width="240" height="125" opacity="0.9"/>
+      
       <!-- Buildings background replacing sky -->
       <image id="buildingsImg" href="SVG/bldgs.svg" x="0" y="500" width="1000" height="300" preserveAspectRatio="xMidYMid slice"/>
       
@@ -518,7 +556,6 @@
           <image class="obstacle" href="SVG/potholes.svg" x="0" y="0" width="60" height="60" style="display:none;"/>
           <image class="obstacle" href="SVG/car2.svg" x="0" y="0" width="80" height="120" style="display:none;"/>
           <image class="obstacle" href="SVG/car3.svg" x="0" y="0" width="80" height="120" style="display:none;"/>
-          <image class="obstacle" href="SVG/car1.svg" x="0" y="0" width="80" height="120" style="display:none;"/>
         </g>
         
         <!-- Quiz banners positioned alternating left/right of road -->
@@ -785,7 +822,7 @@
         endY: 1000,
         startWidth: 260,
         endWidth: 1000,
-        initialOffset: -100
+        initialOffset: isMobile ? 0 : (isIPad ? -50 : -100)
       };
       
       // Calculate road edges based on config
@@ -920,10 +957,12 @@
             // Show final score screen
             showFinalScore();
           } else {
-            // Move to next banner and resume movement
-            currentBannerIndex++;
-            hasPassedBanner = false;
-            isMoving = true;
+            // Wait 4 seconds before resuming movement
+            setTimeout(() => {
+              currentBannerIndex++;
+              hasPassedBanner = false;
+              isMoving = true;
+            }, 4000);
           }
         });
       }
@@ -961,8 +1000,8 @@
       }
 
       // Motion configuration
-      const SPEED = 200;
-      const effectiveSpeed = isIPad ? SPEED * 0.6 : SPEED;
+      const SPEED = isMobile ? 110 : (isIPad ? 120 : 200);
+      const effectiveSpeed = SPEED;
       let selectedVehicle = null;
       let roadOffset = ROAD_CONFIG.initialOffset;
       let isMoving = false;
@@ -991,20 +1030,40 @@
       ];
       let currentLane = 1; // Start in center lane
       // Obstacles - place one before each quiz banner (5 obstacles total)
-      // Banner positions: 180, -420, -1020, -1620, -2220
-      let obstacles = [
-        {hit: false, initialY: 240, side: 1, type: 'car1', maxScale: 0.3},       // Before quiz 1 (banner at 180)
-        {hit: false, initialY: -360, side: 0, type: 'pothole', maxScale: 0.3},   // Before quiz 2 (banner at -420)
-        {hit: false, initialY: -960, side: 1, type: 'car2', maxScale: 0.3},      // Before quiz 3 (banner at -1020)
-        {hit: false, initialY: -1560, side: 0, type: 'car3', maxScale: 0.3},     // Before quiz 4 (banner at -1620)
-        {hit: false, initialY: -2160, side: 1, type: 'car1', maxScale: 0.3}      // Before quiz 5 (banner at -2220)
-      ];
+      // Device-specific positions: obstacle appears first, then quiz banner
+      const obstaclePositions = isIPad ? [
+        {hit: false, initialY: -5000, side: 1, type: 'car1', maxScale: 0.3, targetY: 600, delayed: true},
+        {hit: false, initialY: -5000, side: 0, type: 'pothole', maxScale: 0.3, targetY: -400, delayed: true},
+        {hit: false, initialY: -5000, side: 1, type: 'car2', maxScale: 0.3, targetY: -1600, delayed: true},
+        {hit: false, initialY: -5000, side: 0, type: 'car3', maxScale: 0.3, targetY: -2800, delayed: true},
+        {hit: false, initialY: -5000, side: 1, type: 'car1', maxScale: 0.3, targetY: -4000, delayed: true}
+      ] : (isMobile ? [
+        {hit: false, initialY: -5000, side: 1, type: 'car1', maxScale: 0.8, restartY: 2000, targetY: 900, delayed: true},
+        {hit: false, initialY: -5000, side: 0, type: 'pothole', maxScale: 0.9, restartY: 2100, targetY: 200, delayed: true},
+        {hit: false, initialY: -5000, side: 1, type: 'car2', maxScale: 0.7, restartY: 2200, targetY: -500, delayed: true},
+        {hit: false, initialY: -5000, side: 0, type: 'car3', maxScale: 0.8, restartY: 2300, targetY: -1200, delayed: true}
+      ] : [
+        {hit: false, initialY: -5000, side: 1, type: 'car1', maxScale: 0.3, targetY: 400, delayed: true},
+        {hit: false, initialY: -5000, side: 0, type: 'pothole', maxScale: 0.3, targetY: -400, delayed: true},
+        {hit: false, initialY: -5000, side: 1, type: 'car2', maxScale: 0.3, targetY: -1600, delayed: true},
+        {hit: false, initialY: -5000, side: 0, type: 'car3', maxScale: 0.3, targetY: -2800, delayed: true},
+        {hit: false, initialY: -5000, side: 1, type: 'car1', maxScale: 0.3, targetY: -4000, delayed: true}
+      ]);
+      let obstacles = obstaclePositions;
+      
+      // Initialize obstacles with 3-second staggered delays
+      obstacles.forEach((obstacle, index) => {
+        setTimeout(() => {
+          obstacle.initialY = obstacle.targetY;
+          obstacle.delayed = false;
+        }, 3000 + (index * 3000));
+      });
       
       // Calculate obstacle X position based on road width at given Y
       function getObstacleX(y, side) {
         const progress = Math.max(0, Math.min(1, (y - ROAD_CONFIG.startY) / (ROAD_CONFIG.endY - ROAD_CONFIG.startY)));
         const roadWidth = ROAD_CONFIG.startWidth + (ROAD_CONFIG.endWidth - ROAD_CONFIG.startWidth) * progress;
-        const laneOffset = roadWidth / 3;
+        const laneOffset = (roadWidth / 3) - 20;
         return side === 0 ? ROAD_CONFIG.centerX - laneOffset : ROAD_CONFIG.centerX + laneOffset;
       }
       
@@ -1019,6 +1078,18 @@
         obstacles.forEach(obstacle => {
           obstacle.y = obstacle.initialY + roadOffset;
           obstacle.x = getObstacleX(obstacle.y, obstacle.side);
+          
+          // Restart obstacle when it reaches its specific restartY
+          if (obstacle.y >= (obstacle.restartY || 2400) && !obstacle.restarting) {
+            obstacle.restarting = true;
+            obstacle.initialY = -5000; // Hide car off-screen
+            setTimeout(() => {
+              obstacle.initialY = obstacle.targetY;
+              obstacle.maxScale = 0.7;
+              obstacle.hit = false;
+              obstacle.restarting = false;
+            }, 3000);
+          }
           
           const distanceX = Math.abs(carX - obstacle.x);
           const distanceY = Math.abs(carY - obstacle.y);
@@ -1045,26 +1116,27 @@
             // Calculate distance from car for perspective scaling
             const distanceFromCar = Math.abs(carY - obstacle.y);
             
-            // Base sizes for different devices
+            // Base sizes for different devices - increased for visibility
             let baseSize;
             if (isMobile) {
-              baseSize = obstacle.type === 'pothole' ? 60 : 130;
+              baseSize = obstacle.type === 'pothole' ? 60 : 140;
             } else if (isIPad) {
-              baseSize = obstacle.type === 'pothole' ? 50 : 70;
+              baseSize = obstacle.type === 'pothole' ? 50 : 100;
             } else {
-              baseSize = obstacle.type === 'pothole' ? 40 : 60;
+              baseSize = obstacle.type === 'pothole' ? 40 : 80;
             }
             
-            // Apply perspective scaling - smaller when far, larger when close
-            const minScale = 0.3;
-            const maxScaleLimit = (isMobile && obstacle.type !== 'pothole') ? 2.8 : 2;
-            const maxDistance = 400;
-            const distanceRatio = Math.max(0, Math.min(1, distanceFromCar / maxDistance));
-            const currentScale = maxScaleLimit - (distanceRatio * (maxScaleLimit - minScale));
+            // Smooth scale growth from 1.0 to 2.0 based on Y position
+            const minScale = 1.0; // Start scale at y=900
+            const maxScale = 1.8; // Final scale when close (doubled size)
+            const scaleRange = maxScale - minScale;
+            const distanceRange = 1300; // Distance from y=900 to y=2000
+            const distanceFromStart = obstacle.y - 900;
+            const scaleProgress = Math.min(1, Math.max(0, distanceFromStart / distanceRange));
+            const currentScale = minScale + (scaleProgress * scaleRange);
             
-            // Track maximum scale reached - never reduce size once it grows
-            obstacle.maxScale = Math.max(obstacle.maxScale, currentScale);
-            const scaledSize = baseSize * obstacle.maxScale;
+            // Use calculated scale directly
+            const scaledSize = baseSize * currentScale;
             
             const width = obstacle.type === 'pothole' ? scaledSize : scaledSize;
             const height = obstacle.type === 'pothole' ? scaledSize : scaledSize * 1.615; // Match car aspect ratio
@@ -1073,25 +1145,29 @@
             obstacleElements[i].setAttribute('y', obstacle.y - height / 2);
             obstacleElements[i].setAttribute('width', width);
             obstacleElements[i].setAttribute('height', height);
-            obstacleElements[i].style.display = (gameStarted && obstacle.y > 800 && obstacle.y < ROAD_CONFIG.endY) ? '' : 'none';
+            const minY = isMobile ? 900 : (isIPad ? 650 : 800);
+            const maxY = isMobile ? 2500 : (isIPad ? 2000 : ROAD_CONFIG.endY + 500);
+            obstacleElements[i].style.display = (gameStarted && obstacle.y >= minY && obstacle.y < maxY) ? '' : 'none';
           }
         });
       }
 
-      // Banner positions - start off-screen and move down
-      // Side: 0 = left, 1 = right
-      // Buildings end at y=800, so start banners after that
-      const bannerInitialY = isIPad ? [700, -300, -1500, -2700, -3900] : (isMobile ? [1000, -200, -1400, -2600, -3800] : [900, -300, -1500, -2700, -3900]);
-      const bannerSide = [0, 1, 0, 1, 0]; // Alternating left/right
+      // Banner positions - match obstacles exactly
+      const bannerInitialY = isMobile ? [900, 200, -500, -1200, -1900] : (isIPad ? [600, -400, -1600, -2800, -4000] : [400, -400, -1600, -2800, -4000]);
+      const bannerSide = [0, 1, 0, 1, 0];
+      
+      const bannerMinY = isMobile ? 900 : (isIPad ? 650 : 800);
+      const bannerMaxY = isMobile ? 2500 : (isIPad ? 2000 : ROAD_CONFIG.endY + 500);
       
       // Hide banners and potholes initially
       let gameStarted = false;
+      let bannerDelayed = [true, false, false, false, false]; // First banner delayed by 4 seconds
       
       // Calculate banner X position based on road width at given Y
       function getBannerX(y, side) {
         const progress = Math.max(0, Math.min(1, (y - ROAD_CONFIG.startY) / (ROAD_CONFIG.endY - ROAD_CONFIG.startY)));
         const roadWidth = ROAD_CONFIG.startWidth + (ROAD_CONFIG.endWidth - ROAD_CONFIG.startWidth) * progress;
-        const offset = (roadWidth / 2) + (isIPad ? 80 : 40);
+        const offset = isMobile ? (roadWidth / 2) + 60 : (isIPad ? (roadWidth / 2) + 80 : (roadWidth / 2) + 40);
         return side === 0 ? ROAD_CONFIG.centerX - offset : ROAD_CONFIG.centerX + offset;
       }
       
@@ -1118,20 +1194,18 @@
           const baseScale = Math.max(0.5, Math.min(1.5, 1 - (distanceToCar / 400)));
           const scale = isIPad ? baseScale * 0.6 : baseScale;
           
-          // Show only current banner when it's in visible range (800 to endY)
-          if (gameStarted && index === currentBannerIndex && bannerY > 800 && bannerY < ROAD_CONFIG.endY) {
+          // Show only current banner when it's in visible range and not delayed
+          if (gameStarted && index === currentBannerIndex && bannerY >= bannerMinY && bannerY <= bannerMaxY && !bannerDelayed[index]) {
             banner.setAttribute('transform', `translate(${bannerX}, ${bannerY}) scale(${scale})`);
             banner.style.display = '';
             
-            // Check if car is approaching banner
+            // Check if car is approaching banner - trigger when close
             const distance = carY - bannerY;
-            const triggerDistance = isIPad ? 50 : 200;
+            const triggerDistance = 100;
             if (distance > 0 && distance < triggerDistance && !hasPassedBanner) {
               isMoving = false;
               hasPassedBanner = true;
-              setTimeout(() => {
-                showPopup(currentBannerIndex);
-              }, 100);
+              showPopup(currentBannerIndex);
             }
           } else {
             banner.style.display = 'none';
@@ -1195,7 +1269,7 @@
           const carY = ROAD_CONFIG.endY - (isIPad ? 300 : (isMobile ? 300 : 400));
           const vehicleScale = isIPad ? 1.5 : 2.5;
           activeVehicle.setAttribute('transform', 
-            `translate(${finalCarX + engineVibration + (Math.sin(potholeImpact) * 2)},${carY + carBounce + potholeImpact}) rotate(${carTilt}) scale(${vehicleScale})`);
+            `translate(${finalCarX + engineVibration + (Math.sin(potholeImpact) * 2)},${carY + carBounce + potholeImpact}) scale(${vehicleScale})`);
         }
       }
 
@@ -1269,6 +1343,10 @@
             if (document.querySelector('.wrap')) document.querySelector('.wrap').style.filter = 'none';
             gameStarted = true;
             isMoving = true;
+            // Enable banner detection after 4 seconds
+            setTimeout(() => {
+              bannerDelayed[0] = false;
+            }, 4000);
           }
         }, 1000);
       }
@@ -1440,6 +1518,7 @@
           const buildings = document.getElementById('buildingsImg');
           if (buildings) {
             buildings.setAttribute('y', '600');
+            buildings.setAttribute('height', '300');
           }
           const ground = document.getElementById('groundRect');
           if (ground) {
