@@ -708,22 +708,22 @@ svg image.obstacle[data-type="car"] {
   let hasPassedBanner = false;
 
   // Schedule a banner so it reaches the player exactly after `delaySeconds` of driving
-  function scheduleBannerArrival(quizIndex, delaySeconds = QUIZ_ARRIVAL_DELAY) {
+function scheduleBannerArrival(quizIndex, delaySeconds = QUIZ_ARRIVAL_DELAY) {
     if (!quizBanners[quizIndex]) return;
 
-    // Compute initialY so that: (initialY + (roadOffset + GAME_SPEED*delay)) == vehY
+    // Add random 2–4s extra delay
+    const extraDelay = 2 + Math.random() * 2; // 2–4 sec
+    const totalDelay = delaySeconds + extraDelay;
+
+    // Compute initialY so that it reaches player after totalDelay
     const vehY = ROAD_CONFIG.endY - 300;
-    const initialY = vehY - (roadOffset + GAME_SPEED * delaySeconds);
+    const initialY = vehY - (roadOffset + GAME_SPEED * totalDelay);
 
     bannerStates[quizIndex].initialY = initialY;
     bannerStates[quizIndex].active = true;
     activeBannerIndex = quizIndex;
+}
 
-    // Ensure only this banner is visible/active
-    quizBanners.forEach((b, i) => {
-      if (i !== quizIndex && b) b.style.display = 'none';
-    });
-  }
 
   // Center-aware sizing for banners (keeps text centered and scales from plate center)
   function applyBannerSizing(banner) {
@@ -1038,14 +1038,15 @@ svg image.obstacle[data-type="car"] {
   }
 
   // Seed initial obstacle positions so they don't all appear at once
-  function seedObstacleInitialPositions() {
-    const minY = getCssNumber('--banner-min-y', 800);
-    // Stagger their first entrance into the view over 3..10 seconds
-    obstacles.forEach((obs, i) => {
-      const tSec = randBetween(3 + i * 0.8, 10 + i * 1.2); // spread out by index
-      obs.initialY = minY - (roadOffset + GAME_SPEED * tSec);
-    });
-  }
+ function seedObstacleInitialPositions() {
+  const minY = getCssNumber('--banner-min-y', 800);
+
+  obstacles.forEach((obs, i) => {
+    const tSec = 2 + (i * 2); // 2 sec spacing
+    obs.initialY = minY - (roadOffset + GAME_SPEED * tSec);
+  });
+}
+
 
   // Set obstacle transform using measured size for center scaling
   function getRenderedWidthInSvgUnits(el) {
@@ -1083,7 +1084,17 @@ svg image.obstacle[data-type="car"] {
     return Math.abs(sp2.y - sp1.y);
   }
 
-  function updateObstaclesAndCollisions() {
+// Global trackers (outside function)
+window.nextObstacleIndex = window.nextObstacleIndex || 0;
+window.carOnRoad = window.carOnRoad || false;
+
+// Global
+// Globals
+window.nextObstacleIndex = window.nextObstacleIndex || 0;
+window.carOnRoad = window.carOnRoad || false;
+window.spawnScheduled = window.spawnScheduled || false;
+
+function updateObstaclesAndCollisions() {
     if (!gameStarted) return;
 
     const minY = getCssNumber('--banner-min-y', 800);
@@ -1093,78 +1104,64 @@ svg image.obstacle[data-type="car"] {
     const collisionBuffer = 80;
 
     obstacles.forEach((data, i) => {
-      const el = data.el;
-      const y = data.initialY + roadOffset;
+        const el = data.el;
+        const y = data.initialY + roadOffset;
 
-      // Lane-centered X before clamp
-      let x = getLaneX(y, data.lane);
+        // --- movement / scaling / visibility ---
+        let x = getLaneX(y, data.lane);
+        let wSvg = getRenderedWidthInSvgUnits(el);
+        let hSvg = getRenderedHeightInSvgUnits(el);
+        if (!Number.isFinite(wSvg) || wSvg <= 0) wSvg = getLaneWidthAt(y) * 0.6;
+        if (!Number.isFinite(hSvg) || hSvg <= 0) hSvg = wSvg * 1.5;
+        const scale = proximityScale(Math.abs(vehY - y));
+        const left = x - wSvg / 2;
+        const top  = y - hSvg / 2;
+        el.setAttribute('x', left);
+        el.setAttribute('y', top);
+        el.setAttribute('transform', `translate(${left + wSvg/2},${top + hSvg/2}) scale(${scale}) translate(${-left - wSvg/2},${-top - hSvg/2})`);
+        el.style.display = (y >= minY && y <= maxY + 200) ? '' : 'none';
 
-      // Measure actual rendered size in SVG units (CSS decides final size)
-      let wSvg = getRenderedWidthInSvgUnits(el);
-      let hSvg = getRenderedHeightInSvgUnits(el);
+        // Collision
+        const dx = Math.abs(vehX - x);
+        const dy = Math.abs(vehY - y);
+        if (dx < collisionBuffer && dy < collisionBuffer && !data.hit && y > minY + 50) {
+            data.hit = true;
+            updateScore(-10);
+            potholeImpact = 16;
+            setTimeout(() => { data.hit = false; }, 1000);
+        }
 
-      // Safe fallbacks on first frames if not ready
-      if (!Number.isFinite(wSvg) || wSvg <= 0) {
-        const laneW = getLaneWidthAt(y);
-        const laneFraction = (data.type === 'pothole' || data.type === 'hole') ? 0.35 : 0.6;
-        wSvg = laneW * laneFraction;
-      }
-      if (!Number.isFinite(hSvg) || hSvg <= 0) {
-        const { bw: baseW, bh: baseH } = obstacleBaseSizes[i] || { bw: 80, bh: 120 };
-        const ar = baseW > 0 ? (baseH / baseW) : 1;
-        hSvg = wSvg * (Number.isFinite(ar) && ar > 0 ? ar : 1);
-      }
+        // Sequential car spawning
+        if (data.visible && y > maxY + 300 && !window.spawnScheduled) {
+            // Car is completely off screen, schedule next
+            data.visible = false;
+            window.carOnRoad = false;
+            window.spawnScheduled = true;
 
-      // Proximity-based scale: 90% -> 100% as it nears the player
-      const distToPlayer = Math.abs(vehY - y);   // in SVG units
-      const scale = proximityScale(distToPlayer); // [START_SCALE..1.0]
+            setTimeout(() => {
+                const nextObs = obstacles[window.nextObstacleIndex];
+                if (nextObs) {
+                    const tSec = 8 + Math.random() * 2; // 8–10s delay
+                    nextObs.initialY = minY - (roadOffset + GAME_SPEED * tSec);
+                    nextObs.restarting = false;
+                    nextObs.hit = false;
+                    nextObs.visible = true;
+                    nextObs.el.removeAttribute('transform');
 
-      // Clamp X inside road using the *scaled* width
-      const effectiveW = wSvg * scale;
-      x = clampObstacleToRoad(x, y, effectiveW);
-
-      // Centered position via attributes (keep CSS sizing; do NOT set width/height)
-      const left = x - wSvg / 2;
-      const top  = y - hSvg / 2;
-      el.setAttribute('x', left);
-      el.setAttribute('y', top);
-
-      // Scale around visual center: T(cx,cy) * S(s) * T(-cx,-cy)
-      const cx = left + wSvg / 2;
-      const cy = top  + hSvg / 2;
-      el.setAttribute('transform', `translate(${cx},${cy}) scale(${scale}) translate(${-cx},${-cy})`);
-
-      // Visibility window
-      el.style.display = (y >= minY && y <= maxY + 200) ? '' : 'none';
-
-      // Collision
-      const dx = Math.abs(vehX - x);
-      const dy = Math.abs(vehY - y);
-      if (dx < collisionBuffer && dy < collisionBuffer && !data.hit && y > minY + 50) {
-        data.hit = true;
-        updateScore(-10);
-        potholeImpact = 16;
-        setTimeout(() => { data.hit = false; }, 1000);
-      }
-
-      // Recycle after passing camera — with randomized delay and spacing
-      if (y > maxY + 260 && !data.restarting) {
-        data.restarting = true;
-        // Randomize the next appearance timing so cars don't stack back-to-back
-        const delayMs = randBetween(1200, 2600); // small cooldown before reposition
-        setTimeout(() => {
-          // Schedule next entrance to the view window after 5..9 seconds
-          const tSec = randBetween(5, 9);
-          data.initialY = minY - (roadOffset + GAME_SPEED * tSec) - i * 40; // slight index stagger
-          data.restarting = false;
-          data.hit = false;
-          el.removeAttribute('transform'); // clear scale before next spawn
-        }, delayMs);
-      }
+                    window.nextObstacleIndex = (window.nextObstacleIndex + 1) % obstacles.length;
+                    window.carOnRoad = true;
+                    window.spawnScheduled = false;
+                }
+            }, 500); // small cooldown to avoid overlapping scheduling
+        }
     });
 
     if (potholeImpact > 0) potholeImpact *= 0.88;
-  }
+}
+
+
+
+
 
   function updateVehicleAndRoad() {
     const centerLine = document.getElementById('centerLine');
