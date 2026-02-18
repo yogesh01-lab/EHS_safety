@@ -971,19 +971,44 @@ image.cloud {
         `translate(${x}, ${y}) scale(${distScale}) translate(${-localCx}, ${-localCy})`
       );
 
-      const BANNER_TRIGGER_OFFSET = getTriggerOffset();
-      const triggerY = vehY - BANNER_TRIGGER_OFFSET;
-      const effectiveY = getBannerEffectiveBottomY(bannerEl);
-      const effY = Number.isFinite(effectiveY) ? effectiveY : y;
+// --- Calculate banner bottom properly in SVG space ---
+const plateH = getCssNumber('--banner-plate-h', 180);
+const localBottom = -0.6 * plateH + (plateH / 2);
+const effectiveBottomY = y + (localBottom * distScale);
 
-      const isApproachingFromTop = effY <= vehY;
-      const inTriggerWindow = effY >= triggerY && effY <= vehY;
+// --- Trigger when banner reaches vehicle ---
+// --- Determine TRIGGER_OFFSET dynamically based on screen width ---
+function getTriggerOffset() {
+  const w = window.innerWidth;
+  let offset;
 
-      if (isApproachingFromTop && inTriggerWindow && !hasPassedBanner) {
-        isMoving = false;
-        hasPassedBanner = true;
-        openQuiz(idx + 1);
-      }
+  if (w <= 600) {
+    offset = 400; // mobile
+  } else if (w <= 900) {
+    offset = 180; // tablet portrait
+  } else if (w <= 1200) {
+    offset = 250; // tablet landscape / small desktop
+  } else {
+    offset = 350; // large desktop
+  }
+
+  // Log for debugging
+  console.log(`Screen width: ${w}px → TRIGGER_OFFSET: ${offset}px`);
+
+  return offset;
+}
+
+
+const TRIGGER_OFFSET = getTriggerOffset();
+const triggerLine = vehY - TRIGGER_OFFSET;
+
+if (effectiveBottomY >= triggerLine && !hasPassedBanner) {
+  hasPassedBanner = true;
+  isMoving = false;
+  openQuiz(idx + 1);
+}
+
+
     } else {
       bannerEl.style.display = 'none';
     }
