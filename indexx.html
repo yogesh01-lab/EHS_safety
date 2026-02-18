@@ -94,6 +94,94 @@
       cursor: var(--scene-cursor);
       display: block;
     }
+    /* ===============================
+   CLOUD POSITION + ANIMATION SYSTEM
+   =============================== */
+
+/* Default (Desktop base) */
+:root {
+  --cloud-speed: 45s;
+
+  --cloud1-y: 80px;
+  --cloud2-y: 150px;
+  --cloud3-y: 250px;
+}
+
+/* Cloud animation (keeps Y position dynamic) */
+@keyframes cloudMove {
+  0%   { transform: translateX(-600px) translateY(var(--cloudY, 0px)); }
+  100% { transform: translateX(-2000px) translateY(var(--cloudY, 0px)); }
+}
+
+/* Apply animation */
+#cloud1 {
+  --cloudY: var(--cloud1-y);
+  animation: cloudMove var(--cloud-speed) linear infinite;
+}
+
+#cloud2 {
+  --cloudY: var(--cloud2-y);
+  animation: cloudMove var(--cloud-speed) linear infinite 5s;
+}
+
+#cloud3 {
+  --cloudY: var(--cloud3-y);
+  animation: cloudMove var(--cloud-speed) linear infinite 9s;
+}
+
+/* Safari/iPad transform reliability */
+image.cloud {
+  transform-box: fill-box;
+  transform-origin: center;
+  will-change: transform;
+}
+
+/* ===============================
+   MOBILE (<=767px)
+   =============================== */
+@media (max-width: 767px) {
+  :root {
+    --cloud-speed: 38s;
+
+    --cloud1-y: 120px;
+    --cloud2-y: 200px;
+    --cloud3-y: 300px;
+  }
+}
+
+/* ===============================
+   iPAD PORTRAIT (768–1024px)
+   =============================== */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+  :root {
+    --cloud-speed: 42s;
+
+    --cloud1-y: 100px;
+    --cloud2-y: 180px;
+    --cloud3-y: 260px;
+  }
+}
+
+/* ===============================
+   DESKTOP (>=1025px)
+   =============================== */
+@media (min-width: 1025px) {
+  :root {
+    --cloud-speed: 45s;
+
+    --cloud1-y: 80px;
+    --cloud2-y: 150px;
+    --cloud3-y: 250px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  #cloud1, #cloud2, #cloud3 {
+    animation: none !important;
+  }
+}
+
 
     #scoreBoard {
       position: fixed;
