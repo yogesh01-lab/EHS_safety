@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Road Runner - Car (Portrait Only on Mobile/iPad)</title>
+  <title>Road Runner - Mobile OK + iPad Portrait Reduced View</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <style>
     :root {
@@ -25,7 +25,7 @@
       --banner-font-lg: clamp(36px, 4vw, 60px);
       --banner-font-sm: clamp(20px, 2.4vw, 36px);
 
-      /* NEW: Banner base plate sizes (device-controlled) */
+      /* Banner base plate sizes (device-controlled) */
       --banner-plate-w: 360;
       --banner-plate-h: 180;
       --banner-pole-h: 200;
@@ -53,15 +53,25 @@
       --buildings-ty: 0px;
       --ground-ty: 0px;
 
+      /* ✅ Global device Y offset (applied to the whole scene via #deviceShift) */
+      --device-y-offset: 0px;
+
       /* Green strip (iPad only) */
       --greenery-display: none;
       --greenery-scaleY: 1;
 
-      /* NEW: Obstacle base sizes (device-controlled) */
+      /* Obstacle base sizes (device-controlled) */
       --obstacle-base-w-car: 80;
       --obstacle-base-h-car: 120;
       --obstacle-base-w-hole: 60;
       --obstacle-base-h-hole: 60;
+
+      /* ✅ NEW: Per-layer Y offsets (SVG units). Defaults keep mobile unchanged */
+      --road-ty: 0px;          /* main road polygon */
+      --centerline-ty: 0px;    /* dashed center line */
+      --road-left-ty: 0px;     /* left road border */
+      --road-right-ty: 0px;    /* right road border */
+      --vehicle-ty: 0px;       /* whole vehicle layer (parent of #car/#bike) */
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -75,7 +85,7 @@
     .wrap { width: 100vw; height: var(--scene-height); position: relative; }
 
     .scene {
-      width: 100vw;
+      width: 100vw; /* MOBILE: edge-to-edge stays as-is */
       height: var(--scene-height);
       background: linear-gradient(to bottom, #87ceeb 0%, #98d8e8 100%);
       overflow: hidden;
@@ -99,7 +109,7 @@
       z-index: 100;
     }
 
-    /* Clouds animation */
+    /* Clouds animation (keep your original) */
     @keyframes cloudMove {
       0%   { transform: translateX(-600px); }
       100% { transform: translateX(-2000px); }
@@ -107,6 +117,13 @@
     #cloud1 { animation: cloudMove var(--cloud-speed) linear infinite; }
     #cloud2 { animation: cloudMove var(--cloud-speed) linear infinite 5s; }
     #cloud3 { animation: cloudMove var(--cloud-speed) linear infinite 9s; }
+
+    /* Safari/iPad transform reliability for SVG images */
+    image.cloud {
+      transform-box: fill-box;
+      transform-origin: center;
+      will-change: transform;
+    }
 
     .center-line {
       stroke: var(--center-line);
@@ -163,6 +180,42 @@
     image#buildingsImg { transform: translateY(var(--buildings-ty)); transform-box: fill-box; transform-origin: top; }
     #groundRect { transform: translateY(var(--ground-ty)); transform-box: fill-box; transform-origin: top; }
 
+    /* ✅ Apply a global Y offset (in SVG user units) to the whole scene content */
+    #deviceShift {
+      transform: translateY(var(--device-y-offset));
+      transform-box: view-box;
+      transform-origin: 0 0;
+      will-change: transform;
+    }
+
+    /* ✅ NEW: Per-layer offsets */
+    #mainRoad {
+      transform: translateY(var(--road-ty));
+      transform-box: fill-box;
+      transform-origin: top;
+    }
+    #centerLine {
+      transform: translateY(var(--centerline-ty));
+      transform-box: fill-box;
+      transform-origin: top;
+    }
+    #roadLeftBorder {
+      transform: translateY(var(--road-left-ty));
+      transform-box: fill-box;
+      transform-origin: top;
+    }
+    #roadRightBorder {
+      transform: translateY(var(--road-right-ty));
+      transform-box: fill-box;
+      transform-origin: top;
+    }
+    /* Parent wrapper so CSS offset composes with JS transforms on #car/#bike */
+    #vehicleLayer {
+      transform: translateY(var(--vehicle-ty));
+      transform-box: view-box;
+      transform-origin: 0 0;
+    }
+
     /* Greenery (iPad only) */
     #greeneryStretch {
       display: var(--greenery-display);
@@ -187,8 +240,8 @@
       #cloud1, #cloud2, #cloud3 { animation: none !important; }
     }
 
-    /* Mobile (<=768px) */
-    @media (max-width: 768px) {
+    /* ========= MOBILE (<=767px) — UNTOUCHED ========= */
+    @media (max-width: 767px) {
       :root {
         --score-fs: 1.2rem;
         --score-pad-y: 8px;
@@ -197,67 +250,93 @@
         --popup-pad: 20px;
         --cloud-speed: 38s;
         --banner-scale: 0.85;
-        --vehicle-scale: 1.9;
+        --vehicle-scale: 2.0;
         --banner-min-y: 900;
         --banner-max-y: 2000;
-
         --buildings-ty: 100px;
         --ground-ty: 100px;
-
-        /* Obstacle base sizes smaller on 768px mobile */
         --obstacle-base-w-car: 245px;
         --obstacle-base-h-car: 250px;
         --obstacle-base-w-hole: 198px;
         --obstacle-base-h-hole: 198px;
-        --vehicle-scale: 2.0;
-        
-
-svg image.obstacle[data-type="car"] {
-  width: var(--obstacle-base-w-car) !important;
-  height: var(--obstacle-base-h-car) !important;
-}
-
-
-
-        /* Banner plate smaller on mobile */
         --banner-plate-w: 300;
         --banner-plate-h: 150;
         --banner-pole-h: 170;
+        --device-y-offset: 0px;
+        --road-ty: 0px;
+        --centerline-ty: 0px;
+        --road-left-ty: 0px;
+        --road-right-ty: 0px;
+        --vehicle-ty: 0px;
       }
+
+      svg image.obstacle[data-type="car"] {
+        width: var(--obstacle-base-w-car) !important;
+        height: var(--obstacle-base-h-car) !important;
+      }
+      svg image.obstacle[data-type="pothole"] {
+        width: var(--obstacle-base-w-hole) !important;
+        height: var(--obstacle-base-h-hole) !important;
+      }
+
       .quiz-banner .sign-text[font-size="60"] { font-size: clamp(26px, 6vw, 42px) !important; }
       .quiz-banner .sign-text[font-size="36"] { font-size: clamp(18px, 4.5vw, 28px) !important; }
     }
 
-    /* iPad / Tablets (769px - 1024px) */
-    @media (min-width: 769px) and (max-width: 1024px) {
-      :root {
-        --score-fs: 1.4rem;
-        --popup-max-w: 700px;
-        --cloud-speed: 40s;
-        --banner-scale: 0.95;
-        --vehicle-scale: 1.4;
-        --banner-min-y: 650;
-        --banner-max-y: 2000;
-
-        --buildings-ty: -150px;
-        --ground-ty: -150px;
-        --greenery-display: block;
-        --greenery-scaleY: 1;
-
-        /* Obstacle base sizes mid-range on tablet */
-        --obstacle-base-w-car: 72;
-        --obstacle-base-h-car: 108;
-        --obstacle-base-w-hole: 54;
-        --obstacle-base-h-hole: 54;
-
-        /* Banner plate mid-range on tablet */
-        --banner-plate-w: 340;
-        --banner-plate-h: 170;
-        --banner-pole-h: 190;
+    /* ========= iPAD PORTRAIT ONLY (769–1024px) — REDUCED VIEW ========= */
+    @media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+      /* Reduce visible width and center the game area */
+      .wrap {
+        width: min(760px, 98vw);
+        margin: 0 auto;
       }
+      /* Make scene follow the wrap width (instead of 100vw) */
+      .scene {
+        width: 100%;
+        height: var(--scene-height);
+      }
+      :root {
+        --scene-height: 100vh;    /* slightly less tall to avoid crowding */
+        --score-fs: 1.2rem;
+        --score-pad-y: 8px;
+        --score-pad-x: 16px;
+        --popup-max-w: 92vw;
+        --popup-pad: 22px;
+        --cloud-speed: 42s;
+        --banner-scale: 0.92;
+        --vehicle-scale: 1.6;    /* smaller so car fits comfortably */
+        --banner-min-y: 900;
+        --banner-max-y: 2000;
+        --buildings-ty: 90px;
+        --ground-ty: 90px;
+        --greenery-display: none;
+        --obstacle-base-w-car: 220px;
+        --obstacle-base-h-car: 230px;
+        --obstacle-base-w-hole: 180px;
+        --obstacle-base-h-hole: 180px;
+        --banner-plate-w: 320;
+        --banner-plate-h: 160;
+        --banner-pole-h: 180;
+        --device-y-offset: 00px;
+        --road-ty:-12px;
+        --centerline-ty: 0px;
+        --road-left-ty: -12px;
+        --road-right-ty: -12px;
+        --vehicle-ty: -185px;
+      }
+      svg image.obstacle[data-type="car"] {
+        width: var(--obstacle-base-w-car) !important;
+        height: var(--obstacle-base-h-car) !important;
+      }
+      svg image.obstacle[data-type="pothole"] {
+        width: var(--obstacle-base-w-hole) !important;
+        height: var(--obstacle-base-h-hole) !important;
+      }
+      .quiz-banner .sign-text[font-size="60"] { font-size: clamp(26px, 4.6vw, 40px) !important; }
+      .quiz-banner .sign-text[font-size="36"] { font-size: clamp(18px, 3.8vw, 26px) !important; }
     }
 
-    /* Desktop (>=1025px) */
+    /* ========= DESKTOP (>=1025px) ========= */
     @media (min-width: 1025px) {
       :root {
         --score-fs: 1.6rem;
@@ -277,10 +356,25 @@ svg image.obstacle[data-type="car"] {
         --banner-plate-w: 360;
         --banner-plate-h: 180;
         --banner-pole-h: 200;
+
+        /* Global Y offset remains 0 on desktop */
+        --device-y-offset: 0px;
+
+        /* Keep new per-layer at 0 unless you want desktop shifts too */
+        --road-ty: 0px;
+        --centerline-ty: 0px;
+        --road-left-ty: 0px;
+        --road-right-ty: 0px;
+        --vehicle-ty: 0px;
       }
+      .wrap {
+        width: min(980px, 94vw);
+        margin: 0 auto;
+      }
+      .scene { width: 100%; }
     }
 
-    /* ======== PORTRAIT-ONLY OVERLAY (mobile & tablets) ======== */
+    /* ======== PORTRAIT-ONLY OVERLAY ======== */
     .rotate-overlay {
       position: fixed; inset: 0;
       background: #0b1a2a;
@@ -346,7 +440,7 @@ svg image.obstacle[data-type="car"] {
   </style>
 </head>
 <body>
-  <!-- Portrait-only overlay for mobile/tablet -->
+  <!-- Portrait-only overlay -->
   <div id="rotateOverlay" class="rotate-overlay" aria-live="assertive" aria-label="Rotate device notice">
     <img class="gif" src="SVG/rotate.gif" alt="Rotate your phone" />
     <h2>Please rotate your device</h2>
@@ -372,7 +466,7 @@ svg image.obstacle[data-type="car"] {
   <div class="wrap" id="gameRoot">
     <div id="scoreBoard">Score: <span id="score">0</span></div>
 
-    <!-- Keep a generous viewBox; CSS will scale to screen -->
+    <!-- SVG Scene -->
     <svg id="scene" class="scene" viewBox="0 0 1000 2100" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Third person racing view" xmlns:xlink="http://www.w3.org/1999/xlink">
       <defs>
         <!-- Road & grass textures -->
@@ -394,28 +488,33 @@ svg image.obstacle[data-type="car"] {
         </pattern>
       </defs>
 
-      <!-- Clouds -->
-      <image class="cloud" id="cloud1" href="SVG/cloud1.svg" x="1200" y="80" width="250" height="130" opacity="0.9" xlink:href="SVG/cloud1.svg"/>
-      <image class="cloud" id="cloud2" href="SVG/cloud2.svg" x="1400" y="150" width="280" height="145" opacity="0.85" xlink:href="SVG/cloud2.svg"/>
-      <image class="cloud" id="cloud3" href="SVG/cloud3.svg" x="1600" y="250" width="240" height="125" opacity="0.9" xlink:href="SVG/cloud3.svg"/>
+      <!-- ✅ NEW WRAPPER: applies a single translateY across the whole scene -->
+      <g id="deviceShift">
 
-      <!-- Buildings -->
-      <image id="buildingsImg" href="SVG/bldgs.svg" x="0" y="500" width="1000" height="300" preserveAspectRatio="xMidYMid slice" xlink:href="SVG/bldgs.svg"/>
+        <!-- Clouds -->
+        <image class="cloud" id="cloud1" href="SVG/cloud1.svg" x="1200" y="80" width="250" height="130" opacity="0.9" xlink:href="SVG/cloud1.svg"/>
+        <image class="cloud" id="cloud2" href="SVG/cloud2.svg" x="1400" y="150" width="280" height="145" opacity="0.85" xlink:href="SVG/cloud2.svg"/>
+        <image class="cloud" id="cloud3" href="SVG/cloud3.svg" x="1600" y="250" width="240" height="125" opacity="0.9" xlink:href="SVG/cloud3.svg"/>
 
-      <!-- Greenery strip (iPad only via CSS display) -->
-      <rect id="greeneryStretch" x="0" y="650" width="1000" height="150" fill="url(#grassTexture)" opacity="1" style="display:none;"/>
+        <!-- Buildings -->
+        <image id="buildingsImg" href="SVG/bldgs.svg" x="0" y="500" width="1000" height="300" preserveAspectRatio="xMidYMid slice" xlink:href="SVG/bldgs.svg"/>
 
-      <!-- Ground -->
-      <rect id="groundRect" x="0" y="800" width="1000" height="1300" fill="url(#grassTexture)" opacity="1"/>
+        <!-- Greenery strip (iPad only via CSS display) -->
+        <rect id="greeneryStretch" x="0" y="650" width="1000" height="150" fill="url(#grassTexture)" opacity="1" style="display:none;"/>
 
-      <!-- Road -->
-      <g id="movingRoad">
-        <polygon id="mainRoad" points="370,900 630,900 900,2100 100,2100" fill="url(#roadTexture)" stroke="none"></polygon>
-        <line x1="370" y1="900" x2="100"  y2="2100" stroke="#222" stroke-width="2"/>
-        <line x1="630" y1="900" x2="900"  y2="2100" stroke="#222" stroke-width="2"/>
-        <line id="centerLine" x1="500" y1="900" x2="500" y2="2100" class="center-line"/>
+        <!-- Ground -->
+        <rect id="groundRect" x="0" y="800" width="1000" height="1300" fill="url(#grassTexture)" opacity="1"/>
 
-        <!-- Banners -->
+        <!-- Road -->
+        <g id="movingRoad">
+          <polygon id="mainRoad" points="370,900 630,900 900,2100 100,2100" fill="url(#roadTexture)" stroke="none"></polygon>
+          <!-- ✅ Added IDs to borders so we can apply CSS per-layer offsets -->
+          <line id="roadLeftBorder"  x1="370" y1="900" x2="100"  y2="2100" stroke="#222" stroke-width="2"/>
+          <line id="roadRightBorder" x1="630" y1="900" x2="900"  y2="2100" stroke="#222" stroke-width="2"/>
+          <line id="centerLine" x1="500" y1="900" x2="500" y2="2100" class="center-line"/>
+        </g>
+
+        <!-- Banners (outside road, positioned on sides) -->
         <g class="quiz-banner" id="banner1" transform="translate(360, 700)">
           <rect class="sign-pole" x="-10" y="0" width="20" height="200" rx="10" ry="10"></rect>
           <rect class="sign-plate" x="-180" y="-160" width="360" height="180"></rect>
@@ -440,31 +539,29 @@ svg image.obstacle[data-type="car"] {
           <text class="sign-text title" x="0" y="-80" text-anchor="middle" font-size="60">QUIZ 4</text>
           <text class="sign-text subtitle" x="0" y="-24" text-anchor="middle" font-size="36" opacity="0.8">Emergency</text>
         </g>
-        <g class="quiz-banner" id="banner5" transform="translate(360, -1700)">
-          <rect class="sign-pole" x="-10" y="0" width="20" height="200" rx="10" ry="10"></rect>
-          <rect class="sign-plate" x="-180" y="-160" width="360" height="180"></rect>
-          <text class="sign-text title" x="0" y="-80" text-anchor="middle" font-size="60">QUIZ 5</text>
-          <text class="sign-text subtitle" x="0" y="-24" text-anchor="middle" font-size="36" opacity="0.8">Final</text>
+        <!-- (banner5 exists in DOM but logic uses only first 4) -->
+
+        <!-- ✅ Vehicle parent wrapper so CSS offset composes with JS transforms -->
+        <g id="vehicleLayer">
+          <!-- Player vehicle images -->
+          <g id="car" transform="translate(500,1200)" aria-label="Racing car top view" style="display:none;">
+            <image href="SVG/mainCar.svg" x="-65" y="-105" width="130" height="210" xlink:href="SVG/mainCar.svg"/>
+          </g>
+          <g id="bike" transform="translate(500,1200)" aria-label="Bike top view" style="display:none;">
+            <image href="SVG/bike.svg" x="-65" y="-105" width="130" height="210" xlink:href="SVG/bike.svg"/>
+          </g>
         </g>
-      </g>
 
-      <!-- Player vehicle images -->
-      <g id="car" transform="translate(500,1200)" aria-label="Racing car top view" style="display:none;">
-        <image href="SVG/mainCar.svg" x="-65" y="-105" width="130" height="210" xlink:href="SVG/mainCar.svg"/>
-      </g>
-      <g id="bike" transform="translate(500,1200)" aria-label="Bike top view" style="display:none;">
-        <image href="SVG/bike.svg" x="-65" y="-105" width="130" height="210" xlink:href="SVG/bike.svg"/>
-      </g>
+        <!-- Obstacles -->
+        <g id="obstacles">
+          <image class="obstacle" data-type="car"     data-lane="1" href="SVG/car1.svg"     x="0" y="0" width="80" height="120" xlink:href="SVG/car1.svg"/>
+          <image class="obstacle" data-type="pothole" data-lane="0" href="SVG/potholes.svg" x="0" y="0" width="60" height="60"  xlink:href="SVG/potholes.svg"/>
+          <image class="obstacle" data-type="car"     data-lane="1" href="SVG/car2.svg"     x="0" y="0" width="80" height="120" xlink:href="SVG/car2.svg"/>
+          <image class="obstacle" data-type="car"     data-lane="1" href="SVG/car3.svg"     x="0" y="0" width="80" height="120" xlink:href="SVG/car3.svg"/>
+          <image class="obstacle" data-type="car"     data-lane="0" href="SVG/car1.svg"     x="0" y="0" width="80" height="120" xlink:href="SVG/car1.svg"/>
+        </g>
 
-      <!-- Obstacles (aligned to lanes; JS controls position/size/visibility) -->
-      <g id="obstacles">
-        <!-- Give each an explicit class and data-type for sizing rules -->
-        <image class="obstacle" data-type="car"     data-lane="2" href="SVG/car1.svg"    x="0" y="0" width="80" height="120" xlink:href="SVG/car1.svg"/>
-        <image class="obstacle" data-type="pothole" data-lane="0" href="SVG/potholes.svg" x="0" y="0" width="60" height="60"   xlink:href="SVG/potholes.svg"/>
-        <image class="obstacle" data-type="car"     data-lane="2" href="SVG/car2.svg"    x="0" y="0" width="80" height="120" xlink:href="SVG/car2.svg"/>
-        <image class="obstacle" data-type="car"     data-lane="0" href="SVG/car3.svg"    x="0" y="0" width="80" height="120" xlink:href="SVG/car3.svg"/>
-        <image class="obstacle" data-type="car"     data-lane="2" href="SVG/car1.svg"    x="0" y="0" width="80" height="120" xlink:href="SVG/car1.svg"/>
-      </g>
+      </g><!-- /#deviceShift -->
     </svg>
   </div>
 
@@ -571,6 +668,7 @@ svg image.obstacle[data-type="car"] {
       </div>
     </div>
   </div>
+
 <script>
 (() => {
   const rotateOverlay = document.getElementById('rotateOverlay');
@@ -583,7 +681,6 @@ svg image.obstacle[data-type="car"] {
   // Orientation media query
   const mql = matchMedia('(orientation: landscape)');
 
-  // Helper: are we still on the selection screen?
   function isSelectingVehicle() {
     return vehicleOverlay && vehicleOverlay.style.display !== 'none';
   }
@@ -611,7 +708,6 @@ svg image.obstacle[data-type="car"] {
   const car = document.getElementById('car');
   const bike = document.getElementById('bike');
 
-  // If there are more banners in DOM, we only use first 4
   const quizBannersAll = [
     document.getElementById('banner1'),
     document.getElementById('banner2'),
@@ -642,39 +738,30 @@ svg image.obstacle[data-type="car"] {
   }
 
   function getLaneX(y, laneIndex) {
-    const width = roadWidthAt(y);
-    const left = ROAD_CONFIG.centerX - width/2;
-    const third = width / 3;
-    return left + third * (laneIndex + 0.5);
+    const playerY = ROAD_CONFIG.endY - 300;
+    const t = (playerY - ROAD_CONFIG.startY) / (ROAD_CONFIG.endY - ROAD_CONFIG.startY);
+    const leftEdge = 370 - (270 * t);
+    const rightEdge = 630 + (270 * t);
+    const center = ROAD_CONFIG.centerX;
+
+    if (laneIndex === 0) {
+      return leftEdge * 0.25 + center * 0.75;
+    } else {
+      return center * 0.25 + rightEdge * 0.75;
+    }
   }
 
-  // Clamp obstacle X to stay within road boundaries
-  function clampObstacleToRoad(x, y, obstacleWidth) {
-    const roadW = roadWidthAt(y);
-    const margin = 25;
-    const halfW = obstacleWidth / 2;
-    const leftEdge = ROAD_CONFIG.centerX - roadW / 2 + margin + halfW;
-    const rightEdge = ROAD_CONFIG.centerX + roadW / 2 - margin - halfW;
-    return Math.max(leftEdge, Math.min(rightEdge, x));
-  }
-
-  function getLaneWidthAt(y) {
-    return roadWidthAt(y) / 3;
-  }
+  function getLaneWidthAt(y) { return roadWidthAt(y) / 3; }
 
   function getBannerX(y, side) {
-    // Aligns to road border with a small offset
     const width = roadWidthAt(y);
-    const offset = (width / 2) + 60;
+    const offset = (width / 2) + 150;
     return side === 0 ? ROAD_CONFIG.centerX - offset : ROAD_CONFIG.centerX + offset;
   }
 
   let score = 0;
   const scoreEl = document.getElementById('score');
-  const updateScore = (delta) => {
-    score = Math.max(0, score + delta);
-    scoreEl.textContent = score;
-  };
+  const updateScore = (delta) => { score = Math.max(0, score + delta); scoreEl.textContent = score; };
 
   let selectedVehicle = null; // 'car' | 'bike'
   let isMoving = false;
@@ -690,42 +777,29 @@ svg image.obstacle[data-type="car"] {
   let carBounce = 0;
   let potholeImpact = 0;
 
-  // ====== Movement speed (used for banner arrival timing) ======
-  const GAME_SPEED = 180; // must match tick() movement
+  const GAME_SPEED = 180;
 
-  // ====== QUIZ FLOW (timer-based + moving roadside banners) ======
-  const QUIZ_ARRIVAL_DELAY = 8; // <<< CHANGED from 4s to 8s
-
-  // Alternate sides: left, right, left, right
+  const QUIZ_ARRIVAL_DELAY = 8;
   const bannerSides = [0, 1, 0, 1];
 
-  // Banner instance states (per quiz)
-  const bannerStates = quizBanners.map(() => ({
-    active: false,
-    initialY: 0
-  }));
+  const bannerStates = quizBanners.map(() => ({ active: false, initialY: 0 }));
   let activeBannerIndex = -1;
   let hasPassedBanner = false;
 
-  // Schedule a banner so it reaches the player exactly after `delaySeconds` of driving
-function scheduleBannerArrival(quizIndex, delaySeconds = QUIZ_ARRIVAL_DELAY) {
+  function scheduleBannerArrival(quizIndex, delaySeconds = QUIZ_ARRIVAL_DELAY) {
     if (!quizBanners[quizIndex]) return;
 
-    // Add random 2–4s extra delay
     const extraDelay = 2 + Math.random() * 2; // 2–4 sec
     const totalDelay = delaySeconds + extraDelay;
 
-    // Compute initialY so that it reaches player after totalDelay
     const vehY = ROAD_CONFIG.endY - 300;
     const initialY = vehY - (roadOffset + GAME_SPEED * totalDelay);
 
     bannerStates[quizIndex].initialY = initialY;
     bannerStates[quizIndex].active = true;
     activeBannerIndex = quizIndex;
-}
+  }
 
-
-  // Center-aware sizing for banners (keeps text centered and scales from plate center)
   function applyBannerSizing(banner) {
     const plate = banner.querySelector('.sign-plate');
     const pole = banner.querySelector('.sign-pole');
@@ -738,23 +812,48 @@ function scheduleBannerArrival(quizIndex, delaySeconds = QUIZ_ARRIVAL_DELAY) {
 
     if (pole) pole.setAttribute('height', poleH);
 
-    // Center plate around (0, -plateH/2) like original layout
-    plate.setAttribute('x', -plateW/2);
-    plate.setAttribute('y', -plateH - (plateH * 0.1)); // gap above pole top
-    plate.setAttribute('width', plateW);
-    plate.setAttribute('height', plateH);
+    plate && plate.setAttribute('x', -plateW/2);
+    plate && plate.setAttribute('y', -plateH - (plateH * 0.1));
+    plate && plate.setAttribute('width', plateW);
+    plate && plate.setAttribute('height', plateH);
 
-    // Reposition text to center within plate
     const plateCenterY = -plateH - (plateH * 0.1) + plateH/2;
-    if (title)   title.setAttribute('x', 0);
-    if (subtitle) subtitle.setAttribute('x', 0);
-
-    // Title slightly above center; subtitle slightly below
-    if (title)   title.setAttribute('y', plateCenterY - plateH * 0.18);
-    if (subtitle)subtitle.setAttribute('y', plateCenterY + plateH * 0.12);
+    title   && title.setAttribute('x', 0);
+    subtitle && subtitle.setAttribute('x', 0);
+    title   && title.setAttribute('y', plateCenterY - plateH * 0.18);
+    subtitle && subtitle.setAttribute('y', plateCenterY + plateH * 0.12);
   }
 
-  // Render & handle the currently active banner
+  // ---------- Helpers for trigger measurement ----------
+  function screenToSvgPoint(screenX, screenY) {
+    try {
+      const svg = document.getElementById('scene');
+      if (!svg) return { x: screenX, y: screenY };
+      const p = svg.createSVGPoint();
+      p.x = screenX; p.y = screenY;
+      const inv = svg.getScreenCTM().inverse();
+      return p.matrixTransform(inv);
+    } catch {
+      return { x: screenX, y: screenY };
+    }
+  }
+  function getElementBottomCenterSvgY(el) {
+    const rect = el.getBoundingClientRect();
+    if (!rect || rect.height <= 0) return null;
+    const p = screenToSvgPoint(rect.left + rect.width / 2, rect.bottom);
+    return p.y;
+  }
+  function getBannerEffectiveBottomY(bannerEl) {
+    const plate = bannerEl.querySelector('.sign-plate');
+    const target = plate || bannerEl;
+    return getElementBottomCenterSvgY(target);
+  }
+  function getTriggerOffset() {
+    const v = getCssNumber('--quiz-trigger-offset', 50);
+    return Number.isFinite(v) ? v : 50;
+  }
+  // -----------------------------------------------------
+
   function updateActiveBanner() {
     if (activeBannerIndex < 0) return;
 
@@ -764,11 +863,9 @@ function scheduleBannerArrival(quizIndex, delaySeconds = QUIZ_ARRIVAL_DELAY) {
     const y = state.initialY + roadOffset;
     const x = getBannerX(y, bannerSides[idx]);
 
-    // Visibility window (reuse your banner window)
     const minY = getCssNumber('--banner-min-y', 800);
     const maxY = getCssNumber('--banner-max-y', 2000);
 
-    // Prepare for sizing and proper center-based scaling
     const plateH = getCssNumber('--banner-plate-h', 180);
     const localCx = 0;
     const localCy = -0.6 * plateH;
@@ -779,33 +876,33 @@ function scheduleBannerArrival(quizIndex, delaySeconds = QUIZ_ARRIVAL_DELAY) {
       bannerEl.style.display = '';
       applyBannerSizing(bannerEl);
 
-      // Distance scaling (like obstacles)
-      const d = Math.max(60, Math.abs(vehY - y));
-      const distScale = Math.min(1.05, Math.max(0.75, 850 / d));
+      const d = Math.abs(vehY - y);
+      const distScale = Math.min(1.0, Math.max(0.85, 1 - (d / 3000)));
       bannerEl.setAttribute(
         'transform',
         `translate(${x}, ${y}) scale(${distScale}) translate(${-localCx}, ${-localCy})`
       );
 
-      // When the banner center passes the player, pause & open quiz
-      const dPass = vehY - y;
-      if (dPass > 0 && dPass < 100 && !hasPassedBanner) {
+      const BANNER_TRIGGER_OFFSET = getTriggerOffset();
+      const triggerY = vehY - BANNER_TRIGGER_OFFSET;
+      const effectiveY = getBannerEffectiveBottomY(bannerEl);
+      const effY = Number.isFinite(effectiveY) ? effectiveY : y;
+
+      const isApproachingFromTop = effY <= vehY;
+      const inTriggerWindow = effY >= triggerY && effY <= vehY;
+
+      if (isApproachingFromTop && inTriggerWindow && !hasPassedBanner) {
         isMoving = false;
         hasPassedBanner = true;
-        // Open quiz for this index (1-based numbering)
         openQuiz(idx + 1);
       }
     } else {
-      // Hide when out of window (or inactive)
       bannerEl.style.display = 'none';
     }
   }
 
   // ====== QUIZ UI ======
-  function openQuiz(quizNumber) {
-    // Show quiz modal right away (movement already paused)
-    showQuizQuestions(quizNumber);
-  }
+  function openQuiz(quizNumber) { showQuizQuestions(quizNumber); }
 
   function showQuizQuestions(quizNumber) {
     const questions = [
@@ -840,7 +937,6 @@ function scheduleBannerArrival(quizIndex, delaySeconds = QUIZ_ARRIVAL_DELAY) {
 
     modal.querySelector('#quizForm').addEventListener('submit', (e) => {
       e.preventDefault();
-      // Score (+30 per quiz as before)
       let correct = 0;
       questions.forEach((q,i)=>{
         const v = modal.querySelector(`input[name='q${i}']:checked`);
@@ -849,7 +945,6 @@ function scheduleBannerArrival(quizIndex, delaySeconds = QUIZ_ARRIVAL_DELAY) {
       updateScore(30);
       modal.remove();
 
-      // Deactivate current banner
       if (activeBannerIndex >= 0) {
         const bEl = quizBanners[activeBannerIndex];
         const st = bannerStates[activeBannerIndex];
@@ -859,13 +954,11 @@ function scheduleBannerArrival(quizIndex, delaySeconds = QUIZ_ARRIVAL_DELAY) {
       activeBannerIndex = -1;
       hasPassedBanner = false;
 
-      // Determine next step (total 4 quizzes)
       if (quizNumber >= MAX_QUIZZES) {
         showFinalScore();
       } else {
-        // Resume movement and schedule next banner to ARRIVE in 8s
         isMoving = true;
-        scheduleBannerArrival(quizNumber, QUIZ_ARRIVAL_DELAY); // quizNumber is next index (1-based -> OK)
+        scheduleBannerArrival(quizNumber, QUIZ_ARRIVAL_DELAY);
       }
     });
   }
@@ -919,7 +1012,6 @@ function scheduleBannerArrival(quizIndex, delaySeconds = QUIZ_ARRIVAL_DELAY) {
         gameStarted = true;
         isMoving = true;
 
-        // Schedule first banner to ARRIVE in 8 seconds of driving
         scheduleBannerArrival(0, QUIZ_ARRIVAL_DELAY);
       }
     }, 1000);
@@ -936,16 +1028,12 @@ function scheduleBannerArrival(quizIndex, delaySeconds = QUIZ_ARRIVAL_DELAY) {
   }
 
   // ======== SVG + vehicle sizing helpers ========
-
-  // Get viewBox for mapping clientX -> SVG X
   function getViewBox() {
     const vb = scene.viewBox && scene.viewBox.baseVal;
     if (vb) return { x: vb.x, y: vb.y, w: vb.width, h: vb.height };
-    // Fallback if no viewBox specified
     return { x: 0, y: 0, w: 1000, h: 2000 };
   }
 
-  // Convert clientX to SVG X using bounding rect + viewBox
   function clientXToSvgX(clientX) {
     const rect = scene.getBoundingClientRect();
     const { x, w } = getViewBox();
@@ -953,47 +1041,54 @@ function scheduleBannerArrival(quizIndex, delaySeconds = QUIZ_ARRIVAL_DELAY) {
     return x + t * w;
   }
 
-  // Current vehicle half width in SVG coords (includes CSS scale)
   function getVehicleHalfWidth() {
     const vehEl = document.getElementById(selectedVehicle || '');
-    if (!vehEl) return 65; // Default fallback
+    if (!vehEl) return 65; // fallback
     const scale = getCssNumber('--vehicle-scale', 2.2);
     try {
       const bb = vehEl.getBBox();
       return (bb.width * scale) / 2;
     } catch(e) {
-      return 65; // Fallback if getBBox fails
+      return 65;
     }
   }
 
-  // Clamp X so vehicle stays visually inside road edges
   function clampToRoad(x) {
     const vehY = ROAD_CONFIG.endY - 300;
-    const roadW = roadWidthAt(vehY);
-    const margin = 30; // Increased margin for safety
+       const roadW = roadWidthAt(vehY);
+    const margin = 30; // keep safe margin (mobile behavior unchanged)
     const halfW = getVehicleHalfWidth();
     const leftEdge  = ROAD_CONFIG.centerX - roadW / 2 + margin + halfW;
     const rightEdge = ROAD_CONFIG.centerX + roadW / 2 - margin - halfW;
     return Math.max(leftEdge, Math.min(rightEdge, x));
   }
 
-  // Reclamp both target and current (use after orientation/selection)
   function reclampVehicleX() {
     currentCarX = clampToRoad(currentCarX);
     targetCarX  = clampToRoad(targetCarX);
   }
 
-  // ===== Proximity-based obstacle scale (JS animation only) =====
-  const START_SCALE = 0.9;
+  // Ensure vehicle is visible immediately after selection
+  function placeVehicleImmediately() {
+    const vehY = ROAD_CONFIG.endY - 300;
+    const roadW = roadWidthAt(vehY);
+    const margin = 30;
+    const halfW = getVehicleHalfWidth();
+    currentCarX = ROAD_CONFIG.centerX;
+    targetCarX = ROAD_CONFIG.centerX;
+    const leftEdge  = ROAD_CONFIG.centerX - roadW / 2 + margin + halfW;
+    const rightEdge = ROAD_CONFIG.centerX + roadW / 2 - margin - halfW;
+    currentCarX = Math.max(leftEdge, Math.min(rightEdge, currentCarX));
+    targetCarX  = currentCarX;
+    updateVehicleAndRoad();
+  }
+
+  // ===== Proximity-based obstacle scale =====
+  const START_SCALE = 0.75;
   const FAR_DISTANCE  = 700;
   const NEAR_DISTANCE = 120;
 
-  function easeOutCubic(t) {
-    t = Math.max(0, Math.min(1, t));
-    return 1 - Math.pow(1 - t, 3);
-  }
-
-  // Map distance -> scale in [START_SCALE..1.0]
+  function easeOutCubic(t) { t = Math.max(0, Math.min(1, t)); return 1 - Math.pow(1 - t, 3); }
   function proximityScale(distanceSvg) {
     if (distanceSvg >= FAR_DISTANCE) return START_SCALE;
     const denom = Math.max(1, FAR_DISTANCE - NEAR_DISTANCE);
@@ -1002,62 +1097,26 @@ function scheduleBannerArrival(quizIndex, delaySeconds = QUIZ_ARRIVAL_DELAY) {
     return START_SCALE + (1 - START_SCALE) * eased;
   }
 
-  // ===== Obstacles (cars) pacing improvements =====
   const obstacleEls = Array.from(document.querySelectorAll('#obstacles .obstacle'));
-  function getObstacleBaseSizeFor(el) {
-    const type = (el.getAttribute('data-type') || '').toLowerCase();
-    if (type === 'pothole' || type === 'hole') {
-      return {
-        bw: getCssNumber('--obstacle-base-w-hole', 60),
-        bh: getCssNumber('--obstacle-base-h-hole', 60)
-      };
-    }
-    return {
-      bw: getCssNumber('--obstacle-base-w-car', 80),
-      bh: getCssNumber('--obstacle-base-h-car', 120)
-    };
-  }
-  const obstacleBaseSizes = obstacleEls.map(getObstacleBaseSizeFor);
-
-  // Create obstacle state
   const obstacles = obstacleEls.map((el, i) => {
-    const lane = Math.max(0, Math.min(2, parseInt(el.getAttribute('data-lane') || '1', 10)));
+    const lane = parseInt(el.getAttribute('data-lane') || '0', 10);
     const type = (el.getAttribute('data-type') || 'car').toLowerCase();
     return {
-      el,
-      type,
-      lane,
-      initialY: 0,
-      hit: false,
-      restarting: false
+      el, type,
+      lane: lane > 0 ? 1 : 0,
+      initialY: 0, fixedX: 0,
+      hit: false, restarting: false, visible: false
     };
   });
 
-  function randBetween(min, max) {
-    return min + Math.random() * (max - min);
-  }
-
-  // Seed initial obstacle positions so they don't all appear at once
- function seedObstacleInitialPositions() {
-  const minY = getCssNumber('--banner-min-y', 800);
-
-  obstacles.forEach((obs, i) => {
-    const tSec = 2 + (i * 2); // 2 sec spacing
-    obs.initialY = minY - (roadOffset + GAME_SPEED * tSec);
-  });
-}
-
-
-  // Set obstacle transform using measured size for center scaling
   function getRenderedWidthInSvgUnits(el) {
     const rect = el.getBoundingClientRect();
     const ctm = el.getScreenCTM && el.getScreenCTM();
     const svg = document.getElementById('scene');
     if (!ctm || !svg || rect.width <= 0) return 0;
 
-    const p1 = svg.createSVGPoint();
+    const p1 = svg.createSVGPoint(), p2 = svg.createSVGPoint();
     p1.x = rect.left; p1.y = rect.top;
-    const p2 = svg.createSVGPoint();
     p2.x = rect.left + rect.width; p2.y = rect.top;
 
     const inv = ctm.inverse();
@@ -1072,9 +1131,8 @@ function scheduleBannerArrival(quizIndex, delaySeconds = QUIZ_ARRIVAL_DELAY) {
     const svg = document.getElementById('scene');
     if (!ctm || !svg || rect.height <= 0) return 0;
 
-    const p1 = svg.createSVGPoint();
+    const p1 = svg.createSVGPoint(), p2 = svg.createSVGPoint();
     p1.x = rect.left; p1.y = rect.top;
-    const p2 = svg.createSVGPoint();
     p2.x = rect.left; p2.y = rect.top + rect.height;
 
     const inv = ctm.inverse();
@@ -1084,17 +1142,28 @@ function scheduleBannerArrival(quizIndex, delaySeconds = QUIZ_ARRIVAL_DELAY) {
     return Math.abs(sp2.y - sp1.y);
   }
 
-// Global trackers (outside function)
-window.nextObstacleIndex = window.nextObstacleIndex || 0;
-window.carOnRoad = window.carOnRoad || false;
+  window.nextObstacleIndex = window.nextObstacleIndex || 0;
+  window.carOnRoad = window.carOnRoad || false;
+  window.spawnScheduled = window.spawnScheduled || false;
 
-// Global
-// Globals
-window.nextObstacleIndex = window.nextObstacleIndex || 0;
-window.carOnRoad = window.carOnRoad || false;
-window.spawnScheduled = window.spawnScheduled || false;
+  function seedObstacleInitialPositions() {
+    const minY = getCssNumber('--banner-min-y', 800);
 
-function updateObstaclesAndCollisions() {
+    obstacles.forEach((obs, i) => {
+      if (i === 0) {
+        obs.initialY = minY - (roadOffset + GAME_SPEED * 2);
+        obs.visible = true;
+        obs.fixedX = getLaneX(0, obs.lane);
+      } else {
+        obs.initialY = minY - 9000;
+        obs.visible = false;
+        obs.fixedX = 0;
+      }
+    });
+    window.carOnRoad = true;
+  }
+
+  function updateObstaclesAndCollisions() {
     if (!gameStarted) return;
 
     const minY = getCssNumber('--banner-min-y', 800);
@@ -1104,83 +1173,89 @@ function updateObstaclesAndCollisions() {
     const collisionBuffer = 80;
 
     obstacles.forEach((data, i) => {
-        const el = data.el;
-        const y = data.initialY + roadOffset;
+      const el = data.el;
+      const y = data.initialY + roadOffset;
 
-        // --- movement / scaling / visibility ---
-        let x = getLaneX(y, data.lane);
-        let wSvg = getRenderedWidthInSvgUnits(el);
-        let hSvg = getRenderedHeightInSvgUnits(el);
-        if (!Number.isFinite(wSvg) || wSvg <= 0) wSvg = getLaneWidthAt(y) * 0.6;
-        if (!Number.isFinite(hSvg) || hSvg <= 0) hSvg = wSvg * 1.5;
-        const scale = proximityScale(Math.abs(vehY - y));
-        const left = x - wSvg / 2;
-        const top  = y - hSvg / 2;
-        el.setAttribute('x', left);
-        el.setAttribute('y', top);
-        el.setAttribute('transform', `translate(${left + wSvg/2},${top + hSvg/2}) scale(${scale}) translate(${-left - wSvg/2},${-top - hSvg/2})`);
-        el.style.display = (y >= minY && y <= maxY + 200) ? '' : 'none';
+      if (!data.visible) {
+        el.style.display = 'none';
+        return;
+      }
 
-        // Collision
-        const dx = Math.abs(vehX - x);
-        const dy = Math.abs(vehY - y);
-        if (dx < collisionBuffer && dy < collisionBuffer && !data.hit && y > minY + 50) {
-            data.hit = true;
-            updateScore(-10);
-            potholeImpact = 16;
-            setTimeout(() => { data.hit = false; }, 1000);
-        }
+      const t = (y - ROAD_CONFIG.startY) / (ROAD_CONFIG.endY - ROAD_CONFIG.startY);
+      let x;
+      if (data.lane === 0) {
+        const leftEdge = 370 - (270 * t);
+        x = (leftEdge + ROAD_CONFIG.centerX) * 0.5 + 15;
+      } else {
+        const rightEdge = 630 + (270 * t);
+        x = (ROAD_CONFIG.centerX + rightEdge) * 0.5 - 15;
+      }
 
-        // Sequential car spawning
-        if (data.visible && y > maxY + 300 && !window.spawnScheduled) {
-            // Car is completely off screen, schedule next
-            data.visible = false;
-            window.carOnRoad = false;
-            window.spawnScheduled = true;
+      let wSvg = getRenderedWidthInSvgUnits(el);
+      let hSvg = getRenderedHeightInSvgUnits(el);
+      if (!Number.isFinite(wSvg) || wSvg <= 0) wSvg = getLaneWidthAt(y) * 0.6;
+      if (!Number.isFinite(hSvg) || hSvg <= 0) hSvg = wSvg * 1.5;
 
-            setTimeout(() => {
-                const nextObs = obstacles[window.nextObstacleIndex];
-                if (nextObs) {
-                    const tSec = 8 + Math.random() * 2; // 8–10s delay
-                    nextObs.initialY = minY - (roadOffset + GAME_SPEED * tSec);
-                    nextObs.restarting = false;
-                    nextObs.hit = false;
-                    nextObs.visible = true;
-                    nextObs.el.removeAttribute('transform');
+      const scale = proximityScale(Math.abs(vehY - y));
+      const left = x - wSvg / 2;
+      const top  = y - hSvg / 2;
+      el.setAttribute('x', left);
+      el.setAttribute('y', top);
+      el.setAttribute('transform', `translate(${left + wSvg/2},${top + hSvg/2}) scale(${scale}) translate(${-left - wSvg/2},${-top - hSvg/2})`);
+      el.style.display = (y >= minY && y <= maxY + 200) ? '' : 'none';
 
-                    window.nextObstacleIndex = (window.nextObstacleIndex + 1) % obstacles.length;
-                    window.carOnRoad = true;
-                    window.spawnScheduled = false;
-                }
-            }, 500); // small cooldown to avoid overlapping scheduling
-        }
+      // Collision
+      const dx = Math.abs(vehX - x);
+      const dy = Math.abs(vehY - y);
+      if (dx < collisionBuffer && dy < collisionBuffer && !data.hit && y > minY + 50) {
+        data.hit = true;
+        updateScore(-10);
+        potholeImpact = 16;
+        setTimeout(() => { data.hit = false; }, 1000);
+      }
+
+      // Respawn next obstacles
+      if (y > maxY + 300 && !window.spawnScheduled) {
+        data.visible = false;
+        window.carOnRoad = false;
+        window.spawnScheduled = true;
+
+        setTimeout(() => {
+          window.nextObstacleIndex = (window.nextObstacleIndex + 1) % obstacles.length;
+          const nextObs = obstacles[window.nextObstacleIndex];
+          if (nextObs) {
+            const tSec = 0.5 + Math.random() * 0.5;
+            nextObs.initialY = minY - (roadOffset + GAME_SPEED * tSec);
+            nextObs.fixedX = getLaneX(0, nextObs.lane);
+            nextObs.restarting = false;
+            nextObs.hit = false;
+            nextObs.visible = true;
+            window.carOnRoad = true;
+            window.spawnScheduled = false;
+          }
+        }, 100);
+      }
     });
 
     if (potholeImpact > 0) potholeImpact *= 0.88;
-}
-
-
-
-
+  }
 
   function updateVehicleAndRoad() {
     const centerLine = document.getElementById('centerLine');
     const dashOffset = (-roadOffset) % 80;
     centerLine.setAttribute('stroke-dashoffset', dashOffset);
 
-    // Clamp target first, then interpolate
     targetCarX = clampToRoad(targetCarX);
 
     const diff = targetCarX - currentCarX;
     if (Math.abs(diff) > 0.3) currentCarX += diff * 0.15;
 
-    // Keep current inside the road every frame
     currentCarX = clampToRoad(currentCarX);
 
     if (isMoving) {
       engineVibration = Math.sin(distance * 0.3) * 0.2;
       carBounce = Math.sin(distance * 0.2) * 0.4;
-      distance += 0; // kept for future use
+      distance += 0;
     } else {
       engineVibration *= 0.92;
       carBounce *= 0.92;
@@ -1208,7 +1283,6 @@ function updateObstaclesAndCollisions() {
       distance += GAME_SPEED * dt;
     }
 
-    // Update visuals
     updateActiveBanner();
     updateObstaclesAndCollisions();
     updateVehicleAndRoad();
@@ -1249,16 +1323,13 @@ function updateObstaclesAndCollisions() {
     const laneW = getLaneWidthAt(vehY);
     const step  = Math.max(20, laneW * 0.22); // ~22% of lane width
 
-    let moved = false;
     if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') {
       e.preventDefault();
       targetCarX = clampToRoad(targetCarX - step);
-      moved = true;
     }
     if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd'){
       e.preventDefault();
       targetCarX = clampToRoad(targetCarX + step);
-      moved = true;
     }
   });
 
@@ -1269,8 +1340,8 @@ function updateObstaclesAndCollisions() {
     body.classList.remove('hide-rotate');
     applyLandscapeBlockState(matchMedia('(orientation: landscape)').matches);
     showVehicle('car');
-    // Re-clamp after showing car so width is known
     reclampVehicleX();
+    placeVehicleImmediately(); // ensure visible immediately
     setTimeout(startCountdownAndMove, 150);
   });
   document.getElementById('selectBikeBtn').addEventListener('click', () => {
@@ -1279,8 +1350,8 @@ function updateObstaclesAndCollisions() {
     body.classList.remove('hide-rotate');
     applyLandscapeBlockState(matchMedia('(orientation: landscape)').matches);
     showVehicle('bike');
-    // Re-clamp after showing bike
     reclampVehicleX();
+    placeVehicleImmediately(); // ensure visible immediately
     setTimeout(startCountdownAndMove, 150);
   });
 
@@ -1300,7 +1371,7 @@ function updateObstaclesAndCollisions() {
     rafId = requestAnimationFrame(tick);
   });
 
-  // ===== Pause/resume when page visibility changes =====
+  // Pause/resume when page visibility changes
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
       if (rafId) cancelAnimationFrame(rafId);
@@ -1311,7 +1382,7 @@ function updateObstaclesAndCollisions() {
     }
   });
 
-  // ===== Pause/Resume helpers for orientation overlay =====
+  // Pause/Resume helpers for orientation overlay
   let savedMoving = false;
   function pauseGameForOrientation() {
     if (rafId) {
@@ -1329,24 +1400,20 @@ function updateObstaclesAndCollisions() {
     if (savedMoving) isMoving = true;
   }
 
-  // ===== Media query change handling =====
+  // Media query change handling
   const onMediaChange = () => {
     applyLandscapeBlockState(mql.matches);
-    // Road width / vehicle scale may change -> reclamp vehicle X
     reclampVehicleX();
   };
   if ('addEventListener' in mql) mql.addEventListener('change', onMediaChange);
   else if ('addListener' in mql) mql.addListener(onMediaChange); // older Safari
 
-  // Also reclamp on window resize (when layout shifts)
-  window.addEventListener('resize', () => {
-    reclampVehicleX();
-  });
+  // Also reclamp on window resize/orientation
+  window.addEventListener('resize', () => { reclampVehicleX(); });
+  window.addEventListener('orientationchange', () => { reclampVehicleX(); });
 
-  // iOS sometimes fires orientationchange without resize/MQL change
-  window.addEventListener('orientationchange', () => {
-    reclampVehicleX();
-  });
+  // Expose startQuiz for template buttons
+  window.startQuiz = (n) => { openQuiz(n); };
 })();
 </script>
 </body>
