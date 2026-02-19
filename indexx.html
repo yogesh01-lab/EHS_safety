@@ -972,6 +972,7 @@ function getTriggerOffset() {
     ];
 
     const modal = document.createElement('div');
+    modal.className = 'popup-overlay'; // ensure game input is blocked while quiz is open
     modal.style.cssText = `
       position:fixed; inset:0; background:rgba(0,0,0,.7);
       display:flex; align-items:center; justify-content:center; z-index:2001;
@@ -1159,6 +1160,15 @@ function getTriggerOffset() {
     };
   });
 
+  // helper: never show two obstacles that use the same SVG source at once
+  function canActivateObstacle(obs) {
+    const src = obs.el.getAttribute('href') || '';
+    return !obstacles.some(o =>
+      o !== obs && o.visible &&
+      (o.el.getAttribute('href') || '') === src
+    );
+  }
+
   function getRenderedWidthInSvgUnits(el) {
     const rect = el.getBoundingClientRect();
     const ctm = el.getScreenCTM && el.getScreenCTM();
@@ -1192,23 +1202,18 @@ function getTriggerOffset() {
     return Math.abs(sp2.y - sp1.y);
   }
 
-  window.nextObstacleIndex = window.nextObstacleIndex || 0;
+  // track next index only when using sequential spawns (legacy)
+  // remove spawnScheduled entirely, we will respawn each obstacle individually
   window.carOnRoad = window.carOnRoad || false;
-  window.spawnScheduled = window.spawnScheduled || false;
 
   function seedObstacleInitialPositions() {
     const minY = getCssNumber('--banner-min-y', 800);
 
     obstacles.forEach((obs, i) => {
-      if (i === 0) {
-        obs.initialY = minY - (roadOffset + GAME_SPEED * 2);
-        obs.visible = true;
-        obs.fixedX = getLaneX(0, obs.lane);
-      } else {
-        obs.initialY = minY - 5000;
-        obs.visible = false;
-        obs.fixedX = 0;
-      }
+      // stagger initial positions so multiple obstacles cruise by
+      obs.initialY = minY - (roadOffset + GAME_SPEED * (2 + i * 3));
+      obs.visible = true;
+      obs.fixedX = getLaneX(0, obs.lane);
     });
     window.carOnRoad = true;
   }
@@ -1222,11 +1227,23 @@ function getTriggerOffset() {
     const vehX = currentCarX;
     const collisionBuffer = 80;
 
+    // compute current banner Y (only one active at a time)
+    const bannerY = (activeBannerIndex >= 0)
+      ? (bannerStates[activeBannerIndex].initialY + roadOffset)
+      : null;
+    const bannerVisible = bannerY !== null && bannerY >= minY && bannerY <= maxY + 200;
+
     obstacles.forEach((data, i) => {
       const el = data.el;
-      const y = data.initialY + roadOffset;
+      let y = data.initialY + roadOffset;
 
       if (!data.visible) {
+        el.style.display = 'none';
+        return;
+      }
+
+      // hide any obstacle that would overlap an active banner (potholes in particular)
+      if (bannerY !== null && Math.abs(y - bannerY) < 140) {
         el.style.display = 'none';
         return;
       }
@@ -1246,48 +1263,117 @@ function getTriggerOffset() {
       if (!Number.isFinite(wSvg) || wSvg <= 0) wSvg = getLaneWidthAt(y) * 0.6;
       if (!Number.isFinite(hSvg) || hSvg <= 0) hSvg = wSvg * 1.5;
 
+      // hide if the obstacle would overlap the banner vertically
+      if (bannerY !== null) {
+        const hideDist = (hSvg / 2) + 80; // half height plus margin
+        if (Math.abs(y - bannerY) < hideDist) {
+          data.visible = false;          // prevent future frames
+          el.style.display = 'none';
+          return;
+        }
+      }
+
       const scale = proximityScale(Math.abs(vehY - y));
       const left = x - wSvg / 2;
       const top  = y - hSvg / 2;
       el.setAttribute('x', left);
       el.setAttribute('y', top);
       el.setAttribute('transform', `translate(${left + wSvg/2},${top + hSvg/2}) scale(${scale}) translate(${-left - wSvg/2},${-top - hSvg/2})`);
-      el.style.display = (y >= minY && y <= maxY + 200) ? '' : 'none';
 
-      // Collision
-      const dx = Math.abs(vehX - x);
-      const dy = Math.abs(vehY - y);
-      if (dx < collisionBuffer && dy < collisionBuffer && !data.hit && y > minY + 50) {
-        data.hit = true;
-        updateScore(-10);
-        potholeImpact = 16;
-        setTimeout(() => { data.hit = false; }, 1000);
+      // show obstacle once it reaches the banner-min area, but keep it visible well past the bottom
+      el.style.display = (data.visible && y >= minY) ? '' : 'none';
+
+      // only check collision when obstacle is close to car vertically
+      if (y > vehY - 150) {
+        const activeVehicle = document.getElementById(selectedVehicle || '');
+        if (activeVehicle) {
+          const playerRect = activeVehicle.getBoundingClientRect();
+          const obstacleRect = el.getBoundingClientRect();
+          const padding = 4;
+          const isColliding =
+            playerRect.right - padding > obstacleRect.left &&
+            playerRect.left + padding < obstacleRect.right &&
+            playerRect.bottom - padding > obstacleRect.top &&
+            playerRect.top + padding < obstacleRect.bottom;
+
+          if (isColliding && !data.hit && data.visible) {
+            data.hit = true;
+            updateScore(-10);
+            potholeImpact = 28;
+            data.visible = false;
+            el.style.display = 'none';
+            setTimeout(() => { data.hit = false; }, 500);
+          }
+        }
       }
 
-      // Respawn next obstacles
-      if (y > maxY + 300 && !window.spawnScheduled) {
+      // respawn this obstacle independently once past bottom
+      if (y > maxY + 300 && !data.restarting) {
         data.visible = false;
-        window.carOnRoad = false;
-        window.spawnScheduled = true;
-
-        setTimeout(() => {
-          window.nextObstacleIndex = (window.nextObstacleIndex + 1) % obstacles.length;
-          const nextObs = obstacles[window.nextObstacleIndex];
-          if (nextObs) {
-            const tSec = 0.5 + Math.random() * 0.5;
-            nextObs.initialY = minY - (roadOffset + GAME_SPEED * tSec);
-            nextObs.fixedX = getLaneX(0, nextObs.lane);
-            nextObs.restarting = false;
-            nextObs.hit = false;
-            nextObs.visible = true;
-            window.carOnRoad = true;
-            window.spawnScheduled = false;
+        data.restarting = true;
+        const scheduleRespawn = () => {
+          // if a quiz banner is currently visible, wait and try again
+          if (bannerVisible) {
+            setTimeout(scheduleRespawn, 500);
+            return;
           }
-        }, 100);
+
+          // don't activate if another obstacle uses the same image right now
+          if (!canActivateObstacle(data)) {
+            setTimeout(scheduleRespawn, 500);
+            return;
+          }
+
+          // send it back ahead of the player with some randomness
+          let newY = minY - (roadOffset + GAME_SPEED * (1 + Math.random() * 3));
+          // if new position would sit on current banner, nudge it farther ahead by half the obstacle height
+          if (bannerY !== null) {
+            const estimatedHeight = (getLaneWidthAt(newY) * 0.6) * 1.5; // approximate
+            if (Math.abs(newY - bannerY) < (estimatedHeight / 2 + 100)) {
+              newY -= (estimatedHeight + 200);
+            }
+          }
+          data.initialY = newY;
+          data.fixedX = getLaneX(0, data.lane);
+          data.restarting = false;
+          data.hit = false;
+          data.visible = true;
+        };
+        setTimeout(scheduleRespawn, 1000 + Math.random() * 1500);
       }
     });
 
     if (potholeImpact > 0) potholeImpact *= 0.88;
+
+    // **always have something on the road**
+    // if no obstacle is currently marked visible, respawn one
+    const anyActiveInRange = obstacles.some(d => d.visible && !d.restarting);
+    // throttle forced spawns so they can only fire once per second
+    window.lastForcedSpawn = window.lastForcedSpawn || 0;
+    const now = performance.now();
+    if (!anyActiveInRange && !bannerVisible && now - window.lastForcedSpawn > 1000) {
+      window.lastForcedSpawn = now;
+      // try to pick a car first so the user sees cars rather than just potholes
+      let spare = obstacles.find(d =>
+        d.type === 'car' && !d.visible && !d.restarting && canActivateObstacle(d)
+      );
+      if (!spare) spare = obstacles.find(d =>
+        !d.visible && !d.restarting && canActivateObstacle(d)
+      );
+      if (spare) {
+        spare.restarting = true;
+        // place it right at (or just below) the top of the visible zone so it
+        // shows immediately instead of waiting multiple frames to scroll in
+        let newY = minY + (GAME_SPEED * 0.3);
+        if (bannerY !== null && Math.abs(newY - bannerY) < 140) {
+          newY += 300;
+        }
+        spare.initialY = newY;
+        spare.fixedX = getLaneX(0, spare.lane);
+        spare.visible = true;          // mark it active so the flag stops further spawns
+        spare.restarting = false;
+      }
+    }
   }
 
   function updateVehicleAndRoad() {
@@ -1349,6 +1435,7 @@ function getTriggerOffset() {
   }
 
   document.addEventListener('touchstart', (e) => {
+    // ignore touches inside any popup-overlay (quiz or other dialogs)
     if (e.touches.length === 1 && gameStarted && !e.target.closest('.popup-overlay')) isDragging = true;
   }, {passive:true});
   document.addEventListener('touchmove', (e) => {
@@ -1357,6 +1444,7 @@ function getTriggerOffset() {
   document.addEventListener('touchend', () => { isDragging = false; }, {passive:true});
 
   document.addEventListener('mousedown', (e) => {
+    // ignore mouse down inside modal/popups
     if (gameStarted && !e.target.closest('.popup-overlay')) {
       isDragging = true;
       updateCarPositionFromClientX(e.clientX);
