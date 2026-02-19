@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <title>Road Runner - Mobile OK + iPad Portrait Reduced View</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <link rel="preload" as="image" href="SVG/rotate.gif" />
   <style>
     :root {
       /* Theme */
@@ -135,46 +136,6 @@ image.cloud {
   transform-origin: center;
   will-change: transform;
 }
-
-/* ===============================
-   MOBILE (<=767px)
-   =============================== */
-@media (max-width: 767px) {
-  :root {
-    --cloud-speed: 38s;
-
-    --cloud1-y: 120px;
-    --cloud2-y: 200px;
-    --cloud3-y: 300px;
-  }
-}
-
-/* ===============================
-   iPAD PORTRAIT (768–1024px)
-   =============================== */
-@media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
-  :root {
-    --cloud-speed: 42s;
-
-    --cloud1-y: 100px;
-    --cloud2-y: 180px;
-    --cloud3-y: 260px;
-  }
-}
-
-/* ===============================
-   DESKTOP (>=1025px)
-   =============================== */
-@media (min-width: 1025px) {
-  :root {
-    --cloud-speed: 45s;
-
-    --cloud1-y: 80px;
-    --cloud2-y: 150px;
-    --cloud3-y: 250px;
-  }
-}
-
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   #cloud1, #cloud2, #cloud3 {
@@ -196,16 +157,6 @@ image.cloud {
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
       z-index: 100;
     }
-
-    /* Clouds animation (keep your original) */
-    @keyframes cloudMove {
-      0%   { transform: translateX(-600px); }
-      100% { transform: translateX(-2000px); }
-    }
-    #cloud1 { animation: cloudMove var(--cloud-speed) linear infinite; }
-    #cloud2 { animation: cloudMove var(--cloud-speed) linear infinite 5s; }
-    #cloud3 { animation: cloudMove var(--cloud-speed) linear infinite 9s; }
-
     /* Safari/iPad transform reliability for SVG images */
     image.cloud {
       transform-box: fill-box;
@@ -356,6 +307,9 @@ image.cloud {
         --road-left-ty: 0px;
         --road-right-ty: 0px;
         --vehicle-ty: 0px;
+    --cloud1-y: 120px;
+    --cloud2-y: 200px;
+    --cloud3-y: 300px;
       }
 
       svg image.obstacle[data-type="car"] {
@@ -411,6 +365,9 @@ image.cloud {
         --road-left-ty: -12px;
         --road-right-ty: -12px;
         --vehicle-ty: -185px;
+    --cloud1-y: 305px;
+    --cloud2-y: 300px;
+    --cloud3-y: 290px;
       }
       svg image.obstacle[data-type="car"] {
         width: var(--obstacle-base-w-car) !important;
@@ -454,6 +411,9 @@ image.cloud {
         --road-left-ty: 0px;
         --road-right-ty: 0px;
         --vehicle-ty: 0px;
+    --cloud1-y: 80px;
+    --cloud2-y: 150px;
+    --cloud3-y: 250px;
       }
       .wrap {
         width: min(980px, 94vw);
@@ -461,38 +421,42 @@ image.cloud {
       }
       .scene { width: 100%; }
     }
+   /* ======== ROTATE OVERLAY (controlled by body.landscape-block) ======== */
+.rotate-overlay {
+  position: fixed; inset: 0;
+  background: #fff;
+  color: #0b1a2a;
+  display: none; /* JS toggles via body.landscape-block */
+  align-items: center; justify-content: center; flex-direction: column;
+  z-index: 1010;
+  padding: 24px;
+  text-align: center;
+}
+.rotate-overlay .gif {
+  width: min(240px, 60vw);
+  height: auto;
+  margin-bottom: 16px;
+}
+.rotate-overlay h2 {
+  font-size: clamp(18px, 4.6vw, 24px);
+  margin: 6px 0 8px;
+}
+.rotate-overlay p {
+  font-size: clamp(14px, 3.8vw, 18px);
+  opacity: 0.9;
+  max-width: 520px;
+}
 
-    /* ======== PORTRAIT-ONLY OVERLAY ======== */
-    .rotate-overlay {
-      position: fixed; inset: 0;
-      background: #0b1a2a;
-      color: #fff;
-      display: none;
-      align-items: center; justify-content: center; flex-direction: column;
-      z-index: 1010;
-      padding: 24px;
-      text-align: center;
-    }
-    .rotate-overlay .gif {
-      width: min(240px, 60vw);
-      height: auto;
-      margin-bottom: 16px;
-    }
-    .rotate-overlay h2 {
-      font-size: clamp(18px, 4.6vw, 24px);
-      margin: 6px 0 8px;
-    }
-    .rotate-overlay p {
-      font-size: clamp(14px, 3.8vw, 18px);
-      opacity: 0.9;
-      max-width: 520px;
-    }
-    .hide-rotate .rotate-overlay { display: none !important; }
+/* Hide overlay hard while selecting vehicle */
+.hide-rotate .rotate-overlay { display: none !important; }
 
-    @media (orientation: landscape) and (hover: none) and (pointer: coarse) {
-      .rotate-overlay { display: flex; }
-      body.landscape-block .wrap { filter: blur(3px) brightness(.7); }
-    }
+/* Fallback: if device is landscape + coarse pointer and JS hasn't set class */
+@media (orientation: landscape) and (hover: none) and (pointer: coarse) {
+  body:not(.hide-rotate):not(.landscape-block) .rotate-overlay { display: flex; }
+}
+
+/* Blur game when overlay visible (optional) */
+body.landscape-block .wrap { filter: blur(3px) brightness(.7); }
 
     /* Vehicle selection overlay */
     #vehicleSelectOverlay {
@@ -645,7 +609,7 @@ image.cloud {
           <image class="obstacle" data-type="car"     data-lane="1" href="SVG/car1.svg"     x="0" y="0" width="80" height="120" xlink:href="SVG/car1.svg"/>
           <image class="obstacle" data-type="pothole" data-lane="0" href="SVG/potholes.svg" x="0" y="0" width="60" height="60"  xlink:href="SVG/potholes.svg"/>
           <image class="obstacle" data-type="car"     data-lane="1" href="SVG/car2.svg"     x="0" y="0" width="80" height="120" xlink:href="SVG/car2.svg"/>
-          <image class="obstacle" data-type="car"     data-lane="1" href="SVG/car3.svg"     x="0" y="0" width="80" height="120" xlink:href="SVG/car3.svg"/>
+          <image class="obstacle" data-type="car"     data-lane="0" href="SVG/car3.svg"     x="0" y="0" width="80" height="120" xlink:href="SVG/car3.svg"/>
           <image class="obstacle" data-type="car"     data-lane="0" href="SVG/car1.svg"     x="0" y="0" width="80" height="120" xlink:href="SVG/car1.svg"/>
         </g>
 
@@ -763,35 +727,37 @@ image.cloud {
   const vehicleOverlay = document.getElementById('vehicleSelectOverlay');
   const body = document.body;
 
-  // Detect touch device
-  const isTouch = () => matchMedia('(hover: none) and (pointer: coarse)').matches;
+  // --- Touch-like detection (real touch or emulated in DevTools) ---
+  const isTouchLike = () =>
+    ('ontouchstart' in window) ||
+    (navigator.maxTouchPoints && navigator.maxTouchPoints > 0) ||
+    matchMedia('(hover: none) and (pointer: coarse)').matches;
 
-  // Orientation media query
-  const mql = matchMedia('(orientation: landscape)');
+  // Force overlay for desktop testing: ?forceRotate=1 or localStorage('forceRotate')==='1'
+  const FORCE_ROTATE = /(^|[?&])forceRotate=1(&|$)/.test(location.search) ||
+                       localStorage.getItem('forceRotate') === '1';
 
-  function isSelectingVehicle() {
-    return vehicleOverlay && vehicleOverlay.style.display !== 'none';
+  // Do not show rotate overlay while selecting vehicle
+  const isSelectingVehicle = () =>
+    vehicleOverlay && getComputedStyle(vehicleOverlay).display !== 'none';
+
+  // Landscape detection (multiple signals for iOS/iPadOS reliability)
+  const landscapeMql = matchMedia('(orientation: landscape)');
+  function isLandscape() {
+    try {
+      if (landscapeMql && typeof landscapeMql.matches === 'boolean') {
+        return landscapeMql.matches;
+      }
+    } catch {}
+    try {
+      if (screen.orientation && screen.orientation.type) {
+        return screen.orientation.type.includes('landscape');
+      }
+    } catch {}
+    return window.innerWidth > window.innerHeight;
   }
 
-  // Orientation handling: show overlay in landscape on touch devices; pause game
-  let gamePausedForLandscape = false;
-  function applyLandscapeBlockState(landscape) {
-    if (landscape && isTouch() && !isSelectingVehicle()) {
-      rotateOverlay.style.display = 'flex';
-      body.classList.add('landscape-block');
-      document.getElementById('gameRoot').style.pointerEvents = 'none';
-      pauseGameForOrientation();
-      gamePausedForLandscape = true;
-    } else {
-      rotateOverlay.style.display = 'none';
-      body.classList.remove('landscape-block');
-      document.getElementById('gameRoot').style.pointerEvents = '';
-      resumeGameFromOrientation();
-      gamePausedForLandscape = false;
-    }
-  }
-
-  // ====== Game code ======
+  // ====== Game code (unchanged from your version) ======
   const scene = document.getElementById('scene');
   const car = document.getElementById('car');
   const bike = document.getElementById('bike');
@@ -852,7 +818,7 @@ image.cloud {
   const updateScore = (delta) => { score = Math.max(0, score + delta); scoreEl.textContent = score; };
 
   let selectedVehicle = null; // 'car' | 'bike'
-  let isMoving = false;
+  let isMoving = false;       // NOTE: used also by orientation pause/resume
   let gameStarted = false;
   let lastTs = null;
   let rafId = null;
@@ -900,19 +866,18 @@ image.cloud {
 
     if (pole) pole.setAttribute('height', poleH);
 
-    plate && plate.setAttribute('x', -plateW/2);
-    plate && plate.setAttribute('y', -plateH - (plateH * 0.1));
-    plate && plate.setAttribute('width', plateW);
-    plate && plate.setAttribute('height', plateH);
+    if (plate) {
+      plate.setAttribute('x', -plateW/2);
+      plate.setAttribute('y', -plateH - (plateH * 0.1));
+      plate.setAttribute('width', plateW);
+      plate.setAttribute('height', plateH);
+    }
 
     const plateCenterY = -plateH - (plateH * 0.1) + plateH/2;
-    title   && title.setAttribute('x', 0);
-    subtitle && subtitle.setAttribute('x', 0);
-    title   && title.setAttribute('y', plateCenterY - plateH * 0.18);
-    subtitle && subtitle.setAttribute('y', plateCenterY + plateH * 0.12);
+    if (title) { title.setAttribute('x', 0); title.setAttribute('y', plateCenterY - plateH * 0.18); }
+    if (subtitle) { subtitle.setAttribute('x', 0); subtitle.setAttribute('y', plateCenterY + plateH * 0.12); }
   }
 
-  // ---------- Helpers for trigger measurement ----------
   function screenToSvgPoint(screenX, screenY) {
     try {
       const svg = document.getElementById('scene');
@@ -936,11 +901,6 @@ image.cloud {
     const target = plate || bannerEl;
     return getElementBottomCenterSvgY(target);
   }
-  function getTriggerOffset() {
-    const v = getCssNumber('--quiz-trigger-offset', 50);
-    return Number.isFinite(v) ? v : 50;
-  }
-  // -----------------------------------------------------
 
   function updateActiveBanner() {
     if (activeBannerIndex < 0) return;
@@ -971,44 +931,31 @@ image.cloud {
         `translate(${x}, ${y}) scale(${distScale}) translate(${-localCx}, ${-localCy})`
       );
 
-// --- Calculate banner bottom properly in SVG space ---
-const plateH = getCssNumber('--banner-plate-h', 180);
-const localBottom = -0.6 * plateH + (plateH / 2);
-const effectiveBottomY = y + (localBottom * distScale);
+      // Calculate banner bottom properly in SVG space
+      const localBottom = -0.6 * plateH + (plateH / 2);
+      const effectiveBottomY = y + (localBottom * distScale);
 
-// --- Trigger when banner reaches vehicle ---
-// --- Determine TRIGGER_OFFSET dynamically based on screen width ---
+      // Dynamic TRIGGER_OFFSET by width
 function getTriggerOffset() {
   const w = window.innerWidth;
   let offset;
 
-  if (w <= 600) {
-    offset = 400; // mobile
-  } else if (w <= 900) {
-    offset = 180; // tablet portrait
-  } else if (w <= 1200) {
-    offset = 250; // tablet landscape / small desktop
-  } else {
-    offset = 350; // large desktop
-  }
+  if (w <= 600) offset = 440;
+  else if (w <= 900) offset = 640;
+  else if (w <= 1200) offset = 250;
+  else offset = 350;
 
-  // Log for debugging
-  console.log(`Screen width: ${w}px → TRIGGER_OFFSET: ${offset}px`);
-
+  console.log("Trigger Offset:", offset, "| Width:", w);
   return offset;
 }
+      const TRIGGER_OFFSET = getTriggerOffset();
+      const triggerLine = vehY - TRIGGER_OFFSET;
 
-
-const TRIGGER_OFFSET = getTriggerOffset();
-const triggerLine = vehY - TRIGGER_OFFSET;
-
-if (effectiveBottomY >= triggerLine && !hasPassedBanner) {
-  hasPassedBanner = true;
-  isMoving = false;
-  openQuiz(idx + 1);
-}
-
-
+      if (effectiveBottomY >= triggerLine && !hasPassedBanner) {
+        hasPassedBanner = true;
+        isMoving = false;
+        openQuiz(idx + 1);
+      }
     } else {
       bannerEl.style.display = 'none';
     }
@@ -1130,16 +1077,6 @@ if (effectiveBottomY >= triggerLine && !hasPassedBanner) {
     }, 1000);
   }
 
-  function showVehicle(vehicle) {
-    if (vehicle === 'car') {
-      car.style.display = '';
-      bike.style.display = 'none';
-    } else {
-      car.style.display = 'none';
-      bike.style.display = '';
-    }
-  }
-
   // ======== SVG + vehicle sizing helpers ========
   function getViewBox() {
     const vb = scene.viewBox && scene.viewBox.baseVal;
@@ -1168,7 +1105,7 @@ if (effectiveBottomY >= triggerLine && !hasPassedBanner) {
 
   function clampToRoad(x) {
     const vehY = ROAD_CONFIG.endY - 300;
-       const roadW = roadWidthAt(vehY);
+    const roadW = roadWidthAt(vehY);
     const margin = 30; // keep safe margin (mobile behavior unchanged)
     const halfW = getVehicleHalfWidth();
     const leftEdge  = ROAD_CONFIG.centerX - roadW / 2 + margin + halfW;
@@ -1268,7 +1205,7 @@ if (effectiveBottomY >= triggerLine && !hasPassedBanner) {
         obs.visible = true;
         obs.fixedX = getLaneX(0, obs.lane);
       } else {
-        obs.initialY = minY - 9000;
+        obs.initialY = minY - 5000;
         obs.visible = false;
         obs.fixedX = 0;
       }
@@ -1445,57 +1382,42 @@ if (effectiveBottomY >= triggerLine && !hasPassedBanner) {
       targetCarX = clampToRoad(targetCarX + step);
     }
   });
+  
+function showVehicle(vehicle) {
+    // Toggle car/bike group visibility
+    if (vehicle === 'car') {
+      car.style.display = '';
+      bike.style.display = 'none';
+    } else {
+      car.style.display = 'none';
+      bike.style.display = '';
+    }
+  }
+
 
   // ===== Vehicle selection =====
   document.getElementById('selectCarBtn').addEventListener('click', () => {
     selectedVehicle = 'car';
     vehicleOverlay.style.display = 'none';
     body.classList.remove('hide-rotate');
-    applyLandscapeBlockState(matchMedia('(orientation: landscape)').matches);
+    applyRotateOverlayState(); // re-check now that selection closed
     showVehicle('car');
     reclampVehicleX();
-    placeVehicleImmediately(); // ensure visible immediately
+    placeVehicleImmediately();
     setTimeout(startCountdownAndMove, 150);
   });
   document.getElementById('selectBikeBtn').addEventListener('click', () => {
     selectedVehicle = 'bike';
     vehicleOverlay.style.display = 'none';
     body.classList.remove('hide-rotate');
-    applyLandscapeBlockState(matchMedia('(orientation: landscape)').matches);
+    applyRotateOverlayState(); // re-check now that selection closed
     showVehicle('bike');
     reclampVehicleX();
-    placeVehicleImmediately(); // ensure visible immediately
+    placeVehicleImmediately();
     setTimeout(startCountdownAndMove, 150);
   });
 
-  // ===== Initial setup =====
-  window.addEventListener('DOMContentLoaded', () => {
-    vehicleOverlay.style.display = 'flex';
-    body.classList.add('hide-rotate'); // force-hide rotate overlay while selecting
-    car.style.display = 'none';
-    bike.style.display = 'none';
-    quizBanners.forEach(b => b && (b.style.display = 'none'));
-    applyLandscapeBlockState(mql.matches);
-
-    // Seed initial obstacle spacing
-    seedObstacleInitialPositions();
-
-    // Start RAF
-    rafId = requestAnimationFrame(tick);
-  });
-
-  // Pause/resume when page visibility changes
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      if (rafId) cancelAnimationFrame(rafId);
-      rafId = null;
-    } else {
-      lastTs = null;
-      rafId = requestAnimationFrame(tick);
-    }
-  });
-
-  // Pause/Resume helpers for orientation overlay
+  // ===== Pause/Resume helpers for orientation overlay =====
   let savedMoving = false;
   function pauseGameForOrientation() {
     if (rafId) {
@@ -1513,17 +1435,64 @@ if (effectiveBottomY >= triggerLine && !hasPassedBanner) {
     if (savedMoving) isMoving = true;
   }
 
-  // Media query change handling
-  const onMediaChange = () => {
-    applyLandscapeBlockState(mql.matches);
-    reclampVehicleX();
-  };
-  if ('addEventListener' in mql) mql.addEventListener('change', onMediaChange);
-  else if ('addListener' in mql) mql.addListener(onMediaChange); // older Safari
+  // ===== Show/Hide Rotate Overlay + event wiring =====
+  function applyRotateOverlayState() {
+    const shouldBlock = (FORCE_ROTATE || isTouchLike()) && isLandscape() && !isSelectingVehicle();
 
-  // Also reclamp on window resize/orientation
-  window.addEventListener('resize', () => { reclampVehicleX(); });
-  window.addEventListener('orientationchange', () => { reclampVehicleX(); });
+    if (shouldBlock) {
+      rotateOverlay.style.display = 'flex';
+      body.classList.add('landscape-block');
+      document.getElementById('gameRoot').style.pointerEvents = 'none';
+      pauseGameForOrientation();
+    } else {
+      rotateOverlay.style.display = 'none';
+      body.classList.remove('landscape-block');
+      document.getElementById('gameRoot').style.pointerEvents = '';
+      resumeGameFromOrientation();
+    }
+  }
+
+  function wireOrientationListeners() {
+    if ('addEventListener' in landscapeMql) {
+      landscapeMql.addEventListener('change', applyRotateOverlayState);
+    } else if ('addListener' in landscapeMql) {
+      landscapeMql.addListener(applyRotateOverlayState); // older Safari
+    }
+    window.addEventListener('orientationchange', () => { reclampVehicleX(); applyRotateOverlayState(); });
+    window.addEventListener('resize', () => { reclampVehicleX(); applyRotateOverlayState(); });
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', applyRotateOverlayState);
+    }
+    if (screen.orientation && typeof screen.orientation.addEventListener === 'function') {
+      screen.orientation.addEventListener('change', applyRotateOverlayState);
+    }
+  }
+
+  // ===== Initial setup =====
+  window.addEventListener('DOMContentLoaded', () => {
+    vehicleOverlay.style.display = 'flex';
+    body.classList.add('hide-rotate'); // hide rotate overlay while selecting
+    car.style.display = 'none';
+    bike.style.display = 'none';
+    quizBanners.forEach(b => b && (b.style.display = 'none'));
+
+    wireOrientationListeners();
+    applyRotateOverlayState();
+
+    seedObstacleInitialPositions();
+    rafId = requestAnimationFrame(tick);
+  });
+
+  // ===== Visibility pause/resume =====
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = null;
+    } else {
+      lastTs = null;
+      rafId = requestAnimationFrame(tick);
+    }
+  });
 
   // Expose startQuiz for template buttons
   window.startQuiz = (n) => { openQuiz(n); };
