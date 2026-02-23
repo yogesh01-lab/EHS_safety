@@ -395,8 +395,8 @@ image.cloud {
         --banner-max-y: 2000;
         --scene-cursor: crosshair;
 
-        --buildings-ty: 0px;
-        --ground-ty: 0px;
+        --buildings-ty: 145px;
+        --ground-ty: 99px;
         --greenery-display: none;
 
         /* Desktop banner plate */
@@ -418,7 +418,7 @@ image.cloud {
     --cloud3-y: 250px;
       }
       .wrap {
-        width: min(980px, 94vw);
+        width: min(930px, 90vw);
         margin: 0 auto;
       }
       .scene { width: 100%; }
@@ -430,7 +430,7 @@ image.cloud {
   color: #0b1a2a;
   display: none; /* JS toggles via body.landscape-block */
   align-items: center; justify-content: center; flex-direction: column;
-  z-index: 1010;
+  z-index: 9999;
   padding: 24px;
   text-align: center;
 }
@@ -753,6 +753,8 @@ body.landscape-block .wrap { filter: blur(3px) brightness(.7); }
   const rotateOverlay = document.getElementById('rotateOverlay');
   const vehicleOverlay = document.getElementById('vehicleSelectOverlay');
   const body = document.body;
+let lastObstacleSpawnTime = 0;
+const MIN_OBSTACLE_GAP = 3200; // 2.2 seconds minimum gap 
 
   // --- Touch-like detection (real touch or emulated in DevTools) ---
   const isTouchLike = () =>
@@ -783,6 +785,18 @@ body.landscape-block .wrap { filter: blur(3px) brightness(.7); }
     } catch {}
     return window.innerWidth > window.innerHeight;
   }
+
+  function restartGameCompletely() {
+  try {
+    const bg = document.getElementById('bgAudio');
+    if (bg) {
+      bg.pause();
+      bg.currentTime = 0;
+    }
+  } catch(e){}
+
+  location.reload(); 
+}
 
   // ====== Game code (unchanged from your version) ======
   const scene = document.getElementById('scene');
@@ -1259,6 +1273,7 @@ function showFinalScore() {
   document.body.appendChild(finalOverlay);
 }
   function startCountdownAndMove() {
+    if (rotateOverlay.style.display === 'flex') return;
     let count = 3;
     const wrap = document.querySelector('.wrap');
     if (wrap) {
@@ -1770,21 +1785,54 @@ function showVehicle(vehicle) {
   }
 
   // ===== Show/Hide Rotate Overlay + event wiring =====
-  function applyRotateOverlayState() {
-    const shouldBlock = (FORCE_ROTATE || isTouchLike()) && isLandscape() && !isSelectingVehicle();
+function applyRotateOverlayState() {
+  const isMobileDevice = window.innerWidth <= 1024;
 
-    if (shouldBlock) {
-      rotateOverlay.style.display = 'flex';
-      body.classList.add('landscape-block');
-      document.getElementById('gameRoot').style.pointerEvents = 'none';
-      pauseGameForOrientation();
-    } else {
-      rotateOverlay.style.display = 'none';
-      body.classList.remove('landscape-block');
-      document.getElementById('gameRoot').style.pointerEvents = '';
-      resumeGameFromOrientation();
+  const isLandscapeMode =
+    (FORCE_ROTATE || isMobileDevice) &&
+    isLandscape();
+
+  const selectingVehicle = isSelectingVehicle();
+
+  if (isLandscapeMode) {
+
+    // 🚫 Always block everything in landscape (mobile/ipad)
+    rotateOverlay.style.display = 'flex';
+    body.classList.remove('hide-rotate'); // ensure rotate overlay is visible
+    document.getElementById('gameRoot').style.pointerEvents = 'none';
+
+    pauseGameForOrientation();
+    gameStarted = false;
+    isMoving = false;
+
+    // 🚫 Disable vehicle selection in landscape
+    if (vehicleOverlay) {
+      vehicleOverlay.style.pointerEvents = 'none';
+      vehicleOverlay.style.opacity = '0.5';
     }
+
+  } else {
+
+    // ✅ Portrait mode
+    rotateOverlay.style.display = 'none';
+    body.classList.remove('landscape-block');
+    document.getElementById('gameRoot').style.pointerEvents = '';
+
+    // ✅ Re-enable vehicle selection
+    if (vehicleOverlay) {
+      vehicleOverlay.style.pointerEvents = '';
+      vehicleOverlay.style.opacity = '1';
+    }
+
+    // If game was already running before rotation → restart
+    if (gameStarted) {
+      restartGameCompletely();
+      return;
+    }
+
+    resumeGameFromOrientation();
   }
+}
 
   function wireOrientationListeners() {
     if ('addEventListener' in landscapeMql) {
