@@ -2,586 +2,636 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Road Runner - Bike</title>
+  <title>Road Runner - Mobile OK + iPad Portrait Reduced View</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <link rel="preload" as="image" href="SVG/rotate.gif" />
   <style>
     :root {
+      /* Theme */
       --bg: #87ceeb;
       --road: #4a4a4a;
-      --center-line: #ffd54f;
-      --bike-body: #1976d2;
-      --bike-glass: #64b5f6;
-      --wheel: #212121;
+      --center-line: #fff;
       --sign-bg: #fff;
       --sign-border: #d32f2f;
       --sign-text: #d32f2f;
-      --accent: #ff5722;
+
+      /* Layout */
+      --scene-height: 100dvh;
+
+      /* Motion/animation */
+      --cloud-speed: 45s;
+
+      /* Banners and typography */
+      --banner-scale: 1;
+      --banner-font-lg: clamp(36px, 4vw, 60px);
+      --banner-font-sm: clamp(20px, 2.4vw, 36px);
+
+      /* Banner base plate sizes (device-controlled) */
+      --banner-plate-w: 360;
+      --banner-plate-h: 180;
+      --banner-pole-h: 200;
+
+      /* Popups */
+      --popup-max-w: 800px;
+      --popup-pad: 30px;
+
+      /* Scoreboard */
+      --score-fs: 1.6rem;
+      --score-pad-y: 15px;
+      --score-pad-x: 25px;
+
+      /* Vehicle */
+      --vehicle-scale: 2.2;
+
+      /* Interaction */
+      --scene-cursor: crosshair;
+
+      /* Banner visible window (Y in SVG coords) */
+      --banner-min-y: 800;
+      --banner-max-y: 2000; /* keep <= viewBox height (2100) */
+
+      /* Device-based vertical offsets via transforms */
+      --buildings-ty: 0px;
+      --ground-ty: 0px;
+
+      /* ✅ Global device Y offset (applied to the whole scene via #deviceShift) */
+      --device-y-offset: 0px;
+
+      /* Green strip (iPad only) */
+      --greenery-display: none;
+      --greenery-scaleY: 1;
+
+      /* Obstacle base sizes (device-controlled) */
+      --obstacle-base-w-car: 80;
+      --obstacle-base-h-car: 120;
+      --obstacle-base-w-hole: 60;
+      --obstacle-base-h-hole: 60;
+
+      /* ✅ NEW: Per-layer Y offsets (SVG units). Defaults keep mobile unchanged */
+      --road-ty: 0px;          /* main road polygon */
+      --centerline-ty: 0px;    /* dashed center line */
+      --road-left-ty: 0px;     /* left road border */
+      --road-right-ty: 0px;    /* right road border */
+      --vehicle-ty: 0px;       /* whole vehicle layer (parent of #car/#bike) */
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       background: var(--bg);
       color: #333;
       line-height: 1.5;
-    }
-
-    .wrap {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-      position: relative;
-    }
-
-    header {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    header h1 {
-      font-size: clamp(1.5rem, 4vw, 2.5rem);
-      margin-bottom: 10px;
-      color: #1565c0;
-    }
-    header p {
-      font-size: clamp(0.9rem, 2.5vw, 1.1rem);
-      color: #666;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-
-    /* Bike interactive styles */
-    #bike {
-      cursor: pointer;
-    }
-
-    /* Control button */
-
-    /* SVG scene */
-    .scene {
-      width: 100%;
-      height: auto;
-      max-height: 70vh;
-      border: 3px solid #1976d2;
-      border-radius: 12px;
-      background: linear-gradient(to bottom, #87ceeb 0%, #98d8e8 100%);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
       overflow: hidden;
     }
-
-    /* Road styles */
-    #roadPath {
-      stroke: var(--road);
-      stroke-width: 80;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      fill: none;
+    .wrap { width: 100dvw; height: var(--scene-height); position: relative; }
+    html, body {
+  touch-action: manipulation;
+}
+    .scene {
+      width: 100dvw; /* MOBILE: edge-to-edge stays as-is */
+      height: var(--scene-height);
+      background: linear-gradient(to bottom, #87ceeb 0%, #98d8e8 100%);
+      overflow: hidden;
+      perspective: 800px;
+      transform-style: preserve-3d;
+      cursor: var(--scene-cursor);
+      display: block;
     }
+    /* ===============================
+   CLOUD POSITION + ANIMATION SYSTEM
+   =============================== */
+
+/* Default (Desktop base) */
+:root {
+  --cloud-speed: 45s;
+
+  --cloud1-y: 80px;
+  --cloud2-y: 150px;
+  --cloud3-y: 250px;
+}
+
+/* Cloud animation (keeps Y position dynamic) */
+@keyframes cloudMove {
+  0%   { transform: translateX(-600px) translateY(var(--cloudY, 0px)); }
+  100% { transform: translateX(-2000px) translateY(var(--cloudY, 0px)); }
+}
+
+/* Apply animation */
+#cloud1 {
+  --cloudY: var(--cloud1-y);
+  animation: cloudMove var(--cloud-speed) linear infinite;
+}
+
+#cloud2 {
+  --cloudY: var(--cloud2-y);
+  animation: cloudMove var(--cloud-speed) linear infinite 5s;
+}
+
+#cloud3 {
+  --cloudY: var(--cloud3-y);
+  animation: cloudMove var(--cloud-speed) linear infinite 9s;
+}
+
+/* Safari/iPad transform reliability */
+image.cloud {
+  transform-box: fill-box;
+  transform-origin: center;
+  will-change: transform;
+}
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  #cloud1, #cloud2, #cloud3 {
+    animation: none !important;
+  }
+}
+
+
+    #scoreBoard {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      font-size: var(--score-fs);
+      font-weight: bold;
+      color: #1976d2;
+      background: rgba(255,255,255,0.9);
+      padding: var(--score-pad-y) var(--score-pad-x);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      z-index: 100;
+    }
+    /* Safari/iPad transform reliability for SVG images */
+    image.cloud {
+      transform-box: fill-box;
+      transform-origin: center;
+      will-change: transform;
+    }
+
     .center-line {
       stroke: var(--center-line);
       stroke-width: 6;
-      stroke-dasharray: 26 18;
+      stroke-dasharray: 40 40;
       stroke-linecap: round;
       fill: none;
       opacity: 0.9;
     }
 
-    /* Bike styles - more realistic */
-    #bike {
-      filter: drop-shadow(0 6px 12px rgba(0,0,0,0.3));
+    #car, #bike { filter: drop-shadow(0 6px 12px rgba(0,0,0,0.3)); cursor: pointer; }
+
+    .sign-pole { fill: #8d6e63; }
+    .sign-plate { fill: var(--sign-bg); stroke: var(--sign-border); stroke-width: 3; rx: 8; ry: 8; }
+    .sign-text { font: 700 20px/1.1 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; fill: var(--sign-text); pointer-events: none; }
+    .quiz-banner .sign-text[font-size="60"] { font-size: var(--banner-font-lg) !important; }
+    .quiz-banner .sign-text[font-size="36"] { font-size: var(--banner-font-sm) !important; }
+    .quiz-banner { transform-origin: center; }
+
+    .popup-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+      display: none; justify-content: center; align-items: center; z-index: 1000;
     }
-    .wheel {
-      fill: var(--wheel);
-      stroke: #333;
-      stroke-width: 2;
+    .popup {
+      background: white; border-radius: 12px; padding: 0;
+      max-width: var(--popup-max-w); width: 90%; max-height: 85vh; overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3); position: relative;
     }
-    .tire {
-      fill: #1a1a1a;
-      stroke: #333;
-      stroke-width: 1;
-    }
-    .rim {
-      fill: #c0c0c0;
-      stroke: #999;
-      stroke-width: 1;
-    }
-    .bike-body {
-      fill: var(--bike-body);
-      stroke: #115ca3;
-      stroke-width: 2;
-    }
-    .bike-roof {
-      fill: #1565c0;
-      stroke: #0d47a1;
-      stroke-width: 1;
-    }
-    .glass {
-      fill: var(--bike-glass);
-      stroke: #42a5f5;
-      stroke-width: 1;
-      opacity: 0.8;
-    }
-    .driver {
-      fill: #f4b183;
-      stroke: #b3744a;
-      stroke-width: 1;
-    }
-    .driver-body {
-      fill: #2196f3;
-      stroke: #1976d2;
-      stroke-width: 1;
-    }
-    .shadow {
-      fill: rgba(0,0,0,0.25);
-    }
-    .headlight {
-      fill: #fff9c4;
-      stroke: #ffc107;
-      stroke-width: 1;
-    }
-    .grille {
-      fill: #333;
-      stroke: #555;
-      stroke-width: 1;
+    .popup-close { position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 24px; cursor: pointer; color: #666; z-index: 1001; }
+    .popup-close:hover { color: #333; }
+    #popupContent { max-height: 85vh; overflow-y: auto; }
+
+    .quiz-header { background: linear-gradient(135deg, #1976d2, #42a5f5); color: white; padding: 30px; text-align: center; position: relative; }
+    .quiz-header h2 { margin: 0 0 10px 0; font-size: clamp(1.4rem, 2.2vw, 1.8rem); }
+    .quiz-icon { font-size: clamp(2rem, 6vw, 3rem); margin-top: 10px; }
+
+    .quiz-body { padding: var(--popup-pad); }
+    .quiz-body > p { font-size: 1.1rem; margin-bottom: 25px; color: #555; text-align: center; }
+
+    .topics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 30px; }
+    .topic-card, .info-card { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; transition: transform 0.2s ease; }
+    .topic-card:hover, .info-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .topic-card h4, .info-card h4 { margin: 0 0 10px 0; color: #1976d2; font-size: 1rem; }
+    .topic-card p, .info-card p { margin: 0; color: #666; font-size: 0.9rem; line-height: 1.4; }
+
+    .assessment-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+    .quiz-footer { text-align: center; padding-top: 20px; border-top: 1px solid #e9ecef; }
+    .start-quiz-btn { background: #1976d2; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: background 0.3s ease; }
+    .start-quiz-btn:hover { background: #1565c0; }
+    .start-quiz-btn.final { background: #4caf50; font-size: 1.2rem; padding: 18px 35px; }
+    .start-quiz-btn.final:hover { background: #45a049; }
+
+    /* Buildings & ground transforms (device offsets) */
+    image#buildingsImg { transform: translateY(var(--buildings-ty)); transform-box: fill-box; transform-origin: top; }
+    #groundRect { transform: translateY(var(--ground-ty)); transform-box: fill-box; transform-origin: top; }
+
+    /* ✅ Apply a global Y offset (in SVG user units) to the whole scene content */
+    #deviceShift {
+      transform: translateY(var(--device-y-offset));
+      transform-box: view-box;
+      transform-origin: 0 0;
+      will-change: transform;
     }
 
-    /* Signboard */
-    #signGroup {
-      cursor: pointer;
-      user-select: none;
+    /* ✅ NEW: Per-layer offsets */
+    #mainRoad {
+      transform: translateY(var(--road-ty));
+      transform-box: fill-box;
+      transform-origin: top;
     }
-    .sign-pole {
-      fill: #8d6e63;
+    #centerLine {
+      transform: translateY(var(--centerline-ty));
+      transform-box: fill-box;
+      transform-origin: top;
     }
-    .sign-plate {
-      fill: var(--sign-bg);
-      stroke: var(--sign-border);
-      stroke-width: 3;
-      rx: 8;
-      ry: 8;
+    #roadLeftBorder {
+      transform: translateY(var(--road-left-ty));
+      transform-box: fill-box;
+      transform-origin: top;
     }
-    .sign-text {
-      font: 700 20px/1.1 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      fill: var(--sign-text);
-      pointer-events: none;
+    #roadRightBorder {
+      transform: translateY(var(--road-right-ty));
+      transform-box: fill-box;
+      transform-origin: top;
     }
-
-    /* Mobile and Tablet Responsive Design */
-    @media (max-width: 768px) {
-      .wrap {
-        padding: 10px;
-      }
-      
-      header {
-        margin-bottom: 15px;
-      }
-      
-      .scene {
-        height: 60vh;
-        min-height: 400px;
-        border-width: 2px;
-      }
+    /* Parent wrapper so CSS offset composes with JS transforms on #car/#bike */
+    #vehicleLayer {
+      transform: translateY(var(--vehicle-ty));
+      transform-box: view-box;
+      transform-origin: 0 0;
     }
 
-    /* Mobile Portrait */
-    @media (max-width: 480px) and (orientation: portrait) {
-      .wrap {
-        padding: 5px;
-      }
-      
-      header h1 {
-        font-size: 1.8rem;
-      }
-      
-      header p {
-        font-size: 0.9rem;
-        padding: 0 10px;
-      }
-      
-      .scene {
-        height: 50vh;
-        min-height: 350px;
-      }
-    }
-
-    /* Mobile Landscape */
-    @media (max-width: 768px) and (orientation: landscape) {
-      .wrap {
-        padding: 8px;
-      }
-      
-      header {
-        margin-bottom: 10px;
-      }
-      
-      header h1 {
-        font-size: 1.5rem;
-        margin-bottom: 5px;
-      }
-      
-      header p {
-        font-size: 0.8rem;
-      }
-      
-      .scene {
-        height: 70vh;
-        min-height: 300px;
-      }
-    }
-
-    /* iPad Portrait */
-    @media (min-width: 481px) and (max-width: 768px) and (orientation: portrait) {
-      .wrap {
-        padding: 15px;
-      }
-      
-      .scene {
-        height: 65vh;
-        min-height: 450px;
-      }
-    }
-
-    /* iPad Landscape */
-    @media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape) {
-      .wrap {
-        padding: 18px;
-      }
-      
-      .scene {
-        height: 75vh;
-        min-height: 500px;
-      }
-    }
-
-    /* Large tablets and small desktops */
-    @media (min-width: 1025px) and (max-width: 1200px) {
-      .scene {
-        height: 70vh;
-        max-height: 600px;
-      }
+    /* Greenery (iPad only) */
+    #greeneryStretch {
+      display: var(--greenery-display);
+      transform: scaleY(var(--greenery-scaleY));
+      transform-origin: top;
     }
 
     /* Touch-friendly interactions */
     @media (hover: none) and (pointer: coarse) {
-      #bike {
-        cursor: pointer;
-      }
-      
-      .quiz-banner {
-        cursor: pointer;
-      }
-      
-      .quiz-banner:hover {
-        opacity: 0.8;
-      }
+      #car, #bike, .quiz-banner { cursor: pointer; }
+      .quiz-banner:hover { opacity: 0.95; }
+      :root { --scene-cursor: default; }
     }
 
-    /* High DPI displays */
+    /* High DPI */
     @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-      .scene {
-        image-rendering: -webkit-optimize-contrast;
-        image-rendering: crisp-edges;
-      }
+      .scene { image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; }
     }
 
-    /* Quiz Popup Styles */
-    .popup-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      #cloud1, #cloud2, #cloud3 { animation: none !important; }
     }
-    
-    .popup {
+
+    /* ========= MOBILE (<=767px) — UNTOUCHED ========= */
+    @media (max-width: 767px) {
+      :root {
+        --score-fs: 1.2rem;
+        --score-pad-y: 8px;
+        --score-pad-x: 16px;
+        --popup-max-w: 95vw;
+        --popup-pad: 20px;
+        --cloud-speed: 38s;
+        --banner-scale: 0.85;
+        --vehicle-scale: 2.0;
+        --banner-min-y: 900;
+        --banner-max-y: 2000;
+        --buildings-ty: 100px;
+        --ground-ty: 100px;
+        --obstacle-base-w-car: 245px;
+        --obstacle-base-h-car: 250px;
+        --obstacle-base-w-hole: 198px;
+        --obstacle-base-h-hole: 198px;
+        --banner-plate-w: 300;
+        --banner-plate-h: 150;
+        --banner-pole-h: 170;
+        --device-y-offset: 0px;
+        --road-ty: 0px;
+        --centerline-ty: 0px;
+        --road-left-ty: 0px;
+        --road-right-ty: 0px;
+        --vehicle-ty: 0px;
+    --cloud1-y: 120px;
+    --cloud2-y: 200px;
+    --cloud3-y: 300px;
+      }
+
+      svg image.obstacle[data-type="car"] {
+        width: var(--obstacle-base-w-car) !important;
+        height: var(--obstacle-base-h-car) !important;
+      }
+      svg image.obstacle[data-type="pothole"] {
+        width: var(--obstacle-base-w-hole) !important;
+        height: var(--obstacle-base-h-hole) !important;
+      }
+
+      .quiz-banner .sign-text[font-size="60"] { font-size: clamp(26px, 6vw, 42px) !important; }
+      .quiz-banner .sign-text[font-size="36"] { font-size: clamp(18px, 4.5vw, 28px) !important; }
+    }
+
+    /* ========= iPAD PORTRAIT ONLY (769–1024px) — REDUCED VIEW ========= */
+    @media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+      /* Reduce visible width and center the game area */
+      .wrap {
+        width: min(760px, 98vw);
+        margin: 0 auto;
+      }
+      /* Make scene follow the wrap width (instead of 100vw) */
+      .scene {
+        width: 100%;
+        height: var(--scene-height);
+      }
+      :root {
+        --scene-height: 100dvh;    /* slightly less tall to avoid crowding */
+        --score-fs: 1.2rem;
+        --score-pad-y: 8px;
+        --score-pad-x: 16px;
+        --popup-max-w: 92vw;
+        --popup-pad: 22px;
+        --cloud-speed: 42s;
+        --banner-scale: 0.92;
+        --vehicle-scale: 1.6;    /* smaller so car fits comfortably */
+        --banner-min-y: 900;
+        --banner-max-y: 2000;
+        --buildings-ty: 90px;
+        --ground-ty: 90px;
+        --greenery-display: none;
+        --obstacle-base-w-car: 220px;
+        --obstacle-base-h-car: 230px;
+        --obstacle-base-w-hole: 180px;
+        --obstacle-base-h-hole: 180px;
+        --banner-plate-w: 320;
+        --banner-plate-h: 160;
+        --banner-pole-h: 180;
+        --device-y-offset: 00px;
+        --road-ty:-12px;
+        --centerline-ty: 0px;
+        --road-left-ty: -12px;
+        --road-right-ty: -12px;
+        --vehicle-ty: -185px;
+    --cloud1-y: 305px;
+    --cloud2-y: 300px;
+    --cloud3-y: 290px;
+      }
+      svg image.obstacle[data-type="car"] {
+        width: var(--obstacle-base-w-car) !important;
+        height: var(--obstacle-base-h-car) !important;
+      }
+      svg image.obstacle[data-type="pothole"] {
+        width: var(--obstacle-base-w-hole) !important;
+        height: var(--obstacle-base-h-hole) !important;
+      }
+      .quiz-banner .sign-text[font-size="60"] { font-size: clamp(26px, 4.6vw, 40px) !important; }
+      .quiz-banner .sign-text[font-size="36"] { font-size: clamp(18px, 3.8vw, 26px) !important; }
+    }
+
+    /* ========= DESKTOP (>=1025px) ========= */
+    @media (min-width: 1025px) {
+      :root {
+        --score-fs: 1.6rem;
+        --popup-max-w: 800px;
+        --cloud-speed: 45s;
+        --banner-scale: 1;
+        --vehicle-scale: 2.2;
+        --banner-min-y: 800;
+        --banner-max-y: 2000;
+        --scene-cursor: crosshair;
+
+        --buildings-ty: 0px;
+        --ground-ty: 0px;
+        --greenery-display: none;
+
+        /* Desktop banner plate */
+        --banner-plate-w: 360;
+        --banner-plate-h: 180;
+        --banner-pole-h: 200;
+
+        /* Global Y offset remains 0 on desktop */
+        --device-y-offset: 0px;
+
+        /* Keep new per-layer at 0 unless you want desktop shifts too */
+        --road-ty: 0px;
+        --centerline-ty: 0px;
+        --road-left-ty: 0px;
+        --road-right-ty: 0px;
+        --vehicle-ty: 0px;
+    --cloud1-y: 80px;
+    --cloud2-y: 150px;
+    --cloud3-y: 250px;
+      }
+      .wrap {
+        width: min(980px, 94vw);
+        margin: 0 auto;
+      }
+      .scene { width: 100%; }
+    }
+   /* ======== ROTATE OVERLAY (controlled by body.landscape-block) ======== */
+.rotate-overlay {
+  position: fixed; inset: 0;
+  background: #fff;
+  color: #0b1a2a;
+  display: none; /* JS toggles via body.landscape-block */
+  align-items: center; justify-content: center; flex-direction: column;
+  z-index: 1010;
+  padding: 24px;
+  text-align: center;
+}
+.rotate-overlay .gif {
+  width: min(240px, 60vw);
+  height: auto;
+  margin-bottom: 16px;
+}
+.rotate-overlay h2 {
+  font-size: clamp(18px, 4.6vw, 24px);
+  margin: 6px 0 8px;
+}
+.rotate-overlay p {
+  font-size: clamp(14px, 3.8vw, 18px);
+  opacity: 0.9;
+  max-width: 520px;
+}
+
+/* Hide overlay hard while selecting vehicle */
+.hide-rotate .rotate-overlay { display: none !important; }
+
+/* Fallback: if device is landscape + coarse pointer and JS hasn't set class */
+@media (orientation: landscape) and (hover: none) and (pointer: coarse) {
+  body:not(.hide-rotate):not(.landscape-block) .rotate-overlay { display: flex; }
+}
+
+/* Blur game when overlay visible (optional) */
+body.landscape-block .wrap { filter: blur(3px) brightness(.7); }
+
+    /* Vehicle selection overlay */
+    #vehicleSelectOverlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 5001;
+      display: none;
+      align-items: center; justify-content: center;
+      pointer-events: auto;
+    }
+    #vehicleSelectOverlay .card {
       background: white;
-      border-radius: 12px;
-      padding: 0;
-      max-width: 600px;
-      width: 90%;
-      max-height: 85vh;
-      overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-      position: relative;
-    }
-    
-    .popup-close {
-      position: absolute;
-      top: 15px;
-      right: 20px;
-      background: none;
-      border: none;
-      font-size: 24px;
-      cursor: pointer;
-      color: #666;
-      z-index: 1001;
-    }
-    
-    .popup-close:hover {
-      color: #333;
-    }
-    
-    #popupContent {
-      max-height: 85vh;
-      overflow-y: auto;
-    }
-    
-    .quiz-header {
-      background: linear-gradient(135deg, #1976d2, #42a5f5);
-      color: white;
-      padding: 30px;
+      padding: 40px 30px 30px 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25);
       text-align: center;
-      position: relative;
+      max-width: 90vw;
     }
-    
-    .quiz-header h2 {
-      margin: 0 0 10px 0;
-      font-size: 1.8rem;
+    #vehicleSelectOverlay .choices {
+      display: flex; gap: 40px; justify-content: center; align-items: center; flex-wrap: wrap;
     }
-    
-    .quiz-icon {
-      font-size: 3rem;
-      margin-top: 10px;
+    #vehicleSelectOverlay button {
+      background: none; border: none; cursor: pointer; outline: none;
     }
-    
-    .quiz-body {
-      padding: 30px;
+    #vehicleSelectOverlay button img {
+      display: block; margin: 0 auto;
     }
-    
-    .quiz-body > p {
-      font-size: 1.1rem;
-      margin-bottom: 25px;
-      color: #555;
-      text-align: center;
+    #vehicleSelectOverlay .label {
+      margin-top: 8px; font-weight: bold;
     }
-    
-    .topics-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 15px;
-      margin-bottom: 30px;
-    }
-    
-    .topic-card, .info-card {
-      background: #f8f9fa;
-      border: 1px solid #e9ecef;
-      border-radius: 8px;
-      padding: 20px;
-      transition: transform 0.2s ease;
-    }
-    
-    .topic-card:hover, .info-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    
-    .topic-card h4, .info-card h4 {
-      margin: 0 0 10px 0;
-      color: #1976d2;
-      font-size: 1rem;
-    }
-    
-    .topic-card p, .info-card p {
-      margin: 0;
-      color: #666;
-      font-size: 0.9rem;
-      line-height: 1.4;
-    }
-    
-    .assessment-info {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-      margin-bottom: 30px;
-    }
-    
-    .quiz-footer {
-      text-align: center;
-      padding-top: 20px;
-      border-top: 1px solid #e9ecef;
-    }
-    
-    .start-quiz-btn {
-      background: #1976d2;
-      color: white;
-      border: none;
-      padding: 15px 30px;
-      border-radius: 8px;
-      font-size: 1.1rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-    
-    .start-quiz-btn:hover {
-      background: #1565c0;
-    }
-    
-    .start-quiz-btn.final {
-      background: #4caf50;
-      font-size: 1.2rem;
-      padding: 18px 35px;
-    }
-    
-    .start-quiz-btn.final:hover {
-      background: #45a049;
-    }
-    
-    .quiz-content {
-      display: none;
-    }
-    
-    @media (max-width: 768px) {
-      .popup {
-        width: 95%;
-        max-height: 90vh;
-      }
-      
-      .quiz-header {
-        padding: 20px;
-      }
-      
-      .quiz-header h2 {
-        font-size: 1.5rem;
-      }
-      
-      .quiz-body {
-        padding: 20px;
-      }
-      
-      .topics-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .assessment-info {
-        grid-template-columns: 1fr;
-      }
-    }
+    #selectCarBtn .label { color: #1976d2; }
+    #selectBikeBtn .label { color: #43a047; }
+
+    /* Final score star strip */
+.stars-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  max-width: 720px;
+  margin: 12px auto 0;
+}
+.star-icon {
+  font-size: 28px;
+  color: #ffb300; /* gold */
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0,0,0,.15);
+}
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <h1>EHS Safety</h1>
-      <p>Hold down the bike to drive.</p>
-    </header>
+  <!-- Portrait-only overlay -->
+  <div id="rotateOverlay" class="rotate-overlay" aria-live="assertive" aria-label="Rotate device notice">
+    <img class="gif" src="SVG/rotate.gif" alt="Rotate your phone" />
+    <h2>Please rotate your device</h2>
+  </div>
 
-    <!-- Responsive SVG scene -->
-    <svg id="scene" class="scene" viewBox="0 0 1000 600" role="img" aria-label="Third person racing view">
+  <!-- Vehicle Selection Overlay -->
+  <div id="vehicleSelectOverlay" aria-modal="true" role="dialog">
+    <div class="card">
+      <h2 style="margin-bottom:24px;color:#1976d2;font-size:2rem;">Choose Your Vehicle</h2>
+      <div class="choices">
+        <button id="selectCarBtn" type="button">
+          <img src="SVG/car.svg" width="120" height="120" alt="Car">
+          <div class="label">Car</div>
+        </button>
+        <button id="selectBikeBtn" type="button">
+          <img src="SVG/bike-icon.svg" width="120" height="120" alt="Bike">
+          <div class="label">Bike</div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap" id="gameRoot">
+    <div id="scoreBoard">⭐ Stars: <span id="starsCount">0</span></div>
+
+    <!-- SVG Scene -->
+    <svg id="scene" class="scene" viewBox="0 0 1000 2100" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Third person racing view" xmlns:xlink="http://www.w3.org/1999/xlink">
       <defs>
-        <linearGradient id="hill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#87ceeb"/>
-          <stop offset="50%" stop-color="#c8e6c9"/>
-          <stop offset="100%" stop-color="#a5d6a7"/>
-        </linearGradient>
-        <linearGradient id="roadGradient" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#666"/>
-          <stop offset="100%" stop-color="#333"/>
-        </linearGradient>
+        <!-- Road & grass textures -->
+        <pattern id="roadTexture" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+          <rect width="40" height="40" fill="#63666a"/>
+          <circle cx="8" cy="8" r="1.5" fill="#4a4a4a" opacity="0.6"/>
+          <circle cx="25" cy="15" r="1.2" fill="#787878" opacity="0.5"/>
+          <circle cx="15" cy="30" r="1" fill="#555" opacity="0.9"/>
+          <circle cx="32" cy="32" r="1.3" fill="#707070" opacity="0.4"/>
+          <rect x="10" y="5" width="3" height="1" fill="#555" opacity="0.4"/>
+          <rect x="28" y="22" width="2" height="1" fill="#777" opacity="0.4"/>
+        </pattern>
+        <pattern id="grassTexture" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+          <rect width="40" height="40" fill="#00a838"/>
+          <line x1="5" y1="8" x2="5" y2="16" stroke="#006622" stroke-width="2"/>
+          <line x1="12" y1="5" x2="12" y2="13" stroke="#005519" stroke-width="2"/>
+          <line x1="20" y1="12" x2="20" y2="22" stroke="#006622" stroke-width="2.2"/>
+          <line x1="8" y1="25" x2="8" y2="34" stroke="#005519" stroke-width="2"/>
+        </pattern>
       </defs>
-      
-      <!-- Sky and horizon -->
-      <rect x="0" y="0" width="1000" height="300" fill="url(#hill)"/>
-      
-      <!-- Ground/landscape -->
-      <rect x="0" y="300" width="1000" height="300" fill="#4a7c59" opacity="0.8"/>
 
-      <!-- Moving road group with perspective -->
-      <g id="movingRoad">
-        <!-- Realistic road with gentle curves -->
-        <path d="M 500,1800 Q 480,1700 490,1600 Q 510,1500 495,1400 Q 480,1300 500,1200 Q 520,1100 510,1000 Q 490,900 505,800 Q 520,700 510,600 Q 490,500 500,400 Q 510,300 505,200 Q 490,100 500,0 Q 510,-100 505,-200 Q 490,-300 500,-400 Q 510,-500 505,-600 Q 490,-700 500,-800 Q 510,-900 505,-1000 Q 490,-1100 500,-1200 Q 510,-1300 505,-1400 Q 490,-1500 500,-1600" 
-              stroke="url(#roadGradient)" stroke-width="200" fill="none" stroke-linecap="round"/>
-        
-        <!-- Center line -->
-        <path d="M 500,1800 Q 480,1700 490,1600 Q 510,1500 495,1400 Q 480,1300 500,1200 Q 520,1100 510,1000 Q 490,900 505,800 Q 520,700 510,600 Q 490,500 500,400 Q 510,300 505,200 Q 490,100 500,0 Q 510,-100 505,-200 Q 490,-300 500,-400 Q 510,-500 505,-600 Q 490,-700 500,-800 Q 510,-900 505,-1000 Q 490,-1100 500,-1200 Q 510,-1300 505,-1400 Q 490,-1500 500,-1600" 
-              class="center-line"/>
-        
-        <!-- Extended road for seamless loop -->
-        <path d="M 500,2400 Q 480,2300 490,2200 Q 510,2100 495,2000 Q 480,1900 500,1800" 
-              stroke="url(#roadGradient)" stroke-width="200" fill="none" stroke-linecap="round"/>
-        
-        <!-- Quiz banners positioned alternating left/right of road -->
-        <g class="quiz-banner" transform="translate(360, 180)">
-          <rect class="sign-pole" x="-5" y="0" width="10" height="50" rx="3" ry="3"></rect>
-          <rect class="sign-plate" x="-40" y="-35" width="80" height="40"></rect>
-          <text class="sign-text" x="0" y="-18" text-anchor="middle" font-size="14">QUIZ 1</text>
-          <text class="sign-text" x="0" y="-5" text-anchor="middle" font-size="9" opacity="0.8">Safety</text>
-        </g>
-        
-        <g class="quiz-banner" transform="translate(640, -120)">
-          <rect class="sign-pole" x="-5" y="0" width="10" height="50" rx="3" ry="3"></rect>
-          <rect class="sign-plate" x="-40" y="-35" width="80" height="40"></rect>
-          <text class="sign-text" x="0" y="-18" text-anchor="middle" font-size="14">QUIZ 2</text>
-          <text class="sign-text" x="0" y="-5" text-anchor="middle" font-size="9" opacity="0.8">Health</text>
-        </g>
-        
-        <g class="quiz-banner" transform="translate(360, -420)">
-          <rect class="sign-pole" x="-5" y="0" width="10" height="50" rx="3" ry="3"></rect>
-          <rect class="sign-plate" x="-40" y="-35" width="80" height="40"></rect>
-          <text class="sign-text" x="0" y="-18" text-anchor="middle" font-size="14">QUIZ 3</text>
-          <text class="sign-text" x="0" y="-5" text-anchor="middle" font-size="9" opacity="0.8">Environment</text>
-        </g>
-        
-        <g class="quiz-banner" transform="translate(640, -720)">
-          <rect class="sign-pole" x="-5" y="0" width="10" height="50" rx="3" ry="3"></rect>
-          <rect class="sign-plate" x="-40" y="-35" width="80" height="40"></rect>
-          <text class="sign-text" x="0" y="-18" text-anchor="middle" font-size="14">QUIZ 4</text>
-          <text class="sign-text" x="0" y="-5" text-anchor="middle" font-size="9" opacity="0.8">Emergency</text>
-        </g>
-        
-        <g class="quiz-banner" transform="translate(360, -1020)">
-          <rect class="sign-pole" x="-5" y="0" width="10" height="50" rx="3" ry="3"></rect>
-          <rect class="sign-plate" x="-40" y="-35" width="80" height="40"></rect>
-          <text class="sign-text" x="0" y="-18" text-anchor="middle" font-size="14">QUIZ 5</text>
-          <text class="sign-text" x="0" y="-5" text-anchor="middle" font-size="9" opacity="0.8">Final</text>
-        </g>
-      </g>
+      <!-- ✅ NEW WRAPPER: applies a single translateY across the whole scene -->
+      <g id="deviceShift">
 
-      <!-- Simple bike design -->
-      <g id="bike" transform="translate(500,480)" aria-label="Simple bike">
-        <!-- Shadow -->
-        <ellipse class="shadow" cx="0" cy="25" rx="50" ry="10" opacity="0.3"/>
+        <!-- Clouds -->
+        <image class="cloud" id="cloud1" href="SVG/cloud1.svg" x="1200" y="80" width="250" height="130" opacity="0.9" xlink:href="SVG/cloud1.svg"/>
+        <image class="cloud" id="cloud2" href="SVG/cloud2.svg" x="1400" y="150" width="280" height="145" opacity="0.85" xlink:href="SVG/cloud2.svg"/>
+        <image class="cloud" id="cloud3" href="SVG/cloud3.svg" x="1600" y="250" width="240" height="125" opacity="0.9" xlink:href="SVG/cloud3.svg"/>
 
-        <!-- Front wheel -->
-        <circle class="tire" cx="30" cy="10" r="15"/>
-        <circle class="rim" cx="30" cy="10" r="12" fill="#c0c0c0"/>
-        <circle fill="#333" cx="30" cy="10" r="3"/>
-        
-        <!-- Rear wheel -->
-        <circle class="tire" cx="-30" cy="10" r="15"/>
-        <circle class="rim" cx="-30" cy="10" r="12" fill="#c0c0c0"/>
-        <circle fill="#333" cx="-30" cy="10" r="3"/>
-        
-        <!-- Main frame triangle -->
-        <path class="bike-body" d="M -30,10 L 0,-15 L 30,10 L 0,10 Z" fill="none" stroke-width="4"/>
-        
-        <!-- Seat tube -->
-        <line class="bike-body" x1="-15" y1="10" x2="-10" y2="-20" stroke-width="4"/>
-        
-        <!-- Seat -->
-        <rect fill="#333" x="-18" y="-25" width="16" height="5" rx="2"/>
-        
-        <!-- Handlebars -->
-        <line stroke="#333" stroke-width="4" x1="0" y1="-15" x2="5" y2="-25"/>
-        <rect fill="#333" x="0" y="-28" width="15" height="4" rx="2"/>
-        
-        <!-- Pedals -->
-        <circle fill="#666" cx="0" cy="10" r="4"/>
-        <rect fill="#666" x="-8" y="8" width="6" height="3" rx="1"/>
-        <rect fill="#666" x="6" y="8" width="6" height="3" rx="1"/>
-        
-        <!-- Chain -->
-        <path d="M -4,10 Q -20,15 -27,10" stroke="#333" stroke-width="2" fill="none"/>
-      </g>
+        <!-- Buildings -->
+        <image id="buildingsImg" href="SVG/bldgs.svg" x="0" y="500" width="1000" height="300" preserveAspectRatio="xMidYMid slice" xlink:href="SVG/bldgs.svg"/>
+
+        <!-- Greenery strip (iPad only via CSS display) -->
+        <rect id="greeneryStretch" x="0" y="650" width="1000" height="150" fill="url(#grassTexture)" opacity="1" style="display:none;"/>
+
+        <!-- Ground -->
+        <rect id="groundRect" x="0" y="800" width="1000" height="1300" fill="url(#grassTexture)" opacity="1"/>
+
+        <!-- Road -->
+        <g id="movingRoad">
+          <polygon id="mainRoad" points="370,900 630,900 900,2100 100,2100" fill="url(#roadTexture)" stroke="none"></polygon>
+          <!-- ✅ Added IDs to borders so we can apply CSS per-layer offsets -->
+          <line id="roadLeftBorder"  x1="370" y1="900" x2="100"  y2="2100" stroke="#222" stroke-width="2"/>
+          <line id="roadRightBorder" x1="630" y1="900" x2="900"  y2="2100" stroke="#222" stroke-width="2"/>
+          <line id="centerLine" x1="500" y1="900" x2="500" y2="2100" class="center-line"/>
+        </g>
+
+        <!-- Banners (outside road, positioned on sides) -->
+        <g class="quiz-banner" id="banner1" transform="translate(360, 700)">
+          <rect class="sign-pole" x="-10" y="0" width="20" height="200" rx="10" ry="10"></rect>
+          <rect class="sign-plate" x="-180" y="-160" width="360" height="180"></rect>
+          <text class="sign-text title" x="0" y="-80" text-anchor="middle" font-size="60">QUIZ 1</text>
+          <text class="sign-text subtitle" x="0" y="-24" text-anchor="middle" font-size="36" opacity="0.8">Safety</text>
+        </g>
+        <g class="quiz-banner" id="banner2" transform="translate(640, 100)">
+          <rect class="sign-pole" x="-10" y="0" width="20" height="200" rx="10" ry="10"></rect>
+          <rect class="sign-plate" x="-180" y="-160" width="360" height="180"></rect>
+          <text class="sign-text title" x="0" y="-80" text-anchor="middle" font-size="60">QUIZ 2</text>
+          <text class="sign-text subtitle" x="0" y="-24" text-anchor="middle" font-size="36" opacity="0.8">Health</text>
+        </g>
+        <g class="quiz-banner" id="banner3" transform="translate(360, -500)">
+          <rect class="sign-pole" x="-10" y="0" width="20" height="200" rx="10" ry="10"></rect>
+          <rect class="sign-plate" x="-180" y="-160" width="360" height="180"></rect>
+          <text class="sign-text title" x="0" y="-80" text-anchor="middle" font-size="60">QUIZ 3</text>
+          <text class="sign-text subtitle" x="0" y="-24" text-anchor="middle" font-size="36" opacity="0.8">Environment</text>
+        </g>
+        <g class="quiz-banner" id="banner4" transform="translate(640, -1100)">
+          <rect class="sign-pole" x="-10" y="0" width="20" height="200" rx="10" ry="10"></rect>
+          <rect class="sign-plate" x="-180" y="-160" width="360" height="180"></rect>
+          <text class="sign-text title" x="0" y="-80" text-anchor="middle" font-size="60">QUIZ 4</text>
+          <text class="sign-text subtitle" x="0" y="-24" text-anchor="middle" font-size="36" opacity="0.8">Emergency</text>
+        </g>
+        <!-- (banner5 exists in DOM but logic uses only first 4) -->
+
+        <!-- ✅ Vehicle parent wrapper so CSS offset composes with JS transforms -->
+        <g id="vehicleLayer">
+          <!-- Player vehicle images -->
+          <g id="car" transform="translate(500,1200)" aria-label="Racing car top view" style="display:none;">
+            <image href="SVG/mainCar.svg" x="-65" y="-105" width="130" height="210" xlink:href="SVG/mainCar.svg"/>
+          </g>
+          <g id="bike" transform="translate(500,1200)" aria-label="Bike top view" style="display:none;">
+            <image href="SVG/bike.svg" x="-65" y="-105" width="130" height="210" xlink:href="SVG/bike.svg"/>
+          </g>
+        </g>
+
+        <!-- Obstacles -->
+        <g id="obstacles">
+          <image class="obstacle" data-type="car"     data-lane="1" href="SVG/car1.svg"     x="0" y="0" width="80" height="120" xlink:href="SVG/car1.svg"/>
+          <image class="obstacle" data-type="pothole" data-lane="0" href="SVG/potholes.svg" x="0" y="0" width="60" height="60"  xlink:href="SVG/potholes.svg"/>
+          <image class="obstacle" data-type="car"     data-lane="1" href="SVG/car2.svg"     x="0" y="0" width="80" height="120" xlink:href="SVG/car2.svg"/>
+          <image class="obstacle" data-type="car"     data-lane="0" href="SVG/car3.svg"     x="0" y="0" width="80" height="120" xlink:href="SVG/car3.svg"/>
+          <image class="obstacle" data-type="car"     data-lane="0" href="SVG/car1.svg"     x="0" y="0" width="80" height="120" xlink:href="SVG/car1.svg"/>
+        </g>
+
+      </g><!-- /#deviceShift -->
     </svg>
   </div>
 
@@ -594,7 +644,7 @@
   </div>
 
   <!-- Quiz Content Templates -->
-  <div id="quiz1Content" class="quiz-content">
+  <div id="quiz1Content" class="quiz-content" style="display:none;">
     <div class="quiz-header">
       <h2>Safety Quiz</h2>
       <div class="quiz-icon">🛡️</div>
@@ -602,22 +652,10 @@
     <div class="quiz-body">
       <p>Welcome to the Safety Quiz! This section covers workplace safety protocols and procedures.</p>
       <div class="topics-grid">
-        <div class="topic-card">
-          <h4>🦺 Personal Protective Equipment</h4>
-          <p>Learn about proper PPE usage and maintenance</p>
-        </div>
-        <div class="topic-card">
-          <h4>🚨 Emergency Procedures</h4>
-          <p>Evacuation routes and emergency protocols</p>
-        </div>
-        <div class="topic-card">
-          <h4>⚠️ Hazard Identification</h4>
-          <p>Recognize and report workplace hazards</p>
-        </div>
-        <div class="topic-card">
-          <h4>📋 Safety Reporting</h4>
-          <p>Incident reporting and safety systems</p>
-        </div>
+        <div class="topic-card"><h4>🦺 Personal Protective Equipment</h4><p>Learn about proper PPE usage and maintenance</p></div>
+        <div class="topic-card"><h4>🚨 Emergency Procedures</h4><p>Evacuation routes and emergency protocols</p></div>
+        <div class="topic-card"><h4>⚠️ Hazard Identification</h4><p>Recognize and report workplace hazards</p></div>
+        <div class="topic-card"><h4>📋 Safety Reporting</h4><p>Incident reporting and safety systems</p></div>
       </div>
       <div class="quiz-footer">
         <button class="start-quiz-btn" onclick="startQuiz(1)">Start Safety Quiz</button>
@@ -625,7 +663,7 @@
     </div>
   </div>
 
-  <div id="quiz2Content" class="quiz-content">
+  <div id="quiz2Content" class="quiz-content" style="display:none;">
     <div class="quiz-header">
       <h2>Health Quiz</h2>
       <div class="quiz-icon">💚</div>
@@ -633,22 +671,10 @@
     <div class="quiz-body">
       <p>Test your knowledge about workplace health and wellness!</p>
       <div class="topics-grid">
-        <div class="topic-card">
-          <h4>🪑 Ergonomics</h4>
-          <p>Proper posture and workspace setup</p>
-        </div>
-        <div class="topic-card">
-          <h4>🧘 Stress Management</h4>
-          <p>Mental health and stress reduction</p>
-        </div>
-        <div class="topic-card">
-          <h4>🏥 Health Risks</h4>
-          <p>Occupational health hazards</p>
-        </div>
-        <div class="topic-card">
-          <h4>🧠 Mental Wellness</h4>
-          <p>Mental health awareness programs</p>
-        </div>
+        <div class="topic-card"><h4>🪑 Ergonomics</h4><p>Proper posture and workspace setup</p></div>
+        <div class="topic-card"><h4>🧘 Stress Management</h4><p>Mental health and stress reduction</p></div>
+        <div class="topic-card"><h4>🏥 Health Risks</h4><p>Occupational health hazards</p></div>
+        <div class="topic-card"><h4>🧠 Mental Wellness</h4><p>Mental health awareness programs</p></div>
       </div>
       <div class="quiz-footer">
         <button class="start-quiz-btn" onclick="startQuiz(2)">Start Health Quiz</button>
@@ -656,7 +682,7 @@
     </div>
   </div>
 
-  <div id="quiz3Content" class="quiz-content">
+  <div id="quiz3Content" class="quiz-content" style="display:none;">
     <div class="quiz-header">
       <h2>Environment Quiz</h2>
       <div class="quiz-icon">🌍</div>
@@ -664,22 +690,10 @@
     <div class="quiz-body">
       <p>Environmental responsibility is everyone's duty!</p>
       <div class="topics-grid">
-        <div class="topic-card">
-          <h4>♻️ Waste Reduction</h4>
-          <p>Recycling and waste management</p>
-        </div>
-        <div class="topic-card">
-          <h4>⚡ Energy Conservation</h4>
-          <p>Sustainable energy practices</p>
-        </div>
-        <div class="topic-card">
-          <h4>📋 Compliance</h4>
-          <p>Environmental regulations</p>
-        </div>
-        <div class="topic-card">
-          <h4>🌱 Sustainability</h4>
-          <p>Green workplace initiatives</p>
-        </div>
+        <div class="topic-card"><h4>♻️ Waste Reduction</h4><p>Recycling and waste management</p></div>
+        <div class="topic-card"><h4>⚡ Energy Conservation</h4><p>Sustainable energy practices</p></div>
+        <div class="topic-card"><h4>📋 Compliance</h4><p>Environmental regulations</p></div>
+        <div class="topic-card"><h4>🌱 Sustainability</h4><p>Green workplace initiatives</p></div>
       </div>
       <div class="quiz-footer">
         <button class="start-quiz-btn" onclick="startQuiz(3)">Start Environment Quiz</button>
@@ -687,7 +701,7 @@
     </div>
   </div>
 
-  <div id="quiz4Content" class="quiz-content">
+  <div id="quiz4Content" class="quiz-content" style="display:none;">
     <div class="quiz-header">
       <h2>Emergency Quiz</h2>
       <div class="quiz-icon">🚨</div>
@@ -695,22 +709,10 @@
     <div class="quiz-body">
       <p>Emergency preparedness can save lives!</p>
       <div class="topics-grid">
-        <div class="topic-card">
-          <h4>🔥 Fire Safety</h4>
-          <p>Fire prevention and response</p>
-        </div>
-        <div class="topic-card">
-          <h4>🩹 First Aid</h4>
-          <p>Basic first aid procedures</p>
-        </div>
-        <div class="topic-card">
-          <h4>📞 Emergency Contacts</h4>
-          <p>Contact protocols and procedures</p>
-        </div>
-        <div class="topic-card">
-          <h4>🚪 Evacuation</h4>
-          <p>Emergency evacuation routes</p>
-        </div>
+        <div class="topic-card"><h4>🔥 Fire Safety</h4><p>Fire prevention and response</p></div>
+        <div class="topic-card"><h4>🩹 First Aid</h4><p>Basic first aid procedures</p></div>
+        <div class="topic-card"><h4>📞 Emergency Contacts</h4><p>Contact protocols and procedures</p></div>
+        <div class="topic-card"><h4>🚪 Evacuation</h4><p>Emergency evacuation routes</p></div>
       </div>
       <div class="quiz-footer">
         <button class="start-quiz-btn" onclick="startQuiz(4)">Start Emergency Quiz</button>
@@ -718,7 +720,7 @@
     </div>
   </div>
 
-  <div id="quiz5Content" class="quiz-content">
+  <div id="quiz5Content" class="quiz-content" style="display:none;">
     <div class="quiz-header">
       <h2>Final Assessment</h2>
       <div class="quiz-icon">🏆</div>
@@ -726,292 +728,1162 @@
     <div class="quiz-body">
       <p>Congratulations! You've reached the final assessment.</p>
       <div class="assessment-info">
-        <div class="info-card">
-          <h4>📚 Comprehensive Review</h4>
-          <p>All previous topics combined</p>
-        </div>
-        <div class="info-card">
-          <h4>🎯 Real Scenarios</h4>
-          <p>Practical workplace situations</p>
-        </div>
-        <div class="info-card">
-          <h4>✅ Best Practices</h4>
-          <p>Industry standard procedures</p>
-        </div>
-        <div class="info-card">
-          <h4>🎓 Certification</h4>
-          <p>Earn your EHS certificate</p>
-        </div>
+        <div class="info-card"><h4>📚 Comprehensive Review</h4><p>All previous topics combined</p></div>
+        <div class="info-card"><h4>🎯 Real Scenarios</h4><p>Practical workplace situations</p></div>
+        <div class="info-card"><h4>✅ Best Practices</h4><p>Industry standard procedures</p></div>
+        <div class="info-card"><h4>🎓 Certification</h4><p>Earn your EHS certificate</p></div>
       </div>
       <div class="quiz-footer">
         <button class="start-quiz-btn final" onclick="startQuiz(5)">Start Final Assessment</button>
       </div>
     </div>
   </div>
+    <!-- Game audio (update sources to your files) -->
+<audio id="bgAudio" preload="auto" loop>
+  <source src="audio/bg.mp3" type="audio/mpeg">
+  <source src="audio/bg.ogg" type="audio/ogg">
+</audio>
 
-  <script>
-    (() => {
-      const movingRoad = document.getElementById('movingRoad');
-      const bike = document.getElementById('bike');
-      const quizBanners = document.querySelectorAll('.quiz-banner');
+<audio id="hitAudio" preload="auto">
+  <source src="audio/hit.mp3" type="audio/mpeg">
+  <source src="audio/hit.ogg" type="audio/ogg">
+</audio>
+<script>
+(() => {
+  const rotateOverlay = document.getElementById('rotateOverlay');
+  const vehicleOverlay = document.getElementById('vehicleSelectOverlay');
+  const body = document.body;
 
-      // Quiz content mapping
-      const quizContentIds = ['quiz1Content', 'quiz2Content', 'quiz3Content', 'quiz4Content', 'quiz5Content'];
+  // --- Touch-like detection (real touch or emulated in DevTools) ---
+  const isTouchLike = () =>
+    ('ontouchstart' in window) ||
+    (navigator.maxTouchPoints && navigator.maxTouchPoints > 0) ||
+    matchMedia('(hover: none) and (pointer: coarse)').matches;
 
-      function showPopup(index) {
-        const contentId = quizContentIds[index];
-        const content = document.getElementById(contentId);
-        if (content) {
-          document.getElementById('popupContent').innerHTML = content.innerHTML;
-        }
-        document.getElementById('popupOverlay').style.display = 'flex';
+  // Force overlay for desktop testing: ?forceRotate=1 or localStorage('forceRotate')==='1'
+  const FORCE_ROTATE = /(^|[?&])forceRotate=1(&|$)/.test(location.search) ||
+                       localStorage.getItem('forceRotate') === '1';
+
+  // Do not show rotate overlay while selecting vehicle
+  const isSelectingVehicle = () =>
+    vehicleOverlay && getComputedStyle(vehicleOverlay).display !== 'none';
+
+  // Landscape detection (multiple signals for iOS/iPadOS reliability)
+  const landscapeMql = matchMedia('(orientation: landscape)');
+  function isLandscape() {
+    try {
+      if (landscapeMql && typeof landscapeMql.matches === 'boolean') {
+        return landscapeMql.matches;
       }
-
-      function startQuiz(quizNumber) {
-        hidePopup();
-        window.location.href = `quiz${quizNumber}.html`;
+    } catch {}
+    try {
+      if (screen.orientation && screen.orientation.type) {
+        return screen.orientation.type.includes('landscape');
       }
+    } catch {}
+    return window.innerWidth > window.innerHeight;
+  }
 
-      function hidePopup() {
-        document.getElementById('popupOverlay').style.display = 'none';
-      }
+  function restartGameCompletely() {
+  try {
+    const bg = document.getElementById('bgAudio');
+    if (bg) {
+      bg.pause();
+      bg.currentTime = 0;
+    }
+  } catch(e){}
 
-      // Motion configuration
-      const SPEED = 100;
-      let roadOffset = 0;
-      let isMoving = false;
-      let lastTs = null;
-      let rafId = null;
-      let distance = 0;
-      let bikeTilt = 0;
-      let roadCurve = 0;
-      let bikeBounce = 0;
-      let engineVibration = 0;
-      let nearBanner = false;
-      let currentBannerIndex = 0; // Track which banner we're approaching
-      let hasPassedBanner = false; // Start as false so first banner works
+  location.reload(); 
+}
 
-      // Banner positions (Y coordinates) and their X positions - closer to banners
-      const bannerPositions = [180, -120, -420, -720, -1020];
-      const bannerXPositions = [460, 540, 460, 540, 460]; // Closer to banners
-      
-      // Road curve calculation for realistic movement
-      function getRoadX(distance) {
-        const phase = (distance * 0.003) % (Math.PI * 8);
-        return 500 + Math.sin(phase) * 10; // Gentle curves
-      }
-      
-      let targetBikeX = 500; // Target X position for bike
-      let currentBikeX = 500; // Current X position for smooth movement
+  // ====== Game code (unchanged from your version) ======
+  const scene = document.getElementById('scene');
+  const car = document.getElementById('car');
+  const bike = document.getElementById('bike');
 
-      // Check if bike is near any banner and update target position
-      function checkBannerProximity() {
-        const bikeY = 480;
-        
-        // Update target bike position based on upcoming banner
-        if (currentBannerIndex < bannerPositions.length) {
-          const bannerY = bannerPositions[currentBannerIndex];
-          const bannerScreenY = bannerY + roadOffset;
-          const distance = Math.abs(bikeY - bannerScreenY);
-          
-          // Start steering towards banner when it's 200px away
-          if (distance < 200) {
-            targetBikeX = bannerXPositions[currentBannerIndex];
-          } else {
-            // Return to road center when not near banner
-            targetBikeX = 500;
-          }
-          
-          if (distance < 60 && !hasPassedBanner) {
-            // Stop at current banner
-            isMoving = false;
-            hasPassedBanner = true; // Mark this banner as reached
-            // Move to next banner for next click
-            currentBannerIndex++;
-          }
-        } else {
-          // No more banners, stay on road center
-          targetBikeX = 500;
-        }
-      }
+  const quizBannersAll = [
+    document.getElementById('banner1'),
+    document.getElementById('banner2'),
+    document.getElementById('banner3'),
+    document.getElementById('banner4'),
+    document.getElementById('banner5')
+  ].filter(Boolean);
+  const MAX_QUIZZES = 4;
+  // === One question per quiz, plus two review images per quiz ===
+const QUIZ_QUESTIONS = [
+  {
+    q: 'What is the safest way to cross the road?',
+    a: ['Run quickly', 'Use a crosswalk', 'Ignore traffic'],
+    correct: 1,
+    imgs: ['img/quiz1-1.jpg', 'img/quiz1-2.jpg']   // <-- replace with your real paths
+  },
+  {
+    q: 'What should you wear for safety?',
+    a: ['Helmet', 'Sandals', 'Nothing'],
+    correct: 0,
+    imgs: ['img/quiz2-1.jpg', 'img/quiz2-2.jpg']   // <-- replace
+  },
+  {
+    q: 'What do you do in an emergency?',
+    a: ['Panic', 'Follow procedures', 'Hide'],
+    correct: 1,
+    imgs: ['img/quiz3-1.jpg', 'img/quiz3-2.jpg']   // <-- replace
+  },
+  {
+    q: 'Which is a good environmental practice?',
+    a: ['Littering', 'Recycling', 'Burning waste'],
+    correct: 1,
+    imgs: ['img/quiz4-1.jpg', 'img/quiz4-2.jpg']   // <-- replace
+  }
+];
+  const quizBanners = quizBannersAll.slice(0, MAX_QUIZZES);
 
-      // Update bike steering with very smooth transitions
-      function updateCarSteering() {
-        // Very gradual movement towards target
-        const diff = targetBikeX - currentBikeX;
-        
-        if (Math.abs(diff) > 0.5) {
-          currentBikeX += diff * 0.02; // Very slow, smooth movement
-        }
-        
-        // Minimal tilt effect
-        const tiltAmount = diff * 0.03;
-        bikeTilt = Math.max(-3, Math.min(3, tiltAmount));
-      }
+  const getCssNumber = (name, fallback) => {
+    const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    const n = parseFloat(v);
+    return Number.isFinite(n) ? n : fallback;
+  };
 
-      // Update road position with curves
-      function updateRoadPosition() {
-        // Calculate realistic road curve
-        const curvePhase = (distance * 0.003) % (Math.PI * 8);
-        roadCurve = Math.sin(curvePhase) * 8; // Reduced curve intensity
-        
-        // Apply road movement with gentle curve
-        movingRoad.setAttribute('transform', `translate(${roadCurve * 0.5}, ${roadOffset})`);
-        
-        // Update bike steering towards banners
-        updateCarSteering();
-        
-        // Keep bike mostly centered with minimal deviation
-        const roadX = 500 + roadCurve * 0.1; // Follow road curve very gently
-        
-        // Blend road following with banner steering (more steering influence)
-        const finalBikeX = (currentBikeX * 0.6) + (roadX * 0.4);
-        
-        // Align bike with road and steering
-        if (isMoving) {
-          // Engine vibration
-          engineVibration = Math.sin(distance * 0.3) * 0.1;
-          
-          // Bike bounce from road bumps
-          bikeBounce = Math.sin(distance * 0.2) * 0.3;
-        } else {
-          // Gradual stop
-          engineVibration *= 0.9;
-          bikeBounce *= 0.9;
-          bikeTilt *= 0.95;
-        }
-        
-        const bike = document.getElementById('bike');
-        bike.setAttribute('transform', 
-          `translate(${finalBikeX + engineVibration},${480 + bikeBounce}) rotate(${bikeTilt})`);
-      }
+  const ROAD_CONFIG = {
+    centerX: 500,
+    startY: 900,
+    endY: 2100,
+    startWidth: 260,
+    endWidth: 800
+  };
 
-      // Animation loop
-      function tick(ts) {
-        if (lastTs == null) lastTs = ts;
-        const dt = Math.min((ts - lastTs) / 1000, 0.05);
-        lastTs = ts;
+  function roadWidthAt(y) {
+    const t = Math.max(0, Math.min(1, (y - ROAD_CONFIG.startY) / (ROAD_CONFIG.endY - ROAD_CONFIG.startY)));
+    return ROAD_CONFIG.startWidth + (ROAD_CONFIG.endWidth - ROAD_CONFIG.startWidth) * t;
+  }
 
-        if (isMoving) {
-          roadOffset += SPEED * dt;
-          distance += SPEED * dt;
-          
-          // Check if near banner and auto-stop
-          checkBannerProximity();
-          
-          // Reset for infinite seamless loop
-          if (roadOffset > 1800) {
-            roadOffset = 0;
-          }
-          
-          updateRoadPosition();
-          
-          // Show banners based on distance traveled
-          quizBanners.forEach((banner, index) => {
-            const showDistance = (index + 1) * 150;
-            if (distance >= showDistance && distance < showDistance + 100) {
-              // Banner is active but no pulse effect
-            } else {
-              banner.classList.remove('pulse');
-            }
-          });
-        } else {
-          updateRoadPosition();
-        }
+  function getLaneX(y, laneIndex) {
+    const playerY = ROAD_CONFIG.endY - 300;
+    const t = (playerY - ROAD_CONFIG.startY) / (ROAD_CONFIG.endY - ROAD_CONFIG.startY);
+    const leftEdge = 370 - (270 * t);
+    const rightEdge = 630 + (270 * t);
+    const center = ROAD_CONFIG.centerX;
 
-        rafId = requestAnimationFrame(tick);
-      }
+    if (laneIndex === 0) {
+      return leftEdge * 0.25 + center * 0.75;
+    } else {
+      return center * 0.25 + rightEdge * 0.75;
+    }
+  }
 
-      // Mouse and touch hold controls
-      bike.addEventListener('mousedown', (e) => {
-        e.preventDefault();
-        if (currentBannerIndex < bannerPositions.length) {
-          isMoving = true;
-          hasPassedBanner = false;
-        }
-      });
-      
-      document.addEventListener('mouseup', () => {
+  function getLaneWidthAt(y) { return roadWidthAt(y) / 3; }
+
+  function getBannerX(y, side) {
+    const width = roadWidthAt(y);
+    const offset = (width / 2) + 150;
+    return side === 0 ? ROAD_CONFIG.centerX - offset : ROAD_CONFIG.centerX + offset;
+  }
+
+// --- Star scoring system ---
+// --- Star scoring system (single displayed score: earned - collisions) ---
+const STARS_PER_QUIZ = 5;
+const TOTAL_QUIZZES = MAX_QUIZZES; // 4 in this build
+const totalStars = STARS_PER_QUIZ * TOTAL_QUIZZES; // 20
+let starsRemaining = 0; // ✅ start at 0, build up by quizzes, down by collisions
+
+const starsEl = document.getElementById('starsCount');
+function renderScoreboard() {
+  // Clamp at 0 to avoid negatives
+  if (starsEl) starsEl.textContent = Math.max(0, starsRemaining);
+}
+
+  let selectedVehicle = null; // 'car' | 'bike'
+  let isMoving = false;       // NOTE: used also by orientation pause/resume
+  let gameStarted = false;
+  let lastTs = null;
+  let rafId = null;
+  let distance = 0;
+  let roadOffset = 0;
+
+  let targetCarX = 500;
+  let currentCarX = 500;
+  let engineVibration = 0;
+  let carBounce = 0;
+  let potholeImpact = 0;
+
+  const GAME_SPEED = 180;
+
+  const QUIZ_ARRIVAL_DELAY = 8;
+  const bannerSides = [0, 1, 0, 1];
+
+  const bannerStates = quizBanners.map(() => ({ active: false, initialY: 0 }));
+  let activeBannerIndex = -1;
+  let hasPassedBanner = false;
+
+  function scheduleBannerArrival(quizIndex, delaySeconds = QUIZ_ARRIVAL_DELAY) {
+    if (!quizBanners[quizIndex]) return;
+
+    const extraDelay = 2 + Math.random() * 2; // 2–4 sec
+    const totalDelay = delaySeconds + extraDelay;
+
+    const vehY = ROAD_CONFIG.endY - 300;
+    const initialY = vehY - (roadOffset + GAME_SPEED * totalDelay);
+
+    bannerStates[quizIndex].initialY = initialY;
+    bannerStates[quizIndex].active = true;
+    activeBannerIndex = quizIndex;
+  }
+
+  function applyBannerSizing(banner) {
+    const plate = banner.querySelector('.sign-plate');
+    const pole = banner.querySelector('.sign-pole');
+    const title = banner.querySelector('.title');
+    const subtitle = banner.querySelector('.subtitle');
+
+    const plateW = getCssNumber('--banner-plate-w', 360);
+    const plateH = getCssNumber('--banner-plate-h', 180);
+    const poleH  = getCssNumber('--banner-pole-h', 200);
+
+    if (pole) pole.setAttribute('height', poleH);
+
+    if (plate) {
+      plate.setAttribute('x', -plateW/2);
+      plate.setAttribute('y', -plateH - (plateH * 0.1));
+      plate.setAttribute('width', plateW);
+      plate.setAttribute('height', plateH);
+    }
+
+    const plateCenterY = -plateH - (plateH * 0.1) + plateH/2;
+    if (title) { title.setAttribute('x', 0); title.setAttribute('y', plateCenterY - plateH * 0.18); }
+    if (subtitle) { subtitle.setAttribute('x', 0); subtitle.setAttribute('y', plateCenterY + plateH * 0.12); }
+  }
+
+  function screenToSvgPoint(screenX, screenY) {
+    try {
+      const svg = document.getElementById('scene');
+      if (!svg) return { x: screenX, y: screenY };
+      const p = svg.createSVGPoint();
+      p.x = screenX; p.y = screenY;
+      const inv = svg.getScreenCTM().inverse();
+      return p.matrixTransform(inv);
+    } catch {
+      return { x: screenX, y: screenY };
+    }
+  }
+  function getElementBottomCenterSvgY(el) {
+    const rect = el.getBoundingClientRect();
+    if (!rect || rect.height <= 0) return null;
+    const p = screenToSvgPoint(rect.left + rect.width / 2, rect.bottom);
+    return p.y;
+  }
+  function getBannerEffectiveBottomY(bannerEl) {
+    const plate = bannerEl.querySelector('.sign-plate');
+    const target = plate || bannerEl;
+    return getElementBottomCenterSvgY(target);
+  }
+
+  function updateActiveBanner() {
+    if (activeBannerIndex < 0) return;
+
+    const idx = activeBannerIndex;
+    const bannerEl = quizBanners[idx];
+    const state = bannerStates[idx];
+    const y = state.initialY + roadOffset;
+    const x = getBannerX(y, bannerSides[idx]);
+
+    const minY = getCssNumber('--banner-min-y', 800);
+    const maxY = getCssNumber('--banner-max-y', 2000);
+
+    const plateH = getCssNumber('--banner-plate-h', 180);
+    const localCx = 0;
+    const localCy = -0.6 * plateH;
+
+    const vehY = ROAD_CONFIG.endY - 300;
+
+    if (y >= minY && y <= maxY + 200 && state.active) {
+      bannerEl.style.display = '';
+      applyBannerSizing(bannerEl);
+
+      const d = Math.abs(vehY - y);
+      const distScale = Math.min(1.0, Math.max(0.85, 1 - (d / 3000)));
+      bannerEl.setAttribute(
+        'transform',
+        `translate(${x}, ${y}) scale(${distScale}) translate(${-localCx}, ${-localCy})`
+      );
+
+      // Calculate banner bottom properly in SVG space
+      const localBottom = -0.6 * plateH + (plateH / 2);
+      const effectiveBottomY = y + (localBottom * distScale);
+
+      // Dynamic TRIGGER_OFFSET by width
+function getTriggerOffset() {
+  const w = window.innerWidth;
+  let offset;
+
+  if (w <= 600) offset = 440;
+  else if (w <= 900) offset = 640;
+  else if (w <= 1200) offset = 250;
+  else offset = 350;
+
+  console.log("Trigger Offset:", offset, "| Width:", w);
+  return offset;
+}
+      const TRIGGER_OFFSET = getTriggerOffset();
+      const triggerLine = vehY - TRIGGER_OFFSET;
+
+      if (effectiveBottomY >= triggerLine && !hasPassedBanner) {
+        hasPassedBanner = true;
         isMoving = false;
-      });
-      
-      bike.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        if (currentBannerIndex < bannerPositions.length) {
-          isMoving = true;
-          hasPassedBanner = false;
-        }
-      });
-      
-      document.addEventListener('touchend', () => {
-        isMoving = false;
-      });
-      
-      // Key press controls - bike moves only when key is held down
-      let keysPressed = new Set();
-      
-      document.addEventListener('keydown', (e) => {
-        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd'].includes(e.key.toLowerCase())) {
-          e.preventDefault();
-          keysPressed.add(e.key.toLowerCase());
-          
-          if (currentBannerIndex < bannerPositions.length) {
-            isMoving = true;
-            hasPassedBanner = false;
-          }
-        }
-      });
-      
-      document.addEventListener('keyup', (e) => {
-        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd'].includes(e.key.toLowerCase())) {
-          e.preventDefault();
-          keysPressed.delete(e.key.toLowerCase());
-          
-          if (keysPressed.size === 0) {
-            isMoving = false;
-          }
-        }
-      });
+        openQuiz(idx + 1);
+      }
+    } else {
+      bannerEl.style.display = 'none';
+    }
+  }
 
-      // Initialize
-      updateRoadPosition();
-      rafId = requestAnimationFrame(tick);
+  // ====== QUIZ UI ======
+  function openQuiz(quizNumber) { showQuizQuestions(quizNumber); }
 
-      // Quiz banner click handlers
-      quizBanners.forEach((banner, index) => {
-        banner.addEventListener('click', (e) => {
-          e.stopPropagation();
-          showPopup(index);
+function showQuizQuestions(quizNumber) {
+  const data = QUIZ_QUESTIONS[quizNumber - 1];
+  if (!data) return;
+
+  // Create ONE modal overlay and reuse it for Q&A and image review
+  const modal = document.createElement('div');
+  modal.className = 'popup-overlay';
+  modal.style.cssText = `
+    position:fixed; inset:0; background:rgba(0,0,0,.7);
+    display:flex; align-items:center; justify-content:center; z-index:2001;
+  `;
+  modal.innerHTML = `
+    <div id="quizDialog" role="dialog" aria-modal="true"
+         style="background:#fff; padding:24px; border-radius:12px; width:min(560px, 92vw); max-height:85vh; box-shadow:0 10px 32px rgba(0,0,0,.25); display:flex; flex-direction:column;">
+      <h2 id="quizTitle" style="color:#1976d2; text-align:center; margin-bottom:14px;">Quiz ${quizNumber}</h2>
+      <div id="quizBody" style="overflow:auto;"></div>
+      <div id="quizFooter" style="display:flex; gap:10px; justify-content:center; margin-top:16px;"></div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  const bodyEl = modal.querySelector('#quizBody');
+  const footerEl = modal.querySelector('#quizFooter');
+
+  // Track correctness across steps for this quiz
+  let answeredCorrectly = false;
+
+  // ---- 1) Render Q&A view in this popup ----
+  function renderQuestion() {
+    bodyEl.innerHTML = `
+      <form id="quizForm">
+        <div style="font-weight:600; margin-bottom:10px;">${data.q}</div>
+        ${data.a.map((ans, j) => `
+          <label style="display:block; margin:6px 0;">
+            <input type="radio" name="q0" value="${j}" required> ${ans}
+          </label>
+        `).join('')}
+        <div id="quizMsg" style="margin-top:12px; display:none;"></div>
+      </form>
+    `;
+    footerEl.innerHTML = `
+      <button id="submitBtn"
+        style="background:#1976d2;color:white;padding:10px 18px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">
+        Submit Answer
+      </button>
+      <button id="nextBtn" style="display:none;background:#4caf50;color:white;padding:10px 18px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">
+        Next
+      </button>
+    `;
+
+    const form = bodyEl.querySelector('#quizForm');
+    const msg  = bodyEl.querySelector('#quizMsg');
+    const submitBtn = footerEl.querySelector('#submitBtn');
+    const nextBtn   = footerEl.querySelector('#nextBtn');
+
+    submitBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const picked = form.querySelector(`input[name='q0']:checked`);
+      const val = picked ? parseInt(picked.value, 10) : -1;
+
+      // Lock radios after first attempt
+      form.querySelectorAll('input[type="radio"]').forEach(r => r.disabled = true);
+      nextBtn.style.display = 'inline-block';
+      msg.style.display = 'block';
+
+      if (val === data.correct) {
+        answeredCorrectly = true;
+        msg.style.color = '#2e7d32';
+        msg.textContent = '✅ Correct! Tap Next to continue.';
+      } else {
+        answeredCorrectly = false;
+        const correctText = data.a[data.correct];
+        msg.style.color = '#d32f2f';
+        // Show correct answer (No "Try again")
+        msg.textContent = `❌ Incorrect. Correct answer: ${correctText}`;
+      }
+
+      // Hide submit after evaluation
+      submitBtn.style.display = 'none';
+    });
+
+    nextBtn.addEventListener('click', () => {
+      // Hide the active banner so it doesn't linger
+      if (activeBannerIndex >= 0) {
+        const bEl = quizBanners[activeBannerIndex];
+        const st = bannerStates[activeBannerIndex];
+        st.active = false;
+        if (bEl) bEl.style.display = 'none';
+      }
+      activeBannerIndex = -1;
+      hasPassedBanner = false;
+
+      // ---- 2) Swap this SAME POPUP to the images step ----
+      renderImagesStep();
+    });
+  }
+
+  // ---- Images view in the SAME dialog (Close enabled only after both images seen) ----
+  function renderImagesStep() {
+    const [img1, img2] = data.imgs || [];
+    const src1 = img1 || 'img/placeholder1.jpg';
+    const src2 = img2 || 'img/placeholder2.jpg';
+
+    // Change title (optional)
+    modal.querySelector('#quizTitle').textContent = `Review (Quiz ${quizNumber})`;
+
+    // Body: scrollable container with two stacked, 100% width images
+    bodyEl.innerHTML = `
+      <div style="font-size:.95rem;color:#666;margin-bottom:8px;">
+        Please scroll and view both images to continue.
+      </div>
+      <div id="imgScroll" style="max-height:60vh; overflow-y:auto; border:1px solid #eaeaea; border-radius:8px; padding:8px;">
+        <img id="imgTop" src="${src1}" alt="Review image 1" style="width:100%;height:auto;display:block;margin:0 0 12px 0;" />
+        <img id="imgBottom" src="${src2}" alt="Review image 2" style="width:100%;height:auto;display:block;" />
+      </div>
+    `;
+
+    // Footer: Close (disabled until both images are seen)
+    footerEl.innerHTML = `
+      <button id="closeReviewBtn" disabled
+        style="opacity:.5;cursor:not-allowed;background:#1976d2;color:white;border:none;border-radius:8px;padding:10px 20px;font-weight:bold;">
+        Close
+      </button>
+    `;
+
+    const scroller  = bodyEl.querySelector('#imgScroll');
+    const imgTop    = bodyEl.querySelector('#imgTop');
+    const imgBottom = bodyEl.querySelector('#imgBottom');
+    const closeBtn  = footerEl.querySelector('#closeReviewBtn');
+
+    let seenTop = false;
+    let seenBottom = false;
+
+    function updateCloseState() {
+      if (seenTop && seenBottom) {
+        closeBtn.disabled = false;
+        closeBtn.style.opacity = '1';
+        closeBtn.style.cursor = 'pointer';
+      }
+    }
+
+    function pctInView(el) {
+      const r = el.getBoundingClientRect();
+      const sr = scroller.getBoundingClientRect();
+      const overlap = Math.max(0, Math.min(r.bottom, sr.bottom) - Math.max(r.top, sr.top));
+      const threshold = Math.min(r.height, sr.height) * 0.75; // 75% in view
+      return overlap >= threshold;
+    }
+
+    function checkSeen() {
+      if (!seenTop && pctInView(imgTop)) seenTop = true;
+      if (!seenBottom && pctInView(imgBottom)) seenBottom = true;
+      updateCloseState();
+    }
+
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.target === imgTop    && e.intersectionRatio >= 0.75) seenTop = true;
+          if (e.target === imgBottom && e.intersectionRatio >= 0.75) seenBottom = true;
         });
-        banner.style.cursor = 'pointer';
-      });
+        updateCloseState();
+      }, { root: scroller, threshold: [0, 0.25, 0.5, 0.75, 1] });
+      io.observe(imgTop);
+      io.observe(imgBottom);
+    }
 
-      // Popup close handlers
-      document.getElementById('popupClose').addEventListener('click', hidePopup);
-      document.getElementById('popupOverlay').addEventListener('click', (e) => {
-        if (e.target === document.getElementById('popupOverlay')) {
-          hidePopup();
-        }
-      });
-      
-      // ESC key to close popup
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          hidePopup();
-        }
-      });
+    scroller.addEventListener('scroll', checkSeen, { passive: true });
+    imgTop.addEventListener('load', checkSeen);
+    imgBottom.addEventListener('load', checkSeen);
+    setTimeout(checkSeen, 0);
 
-      // Handle page visibility
-      document.addEventListener('visibilitychange', () => {
-        if (document.hidden) {
-          if (rafId) cancelAnimationFrame(rafId);
-          rafId = null;
-        } else {
-          lastTs = null;
-          rafId = requestAnimationFrame(tick);
+    closeBtn.addEventListener('click', () => {
+      if (closeBtn.disabled) return;
+
+      // ⭐ Award stars only if the question was answered correctly AND both images were viewed
+     if (answeredCorrectly) {
+  starsRemaining += STARS_PER_QUIZ;
+  renderScoreboard();
+}
+
+      // Close the modal and continue the flow
+      modal.remove();
+
+      if (quizNumber >= MAX_QUIZZES) {
+        showFinalScore();   // last quiz done
+      } else {
+        isMoving = true;
+        scheduleBannerArrival(quizNumber, QUIZ_ARRIVAL_DELAY);
+      }
+    });
+  }
+
+  // Start view = question
+  renderQuestion();
+}
+
+function showFinalScore() {
+  const finalOverlay = document.createElement('div');
+  finalOverlay.style.cssText = `
+    position:fixed; inset:0; background:rgba(0,0,0,0.9);
+    display:flex; align-items:center; justify-content:center; z-index:3000;
+  `;
+
+  const safeStars = Math.max(0, starsRemaining);
+  const starsHtml = Array.from({length: safeStars})
+    .map(() => '<span class="star-icon">⭐</span>')
+    .join('');
+
+  finalOverlay.innerHTML = `
+    <div style="background:white;padding:50px;border-radius:16px;text-align:center;max-width:700px;width:92%;box-shadow:0 12px 40px rgba(0,0,0,0.3);">
+      <div style="font-size:4rem;margin-bottom:20px;">🏆</div>
+      <h2 style="color:#1976d2;font-size:2.2rem;margin-bottom:15px;">Congratulations!</h2>
+      <p style="font-size:1.1rem;color:#666;margin-bottom:30px;">You've completed all EHS Safety quizzes!</p>
+
+      <div style="background:linear-gradient(135deg,#1976d2,#42a5f5);color:white;padding:24px;border-radius:12px;margin-bottom:20px;">
+        <div style="font-size:1.1rem;margin-bottom:8px;">Final Stars</div>
+        <div style="font-size:2rem;font-weight:bold;">${safeStars} / ${totalStars} Stars</div>
+      </div>
+
+      <div class="stars-strip">${starsHtml}</div>
+
+      <div style="margin-top:28px;">
+        <button onclick="location.reload()" style="background:#4caf50;color:white;border:none;padding:15px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;cursor:pointer;">
+          Start Over
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(finalOverlay);
+}
+  function startCountdownAndMove() {
+    if (rotateOverlay.style.display === 'flex') return;
+    let count = 3;
+    const wrap = document.querySelector('.wrap');
+    if (wrap) {
+      wrap.style.filter = 'blur(8px)';
+      wrap.style.transition = 'filter .3s';
+    }
+
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+      position:fixed; inset:0; background:rgba(0,0,0,0.5);
+      display:flex; align-items:center; justify-content:center; z-index:3000;
+    `;
+    overlay.innerHTML = `<div id="countdownText" style="color:#fff;font-size:5rem;font-weight:bold;text-shadow:0 4px 8px rgba(0,0,0,0.8);">${count}</div>`;
+    document.body.appendChild(overlay);
+
+    const countdownText = overlay.querySelector('#countdownText');
+    const iv = setInterval(()=>{
+      count--;
+      if (count > 0) {
+        countdownText.textContent = count;
+      } else {
+        clearInterval(iv);
+        overlay.remove();
+        if (wrap) wrap.style.filter = 'none';
+        gameStarted = true;
+        isMoving = true;
+        // start background audio (safe after user gesture)
+try {
+  const bg = document.getElementById('bgAudio');
+  if (bg) { bg.volume = 0.6; bg.play().catch(() => {}); }
+} catch(e) {}
+
+        scheduleBannerArrival(0, QUIZ_ARRIVAL_DELAY);
+      }
+    }, 1000);
+  }
+
+  // ======== SVG + vehicle sizing helpers ========
+  function getViewBox() {
+    const vb = scene.viewBox && scene.viewBox.baseVal;
+    if (vb) return { x: vb.x, y: vb.y, w: vb.width, h: vb.height };
+    return { x: 0, y: 0, w: 1000, h: 2000 };
+  }
+
+  function clientXToSvgX(clientX) {
+    const rect = scene.getBoundingClientRect();
+    const { x, w } = getViewBox();
+    const t = (clientX - rect.left) / rect.width;
+    return x + t * w;
+  }
+
+  function getVehicleHalfWidth() {
+    const vehEl = document.getElementById(selectedVehicle || '');
+    if (!vehEl) return 65; // fallback
+    const scale = getCssNumber('--vehicle-scale', 2.2);
+    try {
+      const bb = vehEl.getBBox();
+      return (bb.width * scale) / 2;
+    } catch(e) {
+      return 65;
+    }
+  }
+
+  function clampToRoad(x) {
+    const vehY = ROAD_CONFIG.endY - 300;
+    const roadW = roadWidthAt(vehY);
+    const margin = 30; // keep safe margin (mobile behavior unchanged)
+    const halfW = getVehicleHalfWidth();
+    const leftEdge  = ROAD_CONFIG.centerX - roadW / 2 + margin + halfW;
+    const rightEdge = ROAD_CONFIG.centerX + roadW / 2 - margin - halfW;
+    return Math.max(leftEdge, Math.min(rightEdge, x));
+  }
+
+  function reclampVehicleX() {
+    currentCarX = clampToRoad(currentCarX);
+    targetCarX  = clampToRoad(targetCarX);
+  }
+
+  // Ensure vehicle is visible immediately after selection
+  function placeVehicleImmediately() {
+    const vehY = ROAD_CONFIG.endY - 300;
+    const roadW = roadWidthAt(vehY);
+    const margin = 30;
+    const halfW = getVehicleHalfWidth();
+    currentCarX = ROAD_CONFIG.centerX;
+    targetCarX = ROAD_CONFIG.centerX;
+    const leftEdge  = ROAD_CONFIG.centerX - roadW / 2 + margin + halfW;
+    const rightEdge = ROAD_CONFIG.centerX + roadW / 2 - margin - halfW;
+    currentCarX = Math.max(leftEdge, Math.min(rightEdge, currentCarX));
+    targetCarX  = currentCarX;
+    updateVehicleAndRoad();
+  }
+
+  // ===== Proximity-based obstacle scale =====
+  const START_SCALE = 0.75;
+  const FAR_DISTANCE  = 700;
+  const NEAR_DISTANCE = 120;
+
+  function easeOutCubic(t) { t = Math.max(0, Math.min(1, t)); return 1 - Math.pow(1 - t, 3); }
+  function proximityScale(distanceSvg) {
+    if (distanceSvg >= FAR_DISTANCE) return START_SCALE;
+    const denom = Math.max(1, FAR_DISTANCE - NEAR_DISTANCE);
+    const t = Math.max(0, Math.min(1, (FAR_DISTANCE - distanceSvg) / denom));
+    const eased = easeOutCubic(t);
+    return START_SCALE + (1 - START_SCALE) * eased;
+  }
+
+  const obstacleEls = Array.from(document.querySelectorAll('#obstacles .obstacle'));
+  const obstacles = obstacleEls.map((el, i) => {
+    const lane = parseInt(el.getAttribute('data-lane') || '0', 10);
+    const type = (el.getAttribute('data-type') || 'car').toLowerCase();
+    return {
+      el, type,
+      lane: lane > 0 ? 1 : 0,
+      initialY: 0, fixedX: 0,
+      hit: false, restarting: false, visible: false
+    };
+  });
+
+  // helper: never show two obstacles that use the same SVG source at once
+  function canActivateObstacle(obs) {
+    const src = obs.el.getAttribute('href') || '';
+    return !obstacles.some(o =>
+      o !== obs && o.visible &&
+      (o.el.getAttribute('href') || '') === src
+    );
+  }
+
+  function getRenderedWidthInSvgUnits(el) {
+    const rect = el.getBoundingClientRect();
+    const ctm = el.getScreenCTM && el.getScreenCTM();
+    const svg = document.getElementById('scene');
+    if (!ctm || !svg || rect.width <= 0) return 0;
+
+    const p1 = svg.createSVGPoint(), p2 = svg.createSVGPoint();
+    p1.x = rect.left; p1.y = rect.top;
+    p2.x = rect.left + rect.width; p2.y = rect.top;
+
+    const inv = ctm.inverse();
+    const sp1 = p1.matrixTransform(inv);
+    const sp2 = p2.matrixTransform(inv);
+
+    return Math.abs(sp2.x - sp1.x);
+  }
+  function getRenderedHeightInSvgUnits(el) {
+    const rect = el.getBoundingClientRect();
+    const ctm = el.getScreenCTM && el.getScreenCTM();
+    const svg = document.getElementById('scene');
+    if (!ctm || !svg || rect.height <= 0) return 0;
+
+    const p1 = svg.createSVGPoint(), p2 = svg.createSVGPoint();
+    p1.x = rect.left; p1.y = rect.top;
+    p2.x = rect.left; p2.y = rect.top + rect.height;
+
+    const inv = ctm.inverse();
+    const sp1 = p1.matrixTransform(inv);
+    const sp2 = p2.matrixTransform(inv);
+
+    return Math.abs(sp2.y - sp1.y);
+  }
+
+  // track next index only when using sequential spawns (legacy)
+  // remove spawnScheduled entirely, we will respawn each obstacle individually
+  window.carOnRoad = window.carOnRoad || false;
+
+  function seedObstacleInitialPositions() {
+    const minY = getCssNumber('--banner-min-y', 800);
+
+    obstacles.forEach((obs, i) => {
+      // stagger initial positions so multiple obstacles cruise by
+      obs.initialY = minY - (roadOffset + GAME_SPEED * (2 + i * 3));
+      obs.visible = true;
+      obs.fixedX = getLaneX(0, obs.lane);
+    });
+    window.carOnRoad = true;
+  }
+
+  function updateObstaclesAndCollisions() {
+    if (!gameStarted) return;
+
+    const minY = getCssNumber('--banner-min-y', 800);
+    const maxY = getCssNumber('--banner-max-y', 2000);
+    const vehY = ROAD_CONFIG.endY - 300;
+    const vehX = currentCarX;
+    const collisionBuffer = 80;
+
+    // compute current banner Y (only one active at a time)
+    const bannerY = (activeBannerIndex >= 0)
+      ? (bannerStates[activeBannerIndex].initialY + roadOffset)
+      : null;
+    const bannerVisible = bannerY !== null && bannerY >= minY && bannerY <= maxY + 200;
+
+    obstacles.forEach((data, i) => {
+      const el = data.el;
+      let y = data.initialY + roadOffset;
+
+      if (!data.visible) {
+        el.style.display = 'none';
+        return;
+      }
+
+
+
+      const t = (y - ROAD_CONFIG.startY) / (ROAD_CONFIG.endY - ROAD_CONFIG.startY);
+      let x;
+      if (data.lane === 0) {
+        const leftEdge = 370 - (270 * t);
+        x = (leftEdge + ROAD_CONFIG.centerX) * 0.5 + 15;
+      } else {
+        const rightEdge = 630 + (270 * t);
+        x = (ROAD_CONFIG.centerX + rightEdge) * 0.5 - 15;
+      }
+
+      let wSvg = getRenderedWidthInSvgUnits(el);
+      let hSvg = getRenderedHeightInSvgUnits(el);
+      if (!Number.isFinite(wSvg) || wSvg <= 0) wSvg = getLaneWidthAt(y) * 0.6;
+      if (!Number.isFinite(hSvg) || hSvg <= 0) hSvg = wSvg * 1.5;
+
+      // hide if the obstacle would overlap the banner vertically
+      if (bannerY !== null) {
+        const hideDist = (hSvg / 2) + 80; // half height plus margin
+        if (Math.abs(y - bannerY) < hideDist) {
+          data.visible = false;          // prevent future frames
+          el.style.display = 'none';
+          return;
         }
-      });
-    })();
-  </script>
+      }
+
+      const scale = proximityScale(Math.abs(vehY - y));
+      const left = x - wSvg / 2;
+      const top  = y - hSvg / 2;
+      el.setAttribute('x', left);
+      el.setAttribute('y', top);
+      el.setAttribute('transform', `translate(${left + wSvg/2},${top + hSvg/2}) scale(${scale}) translate(${-left - wSvg/2},${-top - hSvg/2})`);
+
+      // show obstacle once it reaches the banner-min area, but keep it visible well past the bottom
+      el.style.display = (data.visible && y >= minY) ? '' : 'none';
+
+      // only check collision when obstacle is close to car vertically
+      if (y > vehY - 150) {
+        const activeVehicle = document.getElementById(selectedVehicle || '');
+        if (activeVehicle) {
+          const playerRect = activeVehicle.getBoundingClientRect();
+          const obstacleRect = el.getBoundingClientRect();
+          const padding = 4;
+          const isColliding =
+            playerRect.right - padding > obstacleRect.left &&
+            playerRect.left + padding < obstacleRect.right &&
+            playerRect.bottom - padding > obstacleRect.top &&
+            playerRect.top + padding < obstacleRect.bottom;
+
+          if (isColliding && !data.hit && data.visible) {
+            data.hit = true;
+
+// decrement 1 star on hit
+if (starsRemaining > 0) {
+  starsRemaining -= 1;
+  renderScoreboard();
+}
+
+// impact animation
+potholeImpact = 28;
+
+// hide this obstacle and reset its state later
+data.visible = false;
+el.style.display = 'none';
+setTimeout(() => { data.hit = false; }, 500);
+
+// play hit sound (non-blocking; safe on most browsers post user-gesture)
+try {
+  const hitAudio = document.getElementById('hitAudio');
+  if (hitAudio) {
+    hitAudio.currentTime = 0;
+    hitAudio.play().catch(() => {});
+  }
+} catch (e) {}
+          }
+        }
+      }
+
+      // respawn this obstacle independently once past bottom
+      if (y > maxY + 300 && !data.restarting) {
+        data.visible = false;
+        data.restarting = true;
+        const scheduleRespawn = () => {
+          // if a quiz banner is currently visible, wait and try again
+          if (bannerVisible) {
+            setTimeout(scheduleRespawn, 500);
+            return;
+          }
+
+          // don't activate if another obstacle uses the same image right now
+          if (!canActivateObstacle(data)) {
+            setTimeout(scheduleRespawn, 500);
+            return;
+          }
+
+          // send it back ahead of the player with some randomness
+          let newY = minY - (roadOffset + GAME_SPEED * (1 + Math.random() * 3));
+          // if new position would sit on current banner, nudge it farther ahead by half the obstacle height
+          if (bannerY !== null) {
+            const estimatedHeight = (getLaneWidthAt(newY) * 0.6) * 1.5; // approximate
+            if (Math.abs(newY - bannerY) < (estimatedHeight / 2 + 100)) {
+              newY -= (estimatedHeight + 200);
+            }
+          }
+          data.initialY = newY;
+          data.fixedX = getLaneX(0, data.lane);
+          data.restarting = false;
+          data.hit = false;
+          data.visible = true;
+        };
+        setTimeout(scheduleRespawn, 1000 + Math.random() * 1500);
+      }
+    });
+
+    if (potholeImpact > 0) potholeImpact *= 0.88;
+
+    // **always have something on the road**
+    // if no obstacle is currently marked visible, respawn one
+    const anyActiveInRange = obstacles.some(d => d.visible && !d.restarting);
+    // throttle forced spawns so they can only fire once per second
+    window.lastForcedSpawn = window.lastForcedSpawn || 0;
+    const now = performance.now();
+    if (!anyActiveInRange && !bannerVisible && now - window.lastForcedSpawn > 1000) {
+      window.lastForcedSpawn = now;
+      // try to pick a car first so the user sees cars rather than just potholes
+      let spare = obstacles.find(d =>
+        d.type === 'car' && !d.visible && !d.restarting && canActivateObstacle(d)
+      );
+      if (!spare) spare = obstacles.find(d =>
+        !d.visible && !d.restarting && canActivateObstacle(d)
+      );
+      if (spare) {
+        spare.restarting = true;
+        // place it right at (or just below) the top of the visible zone so it
+        // shows immediately instead of waiting multiple frames to scroll in
+        let newY = minY + (GAME_SPEED * 0.3);
+        if (bannerY !== null && Math.abs(newY - bannerY) < 140) {
+          newY += 300;
+        }
+        spare.initialY = newY;
+        spare.fixedX = getLaneX(0, spare.lane);
+        spare.visible = true;          // mark it active so the flag stops further spawns
+        spare.restarting = false;
+      }
+    }
+  }
+
+  function updateVehicleAndRoad() {
+    const centerLine = document.getElementById('centerLine');
+    const dashOffset = (-roadOffset) % 80;
+    centerLine.setAttribute('stroke-dashoffset', dashOffset);
+
+    targetCarX = clampToRoad(targetCarX);
+
+    const diff = targetCarX - currentCarX;
+    if (Math.abs(diff) > 0.3) currentCarX += diff * 0.15;
+
+    currentCarX = clampToRoad(currentCarX);
+
+    if (isMoving) {
+      engineVibration = Math.sin(distance * 0.3) * 0.2;
+      carBounce = Math.sin(distance * 0.2) * 0.4;
+      distance += 0;
+    } else {
+      engineVibration *= 0.92;
+      carBounce *= 0.92;
+    }
+
+    const activeVehicle = document.getElementById(selectedVehicle || '');
+    if (activeVehicle) {
+      const vehScale = getCssNumber('--vehicle-scale', 2.2);
+      const vehY = ROAD_CONFIG.endY - 300;
+
+      activeVehicle.setAttribute(
+        'transform',
+        `translate(${currentCarX + engineVibration}, ${vehY + carBounce + potholeImpact}) scale(${vehScale})`
+      );
+    }
+  }
+
+  function tick(ts) {
+    if (lastTs == null) lastTs = ts;
+    const dt = Math.min((ts - lastTs) / 1000, 0.05);
+    lastTs = ts;
+
+    if (isMoving) {
+      roadOffset += GAME_SPEED * dt;
+      distance += GAME_SPEED * dt;
+    }
+
+    updateActiveBanner();
+    updateObstaclesAndCollisions();
+    updateVehicleAndRoad();
+
+    rafId = requestAnimationFrame(tick);
+  }
+
+  // ======== Input handling ========
+  let isDragging = false;
+
+  function updateCarPositionFromClientX(clientX) {
+    const svgX = clientXToSvgX(clientX);
+    targetCarX = clampToRoad(svgX);
+  }
+
+  document.addEventListener('touchstart', (e) => {
+    // ignore touches inside any popup-overlay (quiz or other dialogs)
+    if (e.touches.length === 1 && gameStarted && !e.target.closest('.popup-overlay')) isDragging = true;
+  }, {passive:true});
+  document.addEventListener('touchmove', (e) => {
+    if (isDragging && e.touches.length === 1) updateCarPositionFromClientX(e.touches[0].clientX);
+  }, {passive:true});
+  document.addEventListener('touchend', () => { isDragging = false; }, {passive:true});
+
+  document.addEventListener('mousedown', (e) => {
+    // ignore mouse down inside modal/popups
+    if (gameStarted && !e.target.closest('.popup-overlay')) {
+      isDragging = true;
+      updateCarPositionFromClientX(e.clientX);
+    }
+  });
+  document.addEventListener('mousemove', (e) => { if (isDragging) updateCarPositionFromClientX(e.clientX); });
+  document.addEventListener('mouseup', () => { isDragging = false; });
+
+  // Keyboard moves with lane-relative step
+  document.addEventListener('keydown', (e) => {
+    if (!gameStarted) return;
+
+    const vehY  = ROAD_CONFIG.endY - 300;
+    const laneW = getLaneWidthAt(vehY);
+    const step  = Math.max(20, laneW * 0.22); // ~22% of lane width
+
+    if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') {
+      e.preventDefault();
+      targetCarX = clampToRoad(targetCarX - step);
+    }
+    if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd'){
+      e.preventDefault();
+      targetCarX = clampToRoad(targetCarX + step);
+    }
+  });
+  
+function showVehicle(vehicle) {
+    // Toggle car/bike group visibility
+    if (vehicle === 'car') {
+      car.style.display = '';
+      bike.style.display = 'none';
+    } else {
+      car.style.display = 'none';
+      bike.style.display = '';
+    }
+  }
+
+
+  // ===== Vehicle selection =====
+  document.getElementById('selectCarBtn').addEventListener('click', () => {
+    selectedVehicle = 'car';
+    vehicleOverlay.style.display = 'none';
+    body.classList.remove('hide-rotate');
+    applyRotateOverlayState(); // re-check now that selection closed
+    showVehicle('car');
+    reclampVehicleX();
+    placeVehicleImmediately();
+    setTimeout(startCountdownAndMove, 150);
+  });
+  document.getElementById('selectBikeBtn').addEventListener('click', () => {
+    selectedVehicle = 'bike';
+    vehicleOverlay.style.display = 'none';
+    body.classList.remove('hide-rotate');
+    applyRotateOverlayState(); // re-check now that selection closed
+    showVehicle('bike');
+    reclampVehicleX();
+    placeVehicleImmediately();
+    setTimeout(startCountdownAndMove, 150);
+  });
+
+  // ===== Pause/Resume helpers for orientation overlay =====
+  let savedMoving = false;
+  function pauseGameForOrientation() {
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+    savedMoving = isMoving;
+    isMoving = false;
+    try {
+  const bg = document.getElementById('bgAudio');
+  if (bg && !bg.paused) {
+    bg.dataset.wasPlaying = '1';
+    bg.pause();
+  }
+} catch(e) {}
+  }
+  function resumeGameFromOrientation() {
+    if (!rafId) {
+      lastTs = null;
+      rafId = requestAnimationFrame(tick);
+    }
+    if (savedMoving) isMoving = true;
+    try {
+  const bg = document.getElementById('bgAudio');
+  if (bg && bg.dataset.wasPlaying === '1') {
+    bg.play().catch(() => {});
+    bg.dataset.wasPlaying = '';
+  }
+} catch(e) {}
+  }
+
+  // ===== Show/Hide Rotate Overlay + event wiring =====
+function applyRotateOverlayState() {
+  const isMobileDevice = window.innerWidth <= 1024;
+
+  const isLandscapeMode =
+    (FORCE_ROTATE || isMobileDevice) &&
+    isLandscape();
+
+  const selectingVehicle = isSelectingVehicle();
+
+  if (isLandscapeMode) {
+
+    // 🚫 Always block everything in landscape (mobile/ipad)
+    rotateOverlay.style.display = 'flex';
+    body.classList.remove('hide-rotate'); // ensure rotate overlay is visible
+    document.getElementById('gameRoot').style.pointerEvents = 'none';
+
+    pauseGameForOrientation();
+    gameStarted = false;
+    isMoving = false;
+
+    // 🚫 Disable vehicle selection in landscape
+    if (vehicleOverlay) {
+      vehicleOverlay.style.pointerEvents = 'none';
+      vehicleOverlay.style.opacity = '0.5';
+    }
+
+  } else {
+
+    // ✅ Portrait mode
+    rotateOverlay.style.display = 'none';
+    body.classList.remove('landscape-block');
+    document.getElementById('gameRoot').style.pointerEvents = '';
+
+    // ✅ Re-enable vehicle selection
+    if (vehicleOverlay) {
+      vehicleOverlay.style.pointerEvents = '';
+      vehicleOverlay.style.opacity = '1';
+    }
+
+    // If game was already running before rotation → restart
+    if (gameStarted) {
+      restartGameCompletely();
+      return;
+    }
+
+    resumeGameFromOrientation();
+  }
+}
+
+  function wireOrientationListeners() {
+    if ('addEventListener' in landscapeMql) {
+      landscapeMql.addEventListener('change', applyRotateOverlayState);
+    } else if ('addListener' in landscapeMql) {
+      landscapeMql.addListener(applyRotateOverlayState); // older Safari
+    }
+    window.addEventListener('orientationchange', () => { reclampVehicleX(); applyRotateOverlayState(); });
+    window.addEventListener('resize', () => { reclampVehicleX(); applyRotateOverlayState(); });
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', applyRotateOverlayState);
+    }
+    if (screen.orientation && typeof screen.orientation.addEventListener === 'function') {
+      screen.orientation.addEventListener('change', applyRotateOverlayState);
+    }
+  }
+
+  // ===== Initial setup =====
+  window.addEventListener('DOMContentLoaded', () => {
+    vehicleOverlay.style.display = 'flex';
+    body.classList.add('hide-rotate'); // hide rotate overlay while selecting
+    car.style.display = 'none';
+    bike.style.display = 'none';
+    quizBanners.forEach(b => b && (b.style.display = 'none'));
+
+    wireOrientationListeners();
+    applyRotateOverlayState();
+    renderScoreboard();
+
+    seedObstacleInitialPositions();
+    rafId = requestAnimationFrame(tick);
+  });
+
+  // ===== Visibility pause/resume =====
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = null;
+    } else {
+      lastTs = null;
+      rafId = requestAnimationFrame(tick);
+    }
+    const bg = document.getElementById('bgAudio');
+if (document.hidden) {
+  try { if (bg && !bg.paused) { bg.dataset.wasPlaying = '1'; bg.pause(); } } catch(e) {}
+} else {
+  try { if (bg && bg.dataset.wasPlaying === '1') { bg.play().catch(() => {}); bg.dataset.wasPlaying = ''; } } catch(e) {}
+}
+  });
+
+  // Expose startQuiz for template buttons
+  window.startQuiz = (n) => { openQuiz(n); };
+})();
+</script>
 </body>
 </html>
