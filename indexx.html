@@ -16,7 +16,7 @@
       --sign-text: #d32f2f;
 
       /* Layout */
-      --scene-height: 100vh;
+      --scene-height: 100dvh;
 
       /* Motion/animation */
       --cloud-speed: 45s;
@@ -83,10 +83,12 @@
       line-height: 1.5;
       overflow: hidden;
     }
-    .wrap { width: 100vw; height: var(--scene-height); position: relative; }
-
+    .wrap { width: 100dvw; height: var(--scene-height); position: relative; }
+    html, body {
+  touch-action: manipulation;
+}
     .scene {
-      width: 100vw; /* MOBILE: edge-to-edge stays as-is */
+      width: 100dvw; /* MOBILE: edge-to-edge stays as-is */
       height: var(--scene-height);
       background: linear-gradient(to bottom, #87ceeb 0%, #98d8e8 100%);
       overflow: hidden;
@@ -338,7 +340,7 @@ image.cloud {
         height: var(--scene-height);
       }
       :root {
-        --scene-height: 100vh;    /* slightly less tall to avoid crowding */
+        --scene-height: 100dvh;    /* slightly less tall to avoid crowding */
         --score-fs: 1.2rem;
         --score-pad-y: 8px;
         --score-pad-x: 16px;
@@ -489,6 +491,22 @@ body.landscape-block .wrap { filter: blur(3px) brightness(.7); }
     }
     #selectCarBtn .label { color: #1976d2; }
     #selectBikeBtn .label { color: #43a047; }
+
+    /* Final score star strip */
+.stars-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  max-width: 720px;
+  margin: 12px auto 0;
+}
+.star-icon {
+  font-size: 28px;
+  color: #ffb300; /* gold */
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0,0,0,.15);
+}
   </style>
 </head>
 <body>
@@ -516,7 +534,7 @@ body.landscape-block .wrap { filter: blur(3px) brightness(.7); }
   </div>
 
   <div class="wrap" id="gameRoot">
-    <div id="scoreBoard">Score: <span id="score">0</span></div>
+    <div id="scoreBoard">⭐ Stars: <span id="starsCount">0</span></div>
 
     <!-- SVG Scene -->
     <svg id="scene" class="scene" viewBox="0 0 1000 2100" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Third person racing view" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -720,7 +738,16 @@ body.landscape-block .wrap { filter: blur(3px) brightness(.7); }
       </div>
     </div>
   </div>
+    <!-- Game audio (update sources to your files) -->
+<audio id="bgAudio" preload="auto" loop>
+  <source src="audio/bg.mp3" type="audio/mpeg">
+  <source src="audio/bg.ogg" type="audio/ogg">
+</audio>
 
+<audio id="hitAudio" preload="auto">
+  <source src="audio/hit.mp3" type="audio/mpeg">
+  <source src="audio/hit.ogg" type="audio/ogg">
+</audio>
 <script>
 (() => {
   const rotateOverlay = document.getElementById('rotateOverlay');
@@ -770,6 +797,33 @@ body.landscape-block .wrap { filter: blur(3px) brightness(.7); }
     document.getElementById('banner5')
   ].filter(Boolean);
   const MAX_QUIZZES = 4;
+  // === One question per quiz, plus two review images per quiz ===
+const QUIZ_QUESTIONS = [
+  {
+    q: 'What is the safest way to cross the road?',
+    a: ['Run quickly', 'Use a crosswalk', 'Ignore traffic'],
+    correct: 1,
+    imgs: ['img/quiz1-1.jpg', 'img/quiz1-2.jpg']   // <-- replace with your real paths
+  },
+  {
+    q: 'What should you wear for safety?',
+    a: ['Helmet', 'Sandals', 'Nothing'],
+    correct: 0,
+    imgs: ['img/quiz2-1.jpg', 'img/quiz2-2.jpg']   // <-- replace
+  },
+  {
+    q: 'What do you do in an emergency?',
+    a: ['Panic', 'Follow procedures', 'Hide'],
+    correct: 1,
+    imgs: ['img/quiz3-1.jpg', 'img/quiz3-2.jpg']   // <-- replace
+  },
+  {
+    q: 'Which is a good environmental practice?',
+    a: ['Littering', 'Recycling', 'Burning waste'],
+    correct: 1,
+    imgs: ['img/quiz4-1.jpg', 'img/quiz4-2.jpg']   // <-- replace
+  }
+];
   const quizBanners = quizBannersAll.slice(0, MAX_QUIZZES);
 
   const getCssNumber = (name, fallback) => {
@@ -813,9 +867,18 @@ body.landscape-block .wrap { filter: blur(3px) brightness(.7); }
     return side === 0 ? ROAD_CONFIG.centerX - offset : ROAD_CONFIG.centerX + offset;
   }
 
-  let score = 0;
-  const scoreEl = document.getElementById('score');
-  const updateScore = (delta) => { score = Math.max(0, score + delta); scoreEl.textContent = score; };
+// --- Star scoring system ---
+// --- Star scoring system (single displayed score: earned - collisions) ---
+const STARS_PER_QUIZ = 5;
+const TOTAL_QUIZZES = MAX_QUIZZES; // 4 in this build
+const totalStars = STARS_PER_QUIZ * TOTAL_QUIZZES; // 20
+let starsRemaining = 0; // ✅ start at 0, build up by quizzes, down by collisions
+
+const starsEl = document.getElementById('starsCount');
+function renderScoreboard() {
+  // Clamp at 0 to avoid negatives
+  if (starsEl) starsEl.textContent = Math.max(0, starsRemaining);
+}
 
   let selectedVehicle = null; // 'car' | 'bike'
   let isMoving = false;       // NOTE: used also by orientation pause/resume
@@ -964,48 +1027,89 @@ function getTriggerOffset() {
   // ====== QUIZ UI ======
   function openQuiz(quizNumber) { showQuizQuestions(quizNumber); }
 
-  function showQuizQuestions(quizNumber) {
-    const questions = [
-      { q:'What is the safest way to cross the road?', a:['Run quickly','Use a crosswalk','Ignore traffic'], correct:1 },
-      { q:'What should you wear for safety?', a:['Helmet','Sandals','Nothing'], correct:0 },
-      { q:'What do you do in an emergency?', a:['Panic','Follow procedures','Hide'], correct:1 },
-    ];
+function showQuizQuestions(quizNumber) {
+  const data = QUIZ_QUESTIONS[quizNumber - 1];
+  if (!data) return;
 
-    const modal = document.createElement('div');
-    modal.className = 'popup-overlay'; // ensure game input is blocked while quiz is open
-    modal.style.cssText = `
-      position:fixed; inset:0; background:rgba(0,0,0,.7);
-      display:flex; align-items:center; justify-content:center; z-index:2001;
-    `;
-    modal.innerHTML = `
-      <div style="background:#fff;padding:30px;border-radius:12px;max-width:500px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.25);">
-        <h2 style="color:#1976d2;text-align:center;margin-bottom:20px;">Quiz ${quizNumber}</h2>
-        <form id="quizForm">
-          ${questions.map((q,i)=>`
-            <div style="margin-bottom:18px;">
-              <div style="font-weight:bold;margin-bottom:8px;">${i+1}. ${q.q}</div>
-              ${q.a.map((ans,j)=>`
-                <label style="display:block;margin-bottom:4px;">
-                  <input type="radio" name="q${i}" value="${j}" required> ${ans}
-                </label>
-              `).join('')}
-            </div>`).join('')}
-          <button type="submit" style="background:#1976d2;color:white;padding:12px 24px;border:none;border-radius:8px;font-size:1rem;font-weight:bold;cursor:pointer;">Submit Answers</button>
-        </form>
-      </div>
-    `;
-    document.body.appendChild(modal);
+  // Create ONE modal overlay and reuse it for Q&A and image review
+  const modal = document.createElement('div');
+  modal.className = 'popup-overlay';
+  modal.style.cssText = `
+    position:fixed; inset:0; background:rgba(0,0,0,.7);
+    display:flex; align-items:center; justify-content:center; z-index:2001;
+  `;
+  modal.innerHTML = `
+    <div id="quizDialog" role="dialog" aria-modal="true"
+         style="background:#fff; padding:24px; border-radius:12px; width:min(560px, 92vw); max-height:85vh; box-shadow:0 10px 32px rgba(0,0,0,.25); display:flex; flex-direction:column;">
+      <h2 id="quizTitle" style="color:#1976d2; text-align:center; margin-bottom:14px;">Quiz ${quizNumber}</h2>
+      <div id="quizBody" style="overflow:auto;"></div>
+      <div id="quizFooter" style="display:flex; gap:10px; justify-content:center; margin-top:16px;"></div>
+    </div>
+  `;
+  document.body.appendChild(modal);
 
-    modal.querySelector('#quizForm').addEventListener('submit', (e) => {
+  const bodyEl = modal.querySelector('#quizBody');
+  const footerEl = modal.querySelector('#quizFooter');
+
+  // Track correctness across steps for this quiz
+  let answeredCorrectly = false;
+
+  // ---- 1) Render Q&A view in this popup ----
+  function renderQuestion() {
+    bodyEl.innerHTML = `
+      <form id="quizForm">
+        <div style="font-weight:600; margin-bottom:10px;">${data.q}</div>
+        ${data.a.map((ans, j) => `
+          <label style="display:block; margin:6px 0;">
+            <input type="radio" name="q0" value="${j}" required> ${ans}
+          </label>
+        `).join('')}
+        <div id="quizMsg" style="margin-top:12px; display:none;"></div>
+      </form>
+    `;
+    footerEl.innerHTML = `
+      <button id="submitBtn"
+        style="background:#1976d2;color:white;padding:10px 18px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">
+        Submit Answer
+      </button>
+      <button id="nextBtn" style="display:none;background:#4caf50;color:white;padding:10px 18px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">
+        Next
+      </button>
+    `;
+
+    const form = bodyEl.querySelector('#quizForm');
+    const msg  = bodyEl.querySelector('#quizMsg');
+    const submitBtn = footerEl.querySelector('#submitBtn');
+    const nextBtn   = footerEl.querySelector('#nextBtn');
+
+    submitBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      let correct = 0;
-      questions.forEach((q,i)=>{
-        const v = modal.querySelector(`input[name='q${i}']:checked`);
-        if (v && parseInt(v.value,10)===q.correct) correct++;
-      });
-      updateScore(30);
-      modal.remove();
+      const picked = form.querySelector(`input[name='q0']:checked`);
+      const val = picked ? parseInt(picked.value, 10) : -1;
 
+      // Lock radios after first attempt
+      form.querySelectorAll('input[type="radio"]').forEach(r => r.disabled = true);
+      nextBtn.style.display = 'inline-block';
+      msg.style.display = 'block';
+
+      if (val === data.correct) {
+        answeredCorrectly = true;
+        msg.style.color = '#2e7d32';
+        msg.textContent = '✅ Correct! Tap Next to continue.';
+      } else {
+        answeredCorrectly = false;
+        const correctText = data.a[data.correct];
+        msg.style.color = '#d32f2f';
+        // Show correct answer (No "Try again")
+        msg.textContent = `❌ Incorrect. Correct answer: ${correctText}`;
+      }
+
+      // Hide submit after evaluation
+      submitBtn.style.display = 'none';
+    });
+
+    nextBtn.addEventListener('click', () => {
+      // Hide the active banner so it doesn't linger
       if (activeBannerIndex >= 0) {
         const bEl = quizBanners[activeBannerIndex];
         const st = bannerStates[activeBannerIndex];
@@ -1015,8 +1119,100 @@ function getTriggerOffset() {
       activeBannerIndex = -1;
       hasPassedBanner = false;
 
+      // ---- 2) Swap this SAME POPUP to the images step ----
+      renderImagesStep();
+    });
+  }
+
+  // ---- Images view in the SAME dialog (Close enabled only after both images seen) ----
+  function renderImagesStep() {
+    const [img1, img2] = data.imgs || [];
+    const src1 = img1 || 'img/placeholder1.jpg';
+    const src2 = img2 || 'img/placeholder2.jpg';
+
+    // Change title (optional)
+    modal.querySelector('#quizTitle').textContent = `Review (Quiz ${quizNumber})`;
+
+    // Body: scrollable container with two stacked, 100% width images
+    bodyEl.innerHTML = `
+      <div style="font-size:.95rem;color:#666;margin-bottom:8px;">
+        Please scroll and view both images to continue.
+      </div>
+      <div id="imgScroll" style="max-height:60vh; overflow-y:auto; border:1px solid #eaeaea; border-radius:8px; padding:8px;">
+        <img id="imgTop" src="${src1}" alt="Review image 1" style="width:100%;height:auto;display:block;margin:0 0 12px 0;" />
+        <img id="imgBottom" src="${src2}" alt="Review image 2" style="width:100%;height:auto;display:block;" />
+      </div>
+    `;
+
+    // Footer: Close (disabled until both images are seen)
+    footerEl.innerHTML = `
+      <button id="closeReviewBtn" disabled
+        style="opacity:.5;cursor:not-allowed;background:#1976d2;color:white;border:none;border-radius:8px;padding:10px 20px;font-weight:bold;">
+        Close
+      </button>
+    `;
+
+    const scroller  = bodyEl.querySelector('#imgScroll');
+    const imgTop    = bodyEl.querySelector('#imgTop');
+    const imgBottom = bodyEl.querySelector('#imgBottom');
+    const closeBtn  = footerEl.querySelector('#closeReviewBtn');
+
+    let seenTop = false;
+    let seenBottom = false;
+
+    function updateCloseState() {
+      if (seenTop && seenBottom) {
+        closeBtn.disabled = false;
+        closeBtn.style.opacity = '1';
+        closeBtn.style.cursor = 'pointer';
+      }
+    }
+
+    function pctInView(el) {
+      const r = el.getBoundingClientRect();
+      const sr = scroller.getBoundingClientRect();
+      const overlap = Math.max(0, Math.min(r.bottom, sr.bottom) - Math.max(r.top, sr.top));
+      const threshold = Math.min(r.height, sr.height) * 0.75; // 75% in view
+      return overlap >= threshold;
+    }
+
+    function checkSeen() {
+      if (!seenTop && pctInView(imgTop)) seenTop = true;
+      if (!seenBottom && pctInView(imgBottom)) seenBottom = true;
+      updateCloseState();
+    }
+
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.target === imgTop    && e.intersectionRatio >= 0.75) seenTop = true;
+          if (e.target === imgBottom && e.intersectionRatio >= 0.75) seenBottom = true;
+        });
+        updateCloseState();
+      }, { root: scroller, threshold: [0, 0.25, 0.5, 0.75, 1] });
+      io.observe(imgTop);
+      io.observe(imgBottom);
+    }
+
+    scroller.addEventListener('scroll', checkSeen, { passive: true });
+    imgTop.addEventListener('load', checkSeen);
+    imgBottom.addEventListener('load', checkSeen);
+    setTimeout(checkSeen, 0);
+
+    closeBtn.addEventListener('click', () => {
+      if (closeBtn.disabled) return;
+
+      // ⭐ Award stars only if the question was answered correctly AND both images were viewed
+     if (answeredCorrectly) {
+  starsRemaining += STARS_PER_QUIZ;
+  renderScoreboard();
+}
+
+      // Close the modal and continue the flow
+      modal.remove();
+
       if (quizNumber >= MAX_QUIZZES) {
-        showFinalScore();
+        showFinalScore();   // last quiz done
       } else {
         isMoving = true;
         scheduleBannerArrival(quizNumber, QUIZ_ARRIVAL_DELAY);
@@ -1024,27 +1220,44 @@ function getTriggerOffset() {
     });
   }
 
-  function showFinalScore() {
-    const finalOverlay = document.createElement('div');
-    finalOverlay.style.cssText = `
-      position:fixed; inset:0; background:rgba(0,0,0,0.9);
-      display:flex; align-items:center; justify-content:center; z-index:3000;
-    `;
-    finalOverlay.innerHTML = `
-      <div style="background:white;padding:50px;border-radius:16px;text-align:center;max-width:500px;width:90%;box-shadow:0 12px 40px rgba(0,0,0,0.3);">
-        <div style="font-size:4rem;margin-bottom:20px;">🏆</div>
-        <h2 style="color:#1976d2;font-size:2.2rem;margin-bottom:15px;">Congratulations!</h2>
-        <p style="font-size:1.1rem;color:#666;margin-bottom:30px;">You've completed all EHS Safety quizzes!</p>
-        <div style="background:linear-gradient(135deg,#1976d2,#42a5f5);color:white;padding:30px;border-radius:12px;margin-bottom:30px;">
-          <div style="font-size:1.1rem;margin-bottom:10px;">Final Score</div>
-          <div style="font-size:3rem;font-weight:bold;">${score}</div>
-        </div>
-        <button onclick="location.reload()" style="background:#4caf50;color:white;border:none;padding:15px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;cursor:pointer;">Start Over</button>
-      </div>
-    `;
-    document.body.appendChild(finalOverlay);
-  }
+  // Start view = question
+  renderQuestion();
+}
 
+function showFinalScore() {
+  const finalOverlay = document.createElement('div');
+  finalOverlay.style.cssText = `
+    position:fixed; inset:0; background:rgba(0,0,0,0.9);
+    display:flex; align-items:center; justify-content:center; z-index:3000;
+  `;
+
+  const safeStars = Math.max(0, starsRemaining);
+  const starsHtml = Array.from({length: safeStars})
+    .map(() => '<span class="star-icon">⭐</span>')
+    .join('');
+
+  finalOverlay.innerHTML = `
+    <div style="background:white;padding:50px;border-radius:16px;text-align:center;max-width:700px;width:92%;box-shadow:0 12px 40px rgba(0,0,0,0.3);">
+      <div style="font-size:4rem;margin-bottom:20px;">🏆</div>
+      <h2 style="color:#1976d2;font-size:2.2rem;margin-bottom:15px;">Congratulations!</h2>
+      <p style="font-size:1.1rem;color:#666;margin-bottom:30px;">You've completed all EHS Safety quizzes!</p>
+
+      <div style="background:linear-gradient(135deg,#1976d2,#42a5f5);color:white;padding:24px;border-radius:12px;margin-bottom:20px;">
+        <div style="font-size:1.1rem;margin-bottom:8px;">Final Stars</div>
+        <div style="font-size:2rem;font-weight:bold;">${safeStars} / ${totalStars} Stars</div>
+      </div>
+
+      <div class="stars-strip">${starsHtml}</div>
+
+      <div style="margin-top:28px;">
+        <button onclick="location.reload()" style="background:#4caf50;color:white;border:none;padding:15px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;cursor:pointer;">
+          Start Over
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(finalOverlay);
+}
   function startCountdownAndMove() {
     let count = 3;
     const wrap = document.querySelector('.wrap');
@@ -1072,6 +1285,11 @@ function getTriggerOffset() {
         if (wrap) wrap.style.filter = 'none';
         gameStarted = true;
         isMoving = true;
+        // start background audio (safe after user gesture)
+try {
+  const bg = document.getElementById('bgAudio');
+  if (bg) { bg.volume = 0.6; bg.play().catch(() => {}); }
+} catch(e) {}
 
         scheduleBannerArrival(0, QUIZ_ARRIVAL_DELAY);
       }
@@ -1242,11 +1460,7 @@ function getTriggerOffset() {
         return;
       }
 
-      // hide any obstacle that would overlap an active banner (potholes in particular)
-      if (bannerY !== null && Math.abs(y - bannerY) < 140) {
-        el.style.display = 'none';
-        return;
-      }
+
 
       const t = (y - ROAD_CONFIG.startY) / (ROAD_CONFIG.endY - ROAD_CONFIG.startY);
       let x;
@@ -1298,11 +1512,29 @@ function getTriggerOffset() {
 
           if (isColliding && !data.hit && data.visible) {
             data.hit = true;
-            updateScore(-10);
-            potholeImpact = 28;
-            data.visible = false;
-            el.style.display = 'none';
-            setTimeout(() => { data.hit = false; }, 500);
+
+// decrement 1 star on hit
+if (starsRemaining > 0) {
+  starsRemaining -= 1;
+  renderScoreboard();
+}
+
+// impact animation
+potholeImpact = 28;
+
+// hide this obstacle and reset its state later
+data.visible = false;
+el.style.display = 'none';
+setTimeout(() => { data.hit = false; }, 500);
+
+// play hit sound (non-blocking; safe on most browsers post user-gesture)
+try {
+  const hitAudio = document.getElementById('hitAudio');
+  if (hitAudio) {
+    hitAudio.currentTime = 0;
+    hitAudio.play().catch(() => {});
+  }
+} catch (e) {}
           }
         }
       }
@@ -1514,6 +1746,13 @@ function showVehicle(vehicle) {
     }
     savedMoving = isMoving;
     isMoving = false;
+    try {
+  const bg = document.getElementById('bgAudio');
+  if (bg && !bg.paused) {
+    bg.dataset.wasPlaying = '1';
+    bg.pause();
+  }
+} catch(e) {}
   }
   function resumeGameFromOrientation() {
     if (!rafId) {
@@ -1521,6 +1760,13 @@ function showVehicle(vehicle) {
       rafId = requestAnimationFrame(tick);
     }
     if (savedMoving) isMoving = true;
+    try {
+  const bg = document.getElementById('bgAudio');
+  if (bg && bg.dataset.wasPlaying === '1') {
+    bg.play().catch(() => {});
+    bg.dataset.wasPlaying = '';
+  }
+} catch(e) {}
   }
 
   // ===== Show/Hide Rotate Overlay + event wiring =====
@@ -1566,6 +1812,7 @@ function showVehicle(vehicle) {
 
     wireOrientationListeners();
     applyRotateOverlayState();
+    renderScoreboard();
 
     seedObstacleInitialPositions();
     rafId = requestAnimationFrame(tick);
@@ -1580,6 +1827,12 @@ function showVehicle(vehicle) {
       lastTs = null;
       rafId = requestAnimationFrame(tick);
     }
+    const bg = document.getElementById('bgAudio');
+if (document.hidden) {
+  try { if (bg && !bg.paused) { bg.dataset.wasPlaying = '1'; bg.pause(); } } catch(e) {}
+} else {
+  try { if (bg && bg.dataset.wasPlaying === '1') { bg.play().catch(() => {}); bg.dataset.wasPlaying = ''; } } catch(e) {}
+}
   });
 
   // Expose startQuiz for template buttons
