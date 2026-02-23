@@ -1494,8 +1494,17 @@ try {
 
       // hide if the obstacle would overlap the banner vertically
       if (bannerY !== null) {
-        const hideDist = (hSvg / 2) + 80; // half height plus margin
-        if (Math.abs(y - bannerY) < hideDist) {
+  const bannerTop = bannerY - 120;
+  const bannerBottom = bannerY + 120;
+
+  const obstacleTop = y - hSvg / 2;
+  const obstacleBottom = y + hSvg / 2;
+
+  const overlapsBanner =
+    obstacleBottom > bannerTop &&
+    obstacleTop < bannerBottom;
+
+  if (overlapsBanner) {
           data.visible = false;          // prevent future frames
           el.style.display = 'none';
           return;
@@ -1559,6 +1568,15 @@ try {
         data.visible = false;
         data.restarting = true;
         const scheduleRespawn = () => {
+          if (countActiveObstacles() >= 1) {
+  setTimeout(scheduleRespawn, 500);
+  return;
+}
+          const now = performance.now();
+  if (now - lastObstacleSpawnTime < MIN_OBSTACLE_GAP) {
+    setTimeout(scheduleRespawn, 400);
+    return;
+  }
           // if a quiz banner is currently visible, wait and try again
           if (bannerVisible) {
             setTimeout(scheduleRespawn, 500);
