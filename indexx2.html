@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Road Runner - Mobile OK + iPad Portrait Reduced View</title>
+  <title>EHS Safety</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <link rel="preload" as="image" href="SVG/rotate.gif" />
   <style>
@@ -147,7 +147,7 @@ image.cloud {
 
 
     #scoreBoard {
-      position: fixed;
+      position: absolute;
       top: 20px;
       right: 20px;
       font-size: var(--score-fs);
@@ -179,7 +179,8 @@ image.cloud {
 
     .sign-pole { fill: #8d6e63; }
     .sign-plate { fill: var(--sign-bg); stroke: var(--sign-border); stroke-width: 3; rx: 8; ry: 8; }
-    .sign-text { font: 700 20px/1.1 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; fill: var(--sign-text); pointer-events: none; }
+    .sign-text { font: 700 20px/1.1 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; fill: var(--sign-text); pointer-events: none; dominant-baseline: middle;  text-anchor: middle;
+}
     .quiz-banner .sign-text[font-size="60"] { font-size: var(--banner-font-lg) !important; }
     .quiz-banner .sign-text[font-size="36"] { font-size: var(--banner-font-sm) !important; }
     .quiz-banner { transform-origin: center; }
@@ -385,24 +386,30 @@ image.cloud {
 
     /* ========= DESKTOP (>=1025px) ========= */
     @media (min-width: 1025px) {
+      .wrap {
+    width: min(1025px, 90vw);   
+    margin: 0 auto;             
+  }
+      .scene { width: 100%; }
+    
       :root {
         --score-fs: 1.6rem;
         --popup-max-w: 800px;
         --cloud-speed: 45s;
         --banner-scale: 1;
-        --vehicle-scale: 2.2;
+        --vehicle-scale: 1.2;
         --banner-min-y: 800;
         --banner-max-y: 2000;
         --scene-cursor: crosshair;
 
-        --buildings-ty: 0px;
-        --ground-ty: 0px;
+        --buildings-ty: 140px;
+        --ground-ty: 100px;
         --greenery-display: none;
 
         /* Desktop banner plate */
-        --banner-plate-w: 360;
-        --banner-plate-h: 180;
-        --banner-pole-h: 200;
+        --banner-plate-w: 160;
+        --banner-plate-h: 120;
+        --banner-pole-h: 100;
 
         /* Global Y offset remains 0 on desktop */
         --device-y-offset: 0px;
@@ -412,17 +419,17 @@ image.cloud {
         --centerline-ty: 0px;
         --road-left-ty: 0px;
         --road-right-ty: 0px;
-        --vehicle-ty: 0px;
-    --cloud1-y: 80px;
-    --cloud2-y: 150px;
-    --cloud3-y: 250px;
-      }
-      .wrap {
-        width: min(980px, 94vw);
-        margin: 0 auto;
-      }
-      .scene { width: 100%; }
-    }
+        --vehicle-ty: -450px;
+    --cloud1-y: 480px;
+    --cloud2-y: 450px;
+    --cloud3-y: 420px;
+        --obstacle-base-w-car: 180;
+    --obstacle-base-h-car: 320;
+    --obstacle-base-w-hole: 60;
+    --obstacle-base-h-hole: 60;
+      }}
+      
+
    /* ======== ROTATE OVERLAY (controlled by body.landscape-block) ======== */
 .rotate-overlay {
   position: fixed; inset: 0;
@@ -586,28 +593,34 @@ body.landscape-block .wrap { filter: blur(3px) brightness(.7); }
 
         <!-- Banners (outside road, positioned on sides) -->
         <g class="quiz-banner" id="banner1" transform="translate(360, 700)">
-          <rect class="sign-pole" x="-10" y="0" width="20" height="200" rx="10" ry="10"></rect>
-          <rect class="sign-plate" x="-180" y="-160" width="360" height="180"></rect>
-          <text class="sign-text title" x="0" y="-80" text-anchor="middle" font-size="60">QUIZ 1</text>
-          <text class="sign-text subtitle" x="0" y="-24" text-anchor="middle" font-size="36" opacity="0.8">Safety</text>
+          <rect class="sign-pole" x="-10" y="0" width="20" height="var(--banner-pole-h)" rx="10" ry="10"></rect>
+          <rect class="sign-plate" x="calc(var(--banner-plate-w) / -2)" y="calc(var(--banner-plate-h) * -1)" width="var(--banner-plate-w)" height="var(--banner-plate-h)"></rect>
+          <text class="sign-text title" x="0" y="calc(var(--banner-plate-h) * -0.65)" text-anchor="middle" font-size="60">QUIZ 1</text>
         </g>
         <g class="quiz-banner" id="banner2" transform="translate(640, 100)">
-          <rect class="sign-pole" x="-10" y="0" width="20" height="200" rx="10" ry="10"></rect>
-          <rect class="sign-plate" x="-180" y="-160" width="360" height="180"></rect>
-          <text class="sign-text title" x="0" y="-80" text-anchor="middle" font-size="60">QUIZ 2</text>
-          <text class="sign-text subtitle" x="0" y="-24" text-anchor="middle" font-size="36" opacity="0.8">Health</text>
+          <rect class="sign-pole" x="-10" y="0" width="20" height="var(--banner-pole-h)" rx="10" ry="10"></rect>
+          <rect class="sign-plate" x="calc(var(--banner-plate-w) / -2)"
+      y="calc(var(--banner-plate-h) * -1)"
+      width="var(--banner-plate-w)"
+      height="var(--banner-plate-h)"></rect>
+          <text class="sign-text title" x="0" y="calc(var(--banner-plate-h) * -0.65)" text-anchor="middle" font-size="60">QUIZ 2</text>
         </g>
         <g class="quiz-banner" id="banner3" transform="translate(360, -500)">
-          <rect class="sign-pole" x="-10" y="0" width="20" height="200" rx="10" ry="10"></rect>
-          <rect class="sign-plate" x="-180" y="-160" width="360" height="180"></rect>
-          <text class="sign-text title" x="0" y="-80" text-anchor="middle" font-size="60">QUIZ 3</text>
-          <text class="sign-text subtitle" x="0" y="-24" text-anchor="middle" font-size="36" opacity="0.8">Environment</text>
+          <rect class="sign-pole" x="-10" y="0" width="20" height="var(--banner-pole-h)" rx="10" ry="10"></rect>
+          <rect class="sign-plate" x="calc(var(--banner-plate-w) / -2)"
+      y="calc(var(--banner-plate-h) * -1)"
+      width="var(--banner-plate-w)"
+      height="var(--banner-plate-h)"></rect>
+          <text class="sign-text title" x="0" y="calc(var(--banner-plate-h) * -0.65)" text-anchor="middle" font-size="60">QUIZ 3</text>
+
         </g>
         <g class="quiz-banner" id="banner4" transform="translate(640, -1100)">
-          <rect class="sign-pole" x="-10" y="0" width="20" height="200" rx="10" ry="10"></rect>
-          <rect class="sign-plate" x="-180" y="-160" width="360" height="180"></rect>
-          <text class="sign-text title" x="0" y="-80" text-anchor="middle" font-size="60">QUIZ 4</text>
-          <text class="sign-text subtitle" x="0" y="-24" text-anchor="middle" font-size="36" opacity="0.8">Emergency</text>
+          <rect class="sign-pole" x="-10" y="0" width="20" height="var(--banner-pole-h)" rx="10" ry="10"></rect>
+          <rect class="sign-plate" x="calc(var(--banner-plate-w) / -2)"
+      y="calc(var(--banner-plate-h) * -1)"
+      width="var(--banner-plate-w)"
+      height="var(--banner-plate-h)"></rect>
+          <text class="sign-text title" x="0" y="calc(var(--banner-plate-h) * -0.65)" text-anchor="middle" font-size="60">QUIZ 4</text>
         </g>
         <!-- (banner5 exists in DOM but logic uses only first 4) -->
 
@@ -642,101 +655,6 @@ body.landscape-block .wrap { filter: blur(3px) brightness(.7); }
     </div>
   </div>
 
-  <!-- Quiz Content Templates -->
-  <div id="quiz1Content" class="quiz-content" style="display:none;">
-    <div class="quiz-header">
-      <h2>Safety Quiz</h2>
-      <div class="quiz-icon">🛡️</div>
-    </div>
-    <div class="quiz-body">
-      <p>Welcome to the Safety Quiz! This section covers workplace safety protocols and procedures.</p>
-      <div class="topics-grid">
-        <div class="topic-card"><h4>🦺 Personal Protective Equipment</h4><p>Learn about proper PPE usage and maintenance</p></div>
-        <div class="topic-card"><h4>🚨 Emergency Procedures</h4><p>Evacuation routes and emergency protocols</p></div>
-        <div class="topic-card"><h4>⚠️ Hazard Identification</h4><p>Recognize and report workplace hazards</p></div>
-        <div class="topic-card"><h4>📋 Safety Reporting</h4><p>Incident reporting and safety systems</p></div>
-      </div>
-      <div class="quiz-footer">
-        <button class="start-quiz-btn" onclick="startQuiz(1)">Start Safety Quiz</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="quiz2Content" class="quiz-content" style="display:none;">
-    <div class="quiz-header">
-      <h2>Health Quiz</h2>
-      <div class="quiz-icon">💚</div>
-    </div>
-    <div class="quiz-body">
-      <p>Test your knowledge about workplace health and wellness!</p>
-      <div class="topics-grid">
-        <div class="topic-card"><h4>🪑 Ergonomics</h4><p>Proper posture and workspace setup</p></div>
-        <div class="topic-card"><h4>🧘 Stress Management</h4><p>Mental health and stress reduction</p></div>
-        <div class="topic-card"><h4>🏥 Health Risks</h4><p>Occupational health hazards</p></div>
-        <div class="topic-card"><h4>🧠 Mental Wellness</h4><p>Mental health awareness programs</p></div>
-      </div>
-      <div class="quiz-footer">
-        <button class="start-quiz-btn" onclick="startQuiz(2)">Start Health Quiz</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="quiz3Content" class="quiz-content" style="display:none;">
-    <div class="quiz-header">
-      <h2>Environment Quiz</h2>
-      <div class="quiz-icon">🌍</div>
-    </div>
-    <div class="quiz-body">
-      <p>Environmental responsibility is everyone's duty!</p>
-      <div class="topics-grid">
-        <div class="topic-card"><h4>♻️ Waste Reduction</h4><p>Recycling and waste management</p></div>
-        <div class="topic-card"><h4>⚡ Energy Conservation</h4><p>Sustainable energy practices</p></div>
-        <div class="topic-card"><h4>📋 Compliance</h4><p>Environmental regulations</p></div>
-        <div class="topic-card"><h4>🌱 Sustainability</h4><p>Green workplace initiatives</p></div>
-      </div>
-      <div class="quiz-footer">
-        <button class="start-quiz-btn" onclick="startQuiz(3)">Start Environment Quiz</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="quiz4Content" class="quiz-content" style="display:none;">
-    <div class="quiz-header">
-      <h2>Emergency Quiz</h2>
-      <div class="quiz-icon">🚨</div>
-    </div>
-    <div class="quiz-body">
-      <p>Emergency preparedness can save lives!</p>
-      <div class="topics-grid">
-        <div class="topic-card"><h4>🔥 Fire Safety</h4><p>Fire prevention and response</p></div>
-        <div class="topic-card"><h4>🩹 First Aid</h4><p>Basic first aid procedures</p></div>
-        <div class="topic-card"><h4>📞 Emergency Contacts</h4><p>Contact protocols and procedures</p></div>
-        <div class="topic-card"><h4>🚪 Evacuation</h4><p>Emergency evacuation routes</p></div>
-      </div>
-      <div class="quiz-footer">
-        <button class="start-quiz-btn" onclick="startQuiz(4)">Start Emergency Quiz</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="quiz5Content" class="quiz-content" style="display:none;">
-    <div class="quiz-header">
-      <h2>Final Assessment</h2>
-      <div class="quiz-icon">🏆</div>
-    </div>
-    <div class="quiz-body">
-      <p>Congratulations! You've reached the final assessment.</p>
-      <div class="assessment-info">
-        <div class="info-card"><h4>📚 Comprehensive Review</h4><p>All previous topics combined</p></div>
-        <div class="info-card"><h4>🎯 Real Scenarios</h4><p>Practical workplace situations</p></div>
-        <div class="info-card"><h4>✅ Best Practices</h4><p>Industry standard procedures</p></div>
-        <div class="info-card"><h4>🎓 Certification</h4><p>Earn your EHS certificate</p></div>
-      </div>
-      <div class="quiz-footer">
-        <button class="start-quiz-btn final" onclick="startQuiz(5)">Start Final Assessment</button>
-      </div>
-    </div>
-  </div>
     <!-- Game audio (update sources to your files) -->
 <audio id="bgAudio" preload="auto" loop>
   <source src="audio/bg.mp3" type="audio/mpeg">
@@ -793,7 +711,6 @@ body.landscape-block .wrap { filter: blur(3px) brightness(.7); }
     document.getElementById('banner2'),
     document.getElementById('banner3'),
     document.getElementById('banner4'),
-    document.getElementById('banner5')
   ].filter(Boolean);
   const MAX_QUIZZES = 4;
   // === One question per quiz, plus two review images per quiz ===
@@ -913,6 +830,7 @@ const TARGET_ACTIVE_OBS  = 2;
   let hasPassedBanner = false;
 
   function scheduleBannerArrival(quizIndex, delaySeconds = QUIZ_ARRIVAL_DELAY) {
+          hasPassedBanner = false;
     if (!quizBanners[quizIndex]) return;
 
     const extraDelay = 2 + Math.random() * 2; // 2–4 sec
@@ -1014,7 +932,7 @@ function getTriggerOffset() {
 
   if (w <= 600) offset = 440;
   else if (w <= 900) offset = 640;
-  else if (w <= 1200) offset = 250;
+  else if (w <= 1200) offset = 750;
   else offset = 350;
 
   console.log("Trigger Offset:", offset, "| Width:", w);
@@ -1063,75 +981,186 @@ function showQuizQuestions(quizNumber) {
   // Track correctness across steps for this quiz
   let answeredCorrectly = false;
 
-  // ---- 1) Render Q&A view in this popup ----
-  function renderQuestion() {
-    bodyEl.innerHTML = `
-      <form id="quizForm">
-        <div style="font-weight:600; margin-bottom:10px;">${data.q}</div>
-        ${data.a.map((ans, j) => `
-          <label style="display:block; margin:6px 0;">
-            <input type="radio" name="q0" value="${j}" required> ${ans}
-          </label>
-        `).join('')}
-        <div id="quizMsg" style="margin-top:12px; display:none;"></div>
-      </form>
-    `;
-    footerEl.innerHTML = `
-      <button id="submitBtn"
-        style="background:#1976d2;color:white;padding:10px 18px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">
-        Submit Answer
-      </button>
-      <button id="nextBtn" style="display:none;background:#4caf50;color:white;padding:10px 18px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">
-        Next
-      </button>
-    `;
+function renderQuestion() {
 
-    const form = bodyEl.querySelector('#quizForm');
-    const msg  = bodyEl.querySelector('#quizMsg');
-    const submitBtn = footerEl.querySelector('#submitBtn');
-    const nextBtn   = footerEl.querySelector('#nextBtn');
+  // Calculate progress %
+  const progressPercent = (quizNumber / MAX_QUIZZES) * 100;
 
-    submitBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const picked = form.querySelector(`input[name='q0']:checked`);
-      const val = picked ? parseInt(picked.value, 10) : -1;
+  bodyEl.innerHTML = `
+    
+    <!-- Progress Bar -->
+    <div style="height:8px;background:#eee;border-radius:10px;margin-bottom:18px;overflow:hidden;">
+      <div style="
+        height:100%;
+        width:${progressPercent}%;
+        background:linear-gradient(90deg,#1976d2,#42a5f5);
+        transition:width .4s ease;
+      "></div>
+    </div>
 
-      // Lock radios after first attempt
-      form.querySelectorAll('input[type="radio"]').forEach(r => r.disabled = true);
-      nextBtn.style.display = 'inline-block';
-      msg.style.display = 'block';
+    <div style="font-size:20px;font-weight:bold;text-align:center;margin-bottom:15px;color:#1976d2;">
+      Quiz Time
+    </div>
 
-      if (val === data.correct) {
-        answeredCorrectly = true;
-        msg.style.color = '#2e7d32';
-        msg.textContent = '✅ Correct! Tap Next to continue.';
-      } else {
-        answeredCorrectly = false;
-        const correctText = data.a[data.correct];
-        msg.style.color = '#d32f2f';
-        // Show correct answer (No "Try again")
-        msg.textContent = `❌ Incorrect. Correct answer: ${correctText}`;
-      }
+    <div style="font-weight:600;margin-bottom:15px;">
+      ${data.q}
+    </div>
 
-      // Hide submit after evaluation
-      submitBtn.style.display = 'none';
+    <div id="answersWrap">
+      ${data.a.map((ans, j) => `
+        <div class="quiz-option" data-index="${j}" 
+          style="
+            padding:14px;
+            margin-bottom:12px;
+            border:2px solid #ccc;
+            border-radius:10px;
+            cursor:pointer;
+            transition:all .25s ease;
+            transform:scale(1);
+          ">
+          ${ans}
+        </div>
+      `).join('')}
+    </div>
+
+    <div id="quizMsg" style="margin-top:15px;display:none;font-weight:bold;"></div>
+  `;
+
+  footerEl.innerHTML = `
+    <button id="submitBtn"
+      disabled
+      style="
+        background:#90caf9;
+        color:white;
+        padding:10px 18px;
+        border:none;
+        border-radius:8px;
+        font-weight:bold;
+        cursor:not-allowed;
+        transition:.3s;
+      ">
+      Submit
+    </button>
+
+    <button id="nextBtn"
+      style="display:none;background:#4caf50;color:white;padding:10px 18px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">
+      Next
+    </button>
+  `;
+
+  const options = bodyEl.querySelectorAll('.quiz-option');
+  const msg = bodyEl.querySelector('#quizMsg');
+  const submitBtn = footerEl.querySelector('#submitBtn');
+  const nextBtn = footerEl.querySelector('#nextBtn');
+
+  let selectedIndex = null;
+
+  // 🎯 OPTION CLICK
+  options.forEach(opt => {
+    opt.addEventListener('click', () => {
+      if (submitBtn.style.display === 'none') return;
+
+      options.forEach(o => {
+        o.style.background = '';
+        o.style.borderColor = '#ccc';
+        o.style.transform = 'scale(1)';
+      });
+
+      selectedIndex = parseInt(opt.dataset.index);
+
+      opt.style.background = '#e3f2fd';
+      opt.style.borderColor = '#1976d2';
+      opt.style.transform = 'scale(1.03)';
+
+      // Enable submit
+      submitBtn.disabled = false;
+      submitBtn.style.background = '#1976d2';
+      submitBtn.style.cursor = 'pointer';
     });
+  });
 
-    nextBtn.addEventListener('click', () => {
-      // Hide the active banner so it doesn't linger
-      if (activeBannerIndex >= 0) {
-        const bEl = quizBanners[activeBannerIndex];
-        const st = bannerStates[activeBannerIndex];
-        st.active = false;
-        if (bEl) bEl.style.display = 'none';
-      }
-      activeBannerIndex = -1;
-      hasPassedBanner = false;
+  // 🚀 SUBMIT
+  submitBtn.addEventListener('click', () => {
+    if (selectedIndex === null) return;
 
-      // ---- 2) Swap this SAME POPUP to the images step ----
-      renderImagesStep();
-    });
+    submitBtn.style.display = 'none';
+    nextBtn.style.display = 'inline-block';
+    msg.style.display = 'block';
+
+    options.forEach(o => o.style.cursor = 'default');
+
+    if (selectedIndex === data.correct) {
+      answeredCorrectly = true;
+
+      options[selectedIndex].style.background = '#c8e6c9';
+      options[selectedIndex].style.borderColor = '#2e7d32';
+      options[selectedIndex].style.transform = 'scale(1.05)';
+
+      msg.style.color = '#2e7d32';
+      msg.textContent = "That's Correct!";
+    } else {
+      answeredCorrectly = false;
+
+      options[selectedIndex].style.background = '#ffcdd2';
+      options[selectedIndex].style.borderColor = '#d32f2f';
+
+      options[data.correct].style.background = '#c8e6c9';
+      options[data.correct].style.borderColor = '#2e7d32';
+      options[data.correct].style.transform = 'scale(1.05)';
+
+      msg.style.color = '#d32f2f';
+      msg.innerHTML = `
+        That's Incorrect! <br>
+        Correct Answer: <b>${data.a[data.correct]}</b>
+      `;
+    }
+  });
+
+  nextBtn.addEventListener('click', () => {
+    renderInformationScreen();
+  });
+}
+
+function renderInformationScreen() {
+  modal.querySelector('#quizTitle').textContent = "Information";
+
+  bodyEl.innerHTML = `
+    <div style="font-size:16px;color:#555;line-height:1.6;">
+      Please remember to always follow safety rules while driving.
+      Make responsible decisions and stay alert at all times.
+    </div>
+  `;
+
+  footerEl.innerHTML = `
+    <button id="continueBtn"
+      style="background:#1976d2;color:white;padding:12px 22px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">
+      Click to Continue
+    </button>
+  `;
+footerEl.querySelector('#continueBtn').addEventListener('click', () => {
+
+  if (answeredCorrectly) {
+    starsRemaining += STARS_PER_QUIZ;
+    renderScoreboard();
   }
+
+  hasPassedBanner = false;
+  activeBannerIndex = -1;
+  modal.remove();
+
+  if (quizNumber >= MAX_QUIZZES) {
+    showFinalScore();
+    return;
+  }
+
+  isMoving = true;
+
+  // schedule NEXT quiz banner correctly
+  const nextQuizIndex = quizNumber; // because quizNumber is 1-based
+  scheduleBannerArrival(nextQuizIndex, QUIZ_ARRIVAL_DELAY);
+
+});
+}
 
   // ---- Images view in the SAME dialog (Close enabled only after both images seen) ----
   function renderImagesStep() {
@@ -1218,6 +1247,7 @@ function showQuizQuestions(quizNumber) {
 }
 
       // Close the modal and continue the flow
+      activeBannerIndex = -1;
       modal.remove();
 
       if (quizNumber >= MAX_QUIZZES) {
@@ -1225,6 +1255,7 @@ function showQuizQuestions(quizNumber) {
       } else {
         isMoving = true;
         scheduleBannerArrival(quizNumber, QUIZ_ARRIVAL_DELAY);
+hasPassedBanner = false;
       }
     });
   }
@@ -1442,15 +1473,6 @@ function pickSpawnLane(y, type) {
   const lane1Taken = laneOccupiedNear(1, y);
   if (lane0Taken && !lane1Taken) return 1;
   if (lane1Taken && !lane0Taken) return 0;
-
-  // Avoid clustering same type if possible
-  // if (similarTypeNear(type, y)) {
-  //   const l0 = activeObstaclesList().filter(o => o.type === type && o.lane === 0 && Math.abs((o.initialY + roadOffset) - y) < MAX_SIMILAR_GAP_Y).length;
-  //   const l1 = activeObstaclesList().filter(o => o.type === type && o.lane === 1 && Math.abs((o.initialY + roadOffset) - y) < MAX_SIMILAR_GAP_Y).length;
-  //   if (l0 < l1) return 0;
-  //   if (l1 < l0) return 1;
-  // }
-
   return Math.random() < 0.5 ? 0 : 1;
 }
 
@@ -1458,19 +1480,12 @@ function tryRespawnObstacle(data) {
   // Delay if banner guard zone is active
   const bY = getActiveBannerY();
 
-
-  // Maintain target concurrency
-  // Allow 2–3 obstacles naturally
 if (activeObstaclesList().length >= 3) return;
 
   // Avoid duplicate same-src showing at once
   const src = data.el.getAttribute('href') || '';
   if (src) {
     const duplicateSrcLive = activeObstaclesList().some(o => (o.el.getAttribute('href') || '') === src);
-    // if (duplicateSrcLive) {
-    //   setTimeout(() => tryRespawnObstacle(data), 500);
-    //   return;
-    // }
   }
 
   const newY = pickSpawnY();
@@ -1526,9 +1541,6 @@ function scheduleRespawn(data, delay = 800) {
 
     return Math.abs(sp2.y - sp1.y);
   }
-
-  // track next index only when using sequential spawns (legacy)
-  // remove spawnScheduled entirely, we will respawn each obstacle individually
   window.carOnRoad = window.carOnRoad || false;
 
 // === PATCH 3: seed obstacles (replace entire function) ===
@@ -1576,9 +1588,6 @@ function seedObstacleInitialPositions() {
         el.style.display = 'none';
         return;
       }
-
-
-
       const t = (y - ROAD_CONFIG.startY) / (ROAD_CONFIG.endY - ROAD_CONFIG.startY);
       let x;
       if (data.lane === 0) {
@@ -1619,32 +1628,33 @@ function seedObstacleInitialPositions() {
             playerRect.bottom - padding > obstacleRect.top &&
             playerRect.top + padding < obstacleRect.bottom;
 
-          if (isColliding && !data.hit && data.visible) {
-            data.hit = true;
+if (isColliding && !data.hit && data.visible) {
+  data.hit = true;
 
-// decrement 1 star on hit
-if (starsRemaining > 0) {
-  starsRemaining -= 1;
-  renderScoreboard();
-}
-
-// impact animation
-potholeImpact = 28;
-
-// hide this obstacle and reset its state later
-data.visible = false;
-el.style.display = 'none';
-setTimeout(() => { data.hit = false; }, 500);
-
-// play hit sound (non-blocking; safe on most browsers post user-gesture)
-try {
-  const hitAudio = document.getElementById('hitAudio');
-  if (hitAudio) {
-    hitAudio.currentTime = 0;
-    hitAudio.play().catch(() => {});
+  // Reduce star
+  if (starsRemaining > 0) {
+    starsRemaining -= 1;
+    renderScoreboard();
   }
-} catch (e) {}
-          }
+
+  potholeImpact = 28;
+
+  // Hide obstacle
+  data.visible = false;
+  el.style.display = 'none';
+
+  // Respawn after delay
+  scheduleRespawn(data, 1200); // 1.2 sec delay
+
+  // Play sound
+  try {
+    const hitAudio = document.getElementById('hitAudio');
+    if (hitAudio) {
+      hitAudio.currentTime = 0;
+      hitAudio.play().catch(() => {});
+    }
+  } catch (e) {}
+}
         }
       }
 
@@ -1657,16 +1667,11 @@ if (y > maxY + 300 && !data.restarting) {
 
     if (potholeImpact > 0) potholeImpact *= 0.88;
 
-    // **always have something on the road**
-    // if no obstacle is currently marked visible, respawn one
-
 const activesNow = obstacles.filter(d => d.visible && !d.restarting);
 if (activesNow.length < TARGET_ACTIVE_OBS && !bannerVisible) {
   const spare = obstacles.find(d => !d.visible && !d.restarting);
   if (spare) scheduleRespawn(spare, 400);
-}
-
-  }
+} }
 
   function updateVehicleAndRoad() {
     const centerLine = document.getElementById('centerLine');
@@ -1773,7 +1778,6 @@ function showVehicle(vehicle) {
       bike.style.display = '';
     }
   }
-
 
   // ===== Vehicle selection =====
   document.getElementById('selectCarBtn').addEventListener('click', () => {
