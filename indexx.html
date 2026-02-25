@@ -331,7 +331,7 @@ image.cloud {
     @media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
       /* Reduce visible width and center the game area */
       .wrap {
-        width: min(760px, 98vw);
+        width: min(768px, 100vw);
         margin: 0 auto;
       }
       /* Make scene follow the wrap width (instead of 100vw) */
@@ -390,7 +390,7 @@ image.cloud {
         --popup-max-w: 800px;
         --cloud-speed: 45s;
         --banner-scale: 1;
-        --vehicle-scale: 2.2;
+        --vehicle-scale: 1.5;
         --banner-min-y: 800;
         --banner-max-y: 2000;
         --scene-cursor: crosshair;
@@ -400,22 +400,26 @@ image.cloud {
         --greenery-display: none;
 
         /* Desktop banner plate */
-        --banner-plate-w: 360;
-        --banner-plate-h: 180;
-        --banner-pole-h: 200;
+        --banner-plate-w: 260;
+        --banner-plate-h: 130;
+        --banner-pole-h: 100;
 
         /* Global Y offset remains 0 on desktop */
         --device-y-offset: 0px;
 
-        /* Keep new per-layer at 0 unless you want desktop shifts too */
+    --obstacle-base-w-car: 180;
+    --obstacle-base-h-car: 220;
+    --obstacle-base-w-hole: 100;
+    --obstacle-base-h-hole: 100;
+
         --road-ty: 0px;
         --centerline-ty: 0px;
         --road-left-ty: 0px;
         --road-right-ty: 0px;
-        --vehicle-ty: 0px;
-    --cloud1-y: 80px;
-    --cloud2-y: 150px;
-    --cloud3-y: 250px;
+        --vehicle-ty: -370px;
+    --cloud1-y: 455px;
+    --cloud2-y: 400px;
+    --cloud3-y: 370px;
       }
       .wrap {
         width: min(930px, 90vw);
@@ -624,12 +628,11 @@ body.landscape-block .wrap { filter: blur(3px) brightness(.7); }
 
         <!-- Obstacles -->
         <g id="obstacles">
-          <image class="obstacle" data-type="car"     data-lane="1" href="SVG/car1.svg"     x="0" y="0" width="80" height="120" xlink:href="SVG/car1.svg"/>
-          <image class="obstacle" data-type="pothole" data-lane="0" href="SVG/potholes.svg" x="0" y="0" width="60" height="60"  xlink:href="SVG/potholes.svg"/>
-          <image class="obstacle" data-type="car"     data-lane="1" href="SVG/car2.svg"     x="0" y="0" width="80" height="120" xlink:href="SVG/car2.svg"/>
-          <image class="obstacle" data-type="car"     data-lane="0" href="SVG/car3.svg"     x="0" y="0" width="80" height="120" xlink:href="SVG/car3.svg"/>
-          <image class="obstacle" data-type="car"     data-lane="0" href="SVG/car1.svg"     x="0" y="0" width="80" height="120" xlink:href="SVG/car1.svg"/>
-        </g>
+  <image class="obstacle" data-type="car"     data-lane="1" href="SVG/car1.svg"     x="0" y="0" width="80" height="120" xlink:href="SVG/car1.svg"/>
+  <image class="obstacle" data-type="pothole" data-lane="0" href="SVG/potholes.svg" x="0" y="0" width="60" height="60"  xlink:href="SVG/potholes.svg"/>
+  <image class="obstacle" data-type="car"     data-lane="1" href="SVG/car2.svg"     x="0" y="0" width="80" height="120" xlink:href="SVG/car2.svg"/>
+  <image class="obstacle" data-type="car"     data-lane="0" href="SVG/car3.svg"     x="0" y="0" width="80" height="120" xlink:href="SVG/car3.svg"/>
+</g>
 
       </g><!-- /#deviceShift -->
     </svg>
@@ -754,7 +757,7 @@ body.landscape-block .wrap { filter: blur(3px) brightness(.7); }
   const vehicleOverlay = document.getElementById('vehicleSelectOverlay');
   const body = document.body;
 let lastObstacleSpawnTime = 0;
-const MIN_OBSTACLE_GAP = 3200; // 2.2 seconds minimum gap 
+const MIN_OBSTACLE_GAP = 1200; 
 
   // --- Touch-like detection (real touch or emulated in DevTools) ---
   const isTouchLike = () =>
@@ -814,27 +817,27 @@ const MIN_OBSTACLE_GAP = 3200; // 2.2 seconds minimum gap
   // === One question per quiz, plus two review images per quiz ===
 const QUIZ_QUESTIONS = [
   {
-    q: 'What is the safest way to cross the road?',
-    a: ['Run quickly', 'Use a crosswalk', 'Ignore traffic'],
-    correct: 1,
+    q: 'What should you AVOID doing while driving to minimize distraction?',
+    a: ['A. Adjusting mirrors before driving', 'B. Using hands free calling only when necessary', 'C. Checking notifications on your phone', 'D. Maintaining a safe following distance'],
+    correct: 2,
     imgs: ['img/quiz1-1.jpg', 'img/quiz1-2.jpg']   // <-- replace with your real paths
   },
   {
-    q: 'What should you wear for safety?',
-    a: ['Helmet', 'Sandals', 'Nothing'],
-    correct: 0,
+    q: 'What is the safest way to lift heavy objects?',
+    a: ['A. Bend at your waist and pull quickly', 'B. Keep your back straight and lift using your legs', 'C. Twist while lifting to save time', 'D. Lift alone even if the load is heavy'],
+    correct: 1,
     imgs: ['img/quiz2-1.jpg', 'img/quiz2-2.jpg']   // <-- replace
   },
   {
-    q: 'What do you do in an emergency?',
-    a: ['Panic', 'Follow procedures', 'Hide'],
+    q: 'What is essential inside cath labs?',
+    a: ['A. Wearing headphones', 'B. Lead aprons, thyroid shields, lead caps, and proper radiation PPE', 'C. Casual clothing', 'D. Working without breaks'],
     correct: 1,
     imgs: ['img/quiz3-1.jpg', 'img/quiz3-2.jpg']   // <-- replace
   },
   {
-    q: 'Which is a good environmental practice?',
-    a: ['Littering', 'Recycling', 'Burning waste'],
-    correct: 1,
+    q: 'What is the best first step when you notice an unsafe condition?',
+    a: ['A. Ignore it', 'B. Fix it silently', 'C. Report it immediately to a supervisor or safety team', 'D. Wait for someone else'],
+    correct: 2,
     imgs: ['img/quiz4-1.jpg', 'img/quiz4-2.jpg']   // <-- replace
   }
 ];
@@ -897,6 +900,7 @@ function renderScoreboard() {
   let selectedVehicle = null; // 'car' | 'bike'
   let isMoving = false;       // NOTE: used also by orientation pause/resume
   let gameStarted = false;
+  let gameWasRunningBeforeRotate = false;
   let lastTs = null;
   let rafId = null;
   let distance = 0;
@@ -910,12 +914,14 @@ function renderScoreboard() {
 
   const GAME_SPEED = 180;
 
-  const QUIZ_ARRIVAL_DELAY = 8;
+  const QUIZ_ARRIVAL_DELAY = 12;
   const bannerSides = [0, 1, 0, 1];
 
   const bannerStates = quizBanners.map(() => ({ active: false, initialY: 0 }));
   let activeBannerIndex = -1;
   let hasPassedBanner = false;
+
+
 
   function scheduleBannerArrival(quizIndex, delaySeconds = QUIZ_ARRIVAL_DELAY) {
     if (!quizBanners[quizIndex]) return;
@@ -1068,75 +1074,167 @@ function showQuizQuestions(quizNumber) {
   // Track correctness across steps for this quiz
   let answeredCorrectly = false;
 
-  // ---- 1) Render Q&A view in this popup ----
-  function renderQuestion() {
-    bodyEl.innerHTML = `
-      <form id="quizForm">
-        <div style="font-weight:600; margin-bottom:10px;">${data.q}</div>
-        ${data.a.map((ans, j) => `
-          <label style="display:block; margin:6px 0;">
-            <input type="radio" name="q0" value="${j}" required> ${ans}
-          </label>
-        `).join('')}
-        <div id="quizMsg" style="margin-top:12px; display:none;"></div>
-      </form>
-    `;
-    footerEl.innerHTML = `
-      <button id="submitBtn"
-        style="background:#1976d2;color:white;padding:10px 18px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">
-        Submit Answer
-      </button>
-      <button id="nextBtn" style="display:none;background:#4caf50;color:white;padding:10px 18px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">
-        Next
-      </button>
-    `;
+function renderQuestion() {
+  bodyEl.innerHTML = `
+    <div style="font-weight:600;margin-bottom:15px;">
+      ${data.q}
+    </div>
 
-    const form = bodyEl.querySelector('#quizForm');
-    const msg  = bodyEl.querySelector('#quizMsg');
-    const submitBtn = footerEl.querySelector('#submitBtn');
-    const nextBtn   = footerEl.querySelector('#nextBtn');
+    <div id="answersWrap">
+      ${data.a.map((ans, j) => `
+        <div class="quiz-option" data-index="${j}" 
+          style="
+            padding:14px;
+            margin-bottom:12px;
+            border:2px solid #ccc;
+            border-radius:10px;
+            cursor:pointer;
+            transition:all .25s ease;
+            transform:scale(1);
+          ">
+          ${ans}
+        </div>
+      `).join('')}
+    </div>
 
-    submitBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const picked = form.querySelector(`input[name='q0']:checked`);
-      const val = picked ? parseInt(picked.value, 10) : -1;
+    <div id="quizMsg" style="margin-top:15px;display:none;font-weight:bold;"></div>
+  `;
 
-      // Lock radios after first attempt
-      form.querySelectorAll('input[type="radio"]').forEach(r => r.disabled = true);
-      nextBtn.style.display = 'inline-block';
-      msg.style.display = 'block';
+  footerEl.innerHTML = `
+    <button id="submitBtn"
+      disabled
+      style="
+        background:#90caf9;
+        color:white;
+        padding:10px 18px;
+        border:none;
+        border-radius:8px;
+        font-weight:bold;
+        cursor:not-allowed;
+        transition:.3s;
+      ">
+      Submit
+    </button>
 
-      if (val === data.correct) {
-        answeredCorrectly = true;
-        msg.style.color = '#2e7d32';
-        msg.textContent = '✅ Correct! Tap Next to continue.';
-      } else {
-        answeredCorrectly = false;
-        const correctText = data.a[data.correct];
-        msg.style.color = '#d32f2f';
-        // Show correct answer (No "Try again")
-        msg.textContent = `❌ Incorrect. Correct answer: ${correctText}`;
-      }
+    <button id="nextBtn"
+      style="display:none;background:#4caf50;color:white;padding:10px 18px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">
+      Next
+    </button>
+  `;
 
-      // Hide submit after evaluation
-      submitBtn.style.display = 'none';
+  const options = bodyEl.querySelectorAll('.quiz-option');
+  const msg = bodyEl.querySelector('#quizMsg');
+  const submitBtn = footerEl.querySelector('#submitBtn');
+  const nextBtn = footerEl.querySelector('#nextBtn');
+
+  let selectedIndex = null;
+
+  options.forEach(opt => {
+    opt.addEventListener('click', () => {
+      if (submitBtn.style.display === 'none') return;
+
+      options.forEach(o => {
+        o.style.background = '';
+        o.style.borderColor = '#ccc';
+        o.style.transform = 'scale(1)';
+      });
+
+      selectedIndex = parseInt(opt.dataset.index);
+
+      opt.style.background = '#e3f2fd';
+      opt.style.borderColor = '#1976d2';
+      opt.style.transform = 'scale(1.03)';
+
+      submitBtn.disabled = false;
+      submitBtn.style.background = '#1976d2';
+      submitBtn.style.cursor = 'pointer';
     });
+  });
 
-    nextBtn.addEventListener('click', () => {
-      // Hide the active banner so it doesn't linger
-      if (activeBannerIndex >= 0) {
-        const bEl = quizBanners[activeBannerIndex];
-        const st = bannerStates[activeBannerIndex];
-        st.active = false;
-        if (bEl) bEl.style.display = 'none';
-      }
-      activeBannerIndex = -1;
-      hasPassedBanner = false;
+  submitBtn.addEventListener('click', () => {
+    if (selectedIndex === null) return;
 
-      // ---- 2) Swap this SAME POPUP to the images step ----
-      renderImagesStep();
-    });
+    submitBtn.style.display = 'none';
+    nextBtn.style.display = 'inline-block';
+    msg.style.display = 'block';
+
+    options.forEach(o => o.style.cursor = 'default');
+
+    if (selectedIndex === data.correct) {
+      answeredCorrectly = true;
+
+      options[selectedIndex].style.background = '#c8e6c9';
+      options[selectedIndex].style.borderColor = '#2e7d32';
+      options[selectedIndex].style.transform = 'scale(1.05)';
+
+      msg.style.color = '#2e7d32';
+      msg.textContent = "That's Correct!";
+    } else {
+      answeredCorrectly = false;
+
+      options[selectedIndex].style.background = '#ffcdd2';
+      options[selectedIndex].style.borderColor = '#d32f2f';
+
+      options[data.correct].style.background = '#c8e6c9';
+      options[data.correct].style.borderColor = '#2e7d32';
+      options[data.correct].style.transform = 'scale(1.05)';
+
+      msg.style.color = '#d32f2f';
+      msg.innerHTML = `
+        That's Incorrect! <br>
+        Correct Answer: <b>${data.a[data.correct]}</b>
+      `;
+    }
+  });
+
+  nextBtn.addEventListener('click', () => {
+    renderInformationScreen();
+  });
+}
+
+function renderInformationScreen() {
+  modal.querySelector('#quizTitle').textContent = "Information";
+
+  bodyEl.innerHTML = `
+    <div style="font-size:16px;color:#555;line-height:1.6;">
+      Please remember to always follow safety rules while driving.
+      Make responsible decisions and stay alert at all times.
+    </div>
+  `;
+
+  footerEl.innerHTML = `
+    <button id="continueBtn"
+      style="background:#1976d2;color:white;padding:12px 22px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">
+      Click to Continue
+    </button>
+  `;
+footerEl.querySelector('#continueBtn').addEventListener('click', () => {
+
+  if (answeredCorrectly) {
+    starsRemaining += STARS_PER_QUIZ;
+    renderScoreboard();
   }
+// 1) Reset banner state completely
+bannerStates.forEach(s => s.active = false);
+hasPassedBanner = false;
+activeBannerIndex = -1;
+
+// 2) Close the modal
+modal.remove();
+
+// 3) If last quiz -> show final and stop
+if (quizNumber >= MAX_QUIZZES) {
+  showFinalScore();
+  return;
+}
+
+// 4) Resume movement and schedule the NEXT banner
+isMoving = true;
+const nextQuizIndex = quizNumber; // because quizNumber is 1-based
+scheduleBannerArrival(nextQuizIndex, QUIZ_ARRIVAL_DELAY);
+
+});
+}
 
   // ---- Images view in the SAME dialog (Close enabled only after both images seen) ----
   function renderImagesStep() {
@@ -1223,13 +1321,17 @@ function showQuizQuestions(quizNumber) {
 }
 
       // Close the modal and continue the flow
+      activeBannerIndex = -1;
       modal.remove();
 
       if (quizNumber >= MAX_QUIZZES) {
         showFinalScore();   // last quiz done
       } else {
-        isMoving = true;
-        scheduleBannerArrival(quizNumber, QUIZ_ARRIVAL_DELAY);
+        bannerStates.forEach(s => s.active = false);
+        hasPassedBanner = false;
+        activeBannerIndex = -1;
+isMoving = true;
+scheduleBannerArrival(quizNumber, QUIZ_ARRIVAL_DELAY);
       }
     });
   }
@@ -1237,6 +1339,7 @@ function showQuizQuestions(quizNumber) {
   // Start view = question
   renderQuestion();
 }
+
 
 function showFinalScore() {
   const finalOverlay = document.createElement('div');
@@ -1382,25 +1485,31 @@ try {
   }
 
   const obstacleEls = Array.from(document.querySelectorAll('#obstacles .obstacle'));
-  const obstacles = obstacleEls.map((el, i) => {
-    const lane = parseInt(el.getAttribute('data-lane') || '0', 10);
-    const type = (el.getAttribute('data-type') || 'car').toLowerCase();
-    return {
-      el, type,
-      lane: lane > 0 ? 1 : 0,
-      initialY: 0, fixedX: 0,
-      hit: false, restarting: false, visible: false
-    };
-  });
+const obstacles = obstacleEls.map((el, i) => {
+  const lane = parseInt(el.getAttribute('data-lane') || '0', 10);
+  const type = (el.getAttribute('data-type') || 'car').toLowerCase();
+  return {
+    el, type,
+    lane: lane > 0 ? 1 : 0,
+    initialY: 0, fixedX: 0,
+    hit: false, restarting: false, visible: false,
+    nextSpawnAt: 0 
+  };
+});
 
   // helper: never show two obstacles that use the same SVG source at once
-  function canActivateObstacle(obs) {
-    const src = obs.el.getAttribute('href') || '';
-    return !obstacles.some(o =>
-      o !== obs && o.visible &&
-      (o.el.getAttribute('href') || '') === src
-    );
-  }
+function getHref(el) {
+  // support both <image href> and <use xlink:href>
+  return el.getAttribute('href') || el.getAttribute('xlink:href') || '';
+}
+
+function canActivateObstacle(obs) {
+  return true; 
+}
+
+  function countActiveObstacles() {
+  return obstacles.reduce((n, o) => n + (o.visible && !o.restarting ? 1 : 0), 0);
+}
 
   function getRenderedWidthInSvgUnits(el) {
     const rect = el.getBoundingClientRect();
@@ -1439,17 +1548,20 @@ try {
   // remove spawnScheduled entirely, we will respawn each obstacle individually
   window.carOnRoad = window.carOnRoad || false;
 
-  function seedObstacleInitialPositions() {
-    const minY = getCssNumber('--banner-min-y', 800);
+function seedObstacleInitialPositions() {
+  // Start with none visible; let the forced-spawn pick the first randomly
+  obstacles.forEach((obs) => {
+    obs.visible = false;
+    obs.restarting = false;
+    obs.hit = false;
+    obs.nextSpawnAt = performance.now();
+  });
 
-    obstacles.forEach((obs, i) => {
-      // stagger initial positions so multiple obstacles cruise by
-      obs.initialY = minY - (roadOffset + GAME_SPEED * (2 + i * 3));
-      obs.visible = true;
-      obs.fixedX = getLaneX(0, obs.lane);
-    });
-    window.carOnRoad = true;
-  }
+  // Make sure the first spawn can happen immediately if conditions are met
+  lastObstacleSpawnTime = performance.now() - MIN_OBSTACLE_GAP;  // allow immediate spawn
+  window.lastForcedSpawn = 0; // ensure the 1s throttle does not delay first spawn
+  window.carOnRoad = true;
+}
 
   function updateObstaclesAndCollisions() {
     if (!gameStarted) return;
@@ -1494,8 +1606,9 @@ try {
 
       // hide if the obstacle would overlap the banner vertically
       if (bannerY !== null) {
-  const bannerTop = bannerY - 120;
-  const bannerBottom = bannerY + 120;
+const plateH = getCssNumber('--banner-plate-h', 180);
+const bannerTop = bannerY - (plateH * 0.9);
+const bannerBottom = bannerY + (plateH * 0.9);
 
   const obstacleTop = y - hSvg / 2;
   const obstacleBottom = y + hSvg / 2;
@@ -1504,11 +1617,21 @@ try {
     obstacleBottom > bannerTop &&
     obstacleTop < bannerBottom;
 
-  if (overlapsBanner) {
-          data.visible = false;          // prevent future frames
-          el.style.display = 'none';
-          return;
-        }
+if (overlapsBanner) {
+  // kill this instance immediately so it NEVER overlaps the banner
+  data.visible = false;
+  el.style.display = 'none';
+
+  // schedule this same obstacle to respawn after 2–3 seconds
+  const now = performance.now();
+  const delayMs = 2000 + Math.random() * 1000; // 2–3s
+  data.nextSpawnAt = now + delayMs;
+
+  // ensure it’s not considered “hit” anymore
+  data.hit = false;
+
+  return;
+}
       }
 
       const scale = proximityScale(Math.abs(vehY - y));
@@ -1551,6 +1674,11 @@ data.visible = false;
 el.style.display = 'none';
 setTimeout(() => { data.hit = false; }, 500);
 
+// 2–3s personal cooldown
+const now = performance.now();
+const delayMs = 2000 + Math.random() * 1000;
+data.nextSpawnAt = now + delayMs;
+
 // play hit sound (non-blocking; safe on most browsers post user-gesture)
 try {
   const hitAudio = document.getElementById('hitAudio');
@@ -1562,83 +1690,56 @@ try {
           }
         }
       }
-
-      // respawn this obstacle independently once past bottom
-      if (y > maxY + 300 && !data.restarting) {
-        data.visible = false;
-        data.restarting = true;
-        const scheduleRespawn = () => {
-          if (countActiveObstacles() >= 1) {
-  setTimeout(scheduleRespawn, 500);
-  return;
+// respawn this obstacle independently once past bottom
+if (y > maxY + 300 && !data.restarting) {
+  data.visible = false;
+  data.hit = false;
+  const now = performance.now();
+  const delayMs = 2000 + Math.random() * 1000; 
+  data.nextSpawnAt = now + delayMs;            
 }
-          const now = performance.now();
-  if (now - lastObstacleSpawnTime < MIN_OBSTACLE_GAP) {
-    setTimeout(scheduleRespawn, 400);
-    return;
-  }
-          // if a quiz banner is currently visible, wait and try again
-          if (bannerVisible) {
-            setTimeout(scheduleRespawn, 500);
-            return;
-          }
-
-          // don't activate if another obstacle uses the same image right now
-          if (!canActivateObstacle(data)) {
-            setTimeout(scheduleRespawn, 500);
-            return;
-          }
-
-          // send it back ahead of the player with some randomness
-          let newY = minY - (roadOffset + GAME_SPEED * (1 + Math.random() * 3));
-          // if new position would sit on current banner, nudge it farther ahead by half the obstacle height
-          if (bannerY !== null) {
-            const estimatedHeight = (getLaneWidthAt(newY) * 0.6) * 1.5; // approximate
-            if (Math.abs(newY - bannerY) < (estimatedHeight / 2 + 100)) {
-              newY -= (estimatedHeight + 200);
-            }
-          }
-          data.initialY = newY;
-          data.fixedX = getLaneX(0, data.lane);
-          data.restarting = false;
-          data.hit = false;
-          data.visible = true;
-        };
-        setTimeout(scheduleRespawn, 1000 + Math.random() * 1500);
-      }
     });
 
-    if (potholeImpact > 0) potholeImpact *= 0.88;
+if (potholeImpact > 0) potholeImpact *= 0.88;
 
-    // **always have something on the road**
-    // if no obstacle is currently marked visible, respawn one
-    const anyActiveInRange = obstacles.some(d => d.visible && !d.restarting);
-    // throttle forced spawns so they can only fire once per second
-    window.lastForcedSpawn = window.lastForcedSpawn || 0;
-    const now = performance.now();
-    if (!anyActiveInRange && !bannerVisible && now - window.lastForcedSpawn > 1000) {
-      window.lastForcedSpawn = now;
-      // try to pick a car first so the user sees cars rather than just potholes
-      let spare = obstacles.find(d =>
-        d.type === 'car' && !d.visible && !d.restarting && canActivateObstacle(d)
-      );
-      if (!spare) spare = obstacles.find(d =>
-        !d.visible && !d.restarting && canActivateObstacle(d)
-      );
-      if (spare) {
-        spare.restarting = true;
-        // place it right at (or just below) the top of the visible zone so it
-        // shows immediately instead of waiting multiple frames to scroll in
-        let newY = minY + (GAME_SPEED * 0.3);
-        if (bannerY !== null && Math.abs(newY - bannerY) < 140) {
-          newY += 300;
-        }
-        spare.initialY = newY;
-        spare.fixedX = getLaneX(0, spare.lane);
-        spare.visible = true;          // mark it active so the flag stops further spawns
-        spare.restarting = false;
+
+// throttle forced spawns so they can only fire once per second
+window.lastForcedSpawn = window.lastForcedSpawn || 0;
+const now = performance.now();
+
+// small cap on how many obstacles can be on screen together
+const activeCount = obstacles.reduce((n, o) => n + (o.visible && !o.restarting ? 1 : 0), 0);
+const MAX_CONCURRENT = 2; // keep it small for clean gameplay
+
+if (!bannerVisible && activeCount < MAX_CONCURRENT && (now - window.lastForcedSpawn > 1000)) {
+  if (now - lastObstacleSpawnTime >= MIN_OBSTACLE_GAP) {
+    window.lastForcedSpawn = now;
+
+    const candidates = obstacles.filter(d =>
+      !d.visible &&
+      !d.restarting &&
+      performance.now() >= (d.nextSpawnAt || 0) &&
+      canActivateObstacle(d)
+    );
+
+    if (candidates.length > 0) {
+      const spare = candidates[Math.floor(Math.random() * candidates.length)];
+      spare.restarting = true;
+
+      let newY = minY + (GAME_SPEED * 0.3);
+      if (bannerY !== null && Math.abs(newY - bannerY) < 140) {
+        newY += 300;
       }
+
+      spare.initialY = newY;
+      spare.fixedX = getLaneX(0, spare.lane);
+      spare.visible = true;
+      spare.restarting = false;
+
+      lastObstacleSpawnTime = performance.now();
     }
+  }
+}
   }
 
   function updateVehicleAndRoad() {
@@ -1656,7 +1757,6 @@ try {
     if (isMoving) {
       engineVibration = Math.sin(distance * 0.3) * 0.2;
       carBounce = Math.sin(distance * 0.2) * 0.4;
-      distance += 0;
     } else {
       engineVibration *= 0.92;
       carBounce *= 0.92;
@@ -1772,21 +1872,22 @@ function showVehicle(vehicle) {
 
   // ===== Pause/Resume helpers for orientation overlay =====
   let savedMoving = false;
-  function pauseGameForOrientation() {
-    if (rafId) {
-      cancelAnimationFrame(rafId);
-      rafId = null;
+function pauseGameForOrientation() {
+  if (rafId) {
+    cancelAnimationFrame(rafId);
+    rafId = null;
+  }
+  gameWasRunningBeforeRotate = gameStarted; // remember whether game had started
+  savedMoving = isMoving;
+  isMoving = false;
+  try {
+    const bg = document.getElementById('bgAudio');
+    if (bg && !bg.paused) {
+      bg.dataset.wasPlaying = '1';
+      bg.pause();
     }
-    savedMoving = isMoving;
-    isMoving = false;
-    try {
-  const bg = document.getElementById('bgAudio');
-  if (bg && !bg.paused) {
-    bg.dataset.wasPlaying = '1';
-    bg.pause();
-  }
-} catch(e) {}
-  }
+  } catch(e) {}
+}
   function resumeGameFromOrientation() {
     if (!rafId) {
       lastTs = null;
@@ -1805,49 +1906,38 @@ function showVehicle(vehicle) {
   // ===== Show/Hide Rotate Overlay + event wiring =====
 function applyRotateOverlayState() {
   const isMobileDevice = window.innerWidth <= 1024;
-
-  const isLandscapeMode =
-    (FORCE_ROTATE || isMobileDevice) &&
-    isLandscape();
-
+  const isLandscapeMode = (FORCE_ROTATE || isMobileDevice) && isLandscape();
   const selectingVehicle = isSelectingVehicle();
 
-  if (isLandscapeMode) {
-
-    // 🚫 Always block everything in landscape (mobile/ipad)
+  if (isLandscapeMode && !selectingVehicle) {
+    // 🚫 Block gameplay in landscape (but allow vehicle selection stage to proceed)
     rotateOverlay.style.display = 'flex';
-    body.classList.remove('hide-rotate'); // ensure rotate overlay is visible
     document.getElementById('gameRoot').style.pointerEvents = 'none';
 
     pauseGameForOrientation();
-    gameStarted = false;
-    isMoving = false;
 
-    // 🚫 Disable vehicle selection in landscape
+    // Disable vehicle selection UI while landscape
     if (vehicleOverlay) {
       vehicleOverlay.style.pointerEvents = 'none';
       vehicleOverlay.style.opacity = '0.5';
     }
-
   } else {
-
-    // ✅ Portrait mode
+    // ✅ Portrait OR we are selecting a vehicle
     rotateOverlay.style.display = 'none';
-    body.classList.remove('landscape-block');
     document.getElementById('gameRoot').style.pointerEvents = '';
 
-    // ✅ Re-enable vehicle selection
     if (vehicleOverlay) {
       vehicleOverlay.style.pointerEvents = '';
       vehicleOverlay.style.opacity = '1';
     }
 
-    // If game was already running before rotation → restart
-    if (gameStarted) {
+    // If the game had been running before rotation, restart cleanly
+    if (gameWasRunningBeforeRotate) {
       restartGameCompletely();
       return;
     }
 
+    // Otherwise just resume the loop safely
     resumeGameFromOrientation();
   }
 }
