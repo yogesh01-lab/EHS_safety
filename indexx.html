@@ -426,6 +426,11 @@ image.cloud {
         margin: 0 auto;
       }
       .scene { width: 100%; }
+      
+.rotate-overlay {
+    display: none !important;
+  }
+
     }
    /* ======== ROTATE OVERLAY (controlled by body.landscape-block) ======== */
 .rotate-overlay {
@@ -592,26 +597,22 @@ body.landscape-block .wrap { filter: blur(3px) brightness(.7); }
         <g class="quiz-banner" id="banner1" transform="translate(360, 700)">
           <rect class="sign-pole" x="-10" y="0" width="20" height="200" rx="10" ry="10"></rect>
           <rect class="sign-plate" x="-180" y="-160" width="360" height="180"></rect>
-          <text class="sign-text title" x="0" y="-80" text-anchor="middle" font-size="60">QUIZ 1</text>
-          <text class="sign-text subtitle" x="0" y="-24" text-anchor="middle" font-size="36" opacity="0.8">Safety</text>
+          <text class="sign-text title" x="0" y="-80" text-anchor="middle" font-size="60">QUIZ TIME</text>
         </g>
         <g class="quiz-banner" id="banner2" transform="translate(640, 100)">
           <rect class="sign-pole" x="-10" y="0" width="20" height="200" rx="10" ry="10"></rect>
           <rect class="sign-plate" x="-180" y="-160" width="360" height="180"></rect>
-          <text class="sign-text title" x="0" y="-80" text-anchor="middle" font-size="60">QUIZ 2</text>
-          <text class="sign-text subtitle" x="0" y="-24" text-anchor="middle" font-size="36" opacity="0.8">Health</text>
+          <text class="sign-text title" x="0" y="-80" text-anchor="middle" font-size="60">QUIZ TIME</text>
         </g>
         <g class="quiz-banner" id="banner3" transform="translate(360, -500)">
           <rect class="sign-pole" x="-10" y="0" width="20" height="200" rx="10" ry="10"></rect>
           <rect class="sign-plate" x="-180" y="-160" width="360" height="180"></rect>
-          <text class="sign-text title" x="0" y="-80" text-anchor="middle" font-size="60">QUIZ 3</text>
-          <text class="sign-text subtitle" x="0" y="-24" text-anchor="middle" font-size="36" opacity="0.8">Environment</text>
+          <text class="sign-text title" x="0" y="-80" text-anchor="middle" font-size="60">QUIZ TIME</text>
         </g>
         <g class="quiz-banner" id="banner4" transform="translate(640, -1100)">
           <rect class="sign-pole" x="-10" y="0" width="20" height="200" rx="10" ry="10"></rect>
           <rect class="sign-plate" x="-180" y="-160" width="360" height="180"></rect>
-          <text class="sign-text title" x="0" y="-80" text-anchor="middle" font-size="60">QUIZ 4</text>
-          <text class="sign-text subtitle" x="0" y="-24" text-anchor="middle" font-size="36" opacity="0.8">Emergency</text>
+          <text class="sign-text title" x="0" y="-80" text-anchor="middle" font-size="60">QUIZ TIME</text>
         </g>
         <!-- (banner5 exists in DOM but logic uses only first 4) -->
 
@@ -637,110 +638,6 @@ body.landscape-block .wrap { filter: blur(3px) brightness(.7); }
       </g><!-- /#deviceShift -->
     </svg>
   </div>
-
-  <!-- Quiz Popups -->
-  <div class="popup-overlay" id="popupOverlay">
-    <div class="popup" id="popup">
-      <button class="popup-close" id="popupClose">&times;</button>
-      <div id="popupContent"></div>
-    </div>
-  </div>
-
-  <!-- Quiz Content Templates -->
-  <div id="quiz1Content" class="quiz-content" style="display:none;">
-    <div class="quiz-header">
-      <h2>Safety Quiz</h2>
-      <div class="quiz-icon">🛡️</div>
-    </div>
-    <div class="quiz-body">
-      <p>Welcome to the Safety Quiz! This section covers workplace safety protocols and procedures.</p>
-      <div class="topics-grid">
-        <div class="topic-card"><h4>🦺 Personal Protective Equipment</h4><p>Learn about proper PPE usage and maintenance</p></div>
-        <div class="topic-card"><h4>🚨 Emergency Procedures</h4><p>Evacuation routes and emergency protocols</p></div>
-        <div class="topic-card"><h4>⚠️ Hazard Identification</h4><p>Recognize and report workplace hazards</p></div>
-        <div class="topic-card"><h4>📋 Safety Reporting</h4><p>Incident reporting and safety systems</p></div>
-      </div>
-      <div class="quiz-footer">
-        <button class="start-quiz-btn" onclick="startQuiz(1)">Start Safety Quiz</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="quiz2Content" class="quiz-content" style="display:none;">
-    <div class="quiz-header">
-      <h2>Health Quiz</h2>
-      <div class="quiz-icon">💚</div>
-    </div>
-    <div class="quiz-body">
-      <p>Test your knowledge about workplace health and wellness!</p>
-      <div class="topics-grid">
-        <div class="topic-card"><h4>🪑 Ergonomics</h4><p>Proper posture and workspace setup</p></div>
-        <div class="topic-card"><h4>🧘 Stress Management</h4><p>Mental health and stress reduction</p></div>
-        <div class="topic-card"><h4>🏥 Health Risks</h4><p>Occupational health hazards</p></div>
-        <div class="topic-card"><h4>🧠 Mental Wellness</h4><p>Mental health awareness programs</p></div>
-      </div>
-      <div class="quiz-footer">
-        <button class="start-quiz-btn" onclick="startQuiz(2)">Start Health Quiz</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="quiz3Content" class="quiz-content" style="display:none;">
-    <div class="quiz-header">
-      <h2>Environment Quiz</h2>
-      <div class="quiz-icon">🌍</div>
-    </div>
-    <div class="quiz-body">
-      <p>Environmental responsibility is everyone's duty!</p>
-      <div class="topics-grid">
-        <div class="topic-card"><h4>♻️ Waste Reduction</h4><p>Recycling and waste management</p></div>
-        <div class="topic-card"><h4>⚡ Energy Conservation</h4><p>Sustainable energy practices</p></div>
-        <div class="topic-card"><h4>📋 Compliance</h4><p>Environmental regulations</p></div>
-        <div class="topic-card"><h4>🌱 Sustainability</h4><p>Green workplace initiatives</p></div>
-      </div>
-      <div class="quiz-footer">
-        <button class="start-quiz-btn" onclick="startQuiz(3)">Start Environment Quiz</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="quiz4Content" class="quiz-content" style="display:none;">
-    <div class="quiz-header">
-      <h2>Emergency Quiz</h2>
-      <div class="quiz-icon">🚨</div>
-    </div>
-    <div class="quiz-body">
-      <p>Emergency preparedness can save lives!</p>
-      <div class="topics-grid">
-        <div class="topic-card"><h4>🔥 Fire Safety</h4><p>Fire prevention and response</p></div>
-        <div class="topic-card"><h4>🩹 First Aid</h4><p>Basic first aid procedures</p></div>
-        <div class="topic-card"><h4>📞 Emergency Contacts</h4><p>Contact protocols and procedures</p></div>
-        <div class="topic-card"><h4>🚪 Evacuation</h4><p>Emergency evacuation routes</p></div>
-      </div>
-      <div class="quiz-footer">
-        <button class="start-quiz-btn" onclick="startQuiz(4)">Start Emergency Quiz</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="quiz5Content" class="quiz-content" style="display:none;">
-    <div class="quiz-header">
-      <h2>Final Assessment</h2>
-      <div class="quiz-icon">🏆</div>
-    </div>
-    <div class="quiz-body">
-      <p>Congratulations! You've reached the final assessment.</p>
-      <div class="assessment-info">
-        <div class="info-card"><h4>📚 Comprehensive Review</h4><p>All previous topics combined</p></div>
-        <div class="info-card"><h4>🎯 Real Scenarios</h4><p>Practical workplace situations</p></div>
-        <div class="info-card"><h4>✅ Best Practices</h4><p>Industry standard procedures</p></div>
-        <div class="info-card"><h4>🎓 Certification</h4><p>Earn your EHS certificate</p></div>
-      </div>
-      <div class="quiz-footer">
-        <button class="start-quiz-btn final" onclick="startQuiz(5)">Start Final Assessment</button>
-      </div>
-    </div>
-  </div>
     <!-- Game audio (update sources to your files) -->
 <audio id="bgAudio" preload="auto" loop>
   <source src="audio/bg.mp3" type="audio/mpeg">
@@ -755,9 +652,13 @@ body.landscape-block .wrap { filter: blur(3px) brightness(.7); }
 (() => {
   const rotateOverlay = document.getElementById('rotateOverlay');
   const vehicleOverlay = document.getElementById('vehicleSelectOverlay');
-  const body = document.body;
-let lastObstacleSpawnTime = 0;
-const MIN_OBSTACLE_GAP = 1200; 
+  const body = document.body; 
+
+// Tighter default gaps
+const MIN_GAP_MS = 1000;
+const MAX_GAP_MS = 2000;
+
+
 
   // --- Touch-like detection (real touch or emulated in DevTools) ---
   const isTouchLike = () =>
@@ -986,7 +887,11 @@ function renderScoreboard() {
   }
 
   function updateActiveBanner() {
-    if (activeBannerIndex < 0) return;
+    if (activeBannerIndex < 0){
+      
+    quizBanners.forEach(b => b && (b.style.display = 'none'));
+      return;
+    } 
 
     const idx = activeBannerIndex;
     const bannerEl = quizBanners[idx];
@@ -1025,7 +930,7 @@ function getTriggerOffset() {
 
   if (w <= 600) offset = 440;
   else if (w <= 900) offset = 640;
-  else if (w <= 1200) offset = 250;
+  else if (w <= 1200) offset = 550;
   else offset = 350;
 
   console.log("Trigger Offset:", offset, "| Width:", w);
@@ -1403,6 +1308,7 @@ function showFinalScore() {
         if (wrap) wrap.style.filter = 'none';
         gameStarted = true;
         isMoving = true;
+        scheduleNextSpawn(500);
         // start background audio (safe after user gesture)
 try {
   const bg = document.getElementById('bgAudio');
@@ -1471,7 +1377,7 @@ try {
   }
 
   // ===== Proximity-based obstacle scale =====
-  const START_SCALE = 0.75;
+  const START_SCALE = 0.65;
   const FAR_DISTANCE  = 700;
   const NEAR_DISTANCE = 120;
 
@@ -1481,7 +1387,7 @@ try {
     const denom = Math.max(1, FAR_DISTANCE - NEAR_DISTANCE);
     const t = Math.max(0, Math.min(1, (FAR_DISTANCE - distanceSvg) / denom));
     const eased = easeOutCubic(t);
-    return START_SCALE + (1 - START_SCALE) * eased;
+    return START_SCALE + (0.70 - START_SCALE) * eased;
   }
 
   const obstacleEls = Array.from(document.querySelectorAll('#obstacles .obstacle'));
@@ -1549,198 +1455,155 @@ function canActivateObstacle(obs) {
   window.carOnRoad = window.carOnRoad || false;
 
 function seedObstacleInitialPositions() {
-  // Start with none visible; let the forced-spawn pick the first randomly
   obstacles.forEach((obs) => {
     obs.visible = false;
     obs.restarting = false;
     obs.hit = false;
-    obs.nextSpawnAt = performance.now();
+    obs.nextSpawnAt = 0; // not used anymore for timing decisions
   });
-
-  // Make sure the first spawn can happen immediately if conditions are met
-  lastObstacleSpawnTime = performance.now() - MIN_OBSTACLE_GAP;  // allow immediate spawn
-  window.lastForcedSpawn = 0; // ensure the 1s throttle does not delay first spawn
-  window.carOnRoad = true;
 }
 
-  function updateObstaclesAndCollisions() {
-    if (!gameStarted) return;
+function updateObstaclesAndCollisions() {
+  if (!gameStarted) return;
 
-    const minY = getCssNumber('--banner-min-y', 800);
-    const maxY = getCssNumber('--banner-max-y', 2000);
-    const vehY = ROAD_CONFIG.endY - 300;
-    const vehX = currentCarX;
-    const collisionBuffer = 80;
+  const minY = getCssNumber('--banner-min-y', 800);
+  const maxY = getCssNumber('--banner-max-y', 2000);
+  const vehY = ROAD_CONFIG.endY - 300;
+  const vehX = currentCarX;
 
-    // compute current banner Y (only one active at a time)
-    const bannerY = (activeBannerIndex >= 0)
-      ? (bannerStates[activeBannerIndex].initialY + roadOffset)
-      : null;
-    const bannerVisible = bannerY !== null && bannerY >= minY && bannerY <= maxY + 200;
+  obstacles.forEach((data) => {
+    const el = data.el;
+    let y = data.initialY + roadOffset;
 
-    obstacles.forEach((data, i) => {
-      const el = data.el;
-      let y = data.initialY + roadOffset;
+    // hide obstacles not active
+    if (!data.visible) {
+      el.style.display = 'none';
+      return;
+    }
 
-      if (!data.visible) {
-        el.style.display = 'none';
-        return;
-      }
+    // lane X position
+    const t = (y - ROAD_CONFIG.startY) / (ROAD_CONFIG.endY - ROAD_CONFIG.startY);
+    let x;
+    if (data.lane === 0) {
+      const leftEdge = 370 - (270 * t);
+      x = (leftEdge + ROAD_CONFIG.centerX) * 0.5 + 15;
+    } else {
+      const rightEdge = 630 + (270 * t);
+      x = (ROAD_CONFIG.centerX + rightEdge) * 0.5 - 15;
+    }
 
+    // fallback size if SVG not yet measurable
+    let wSvg = getRenderedWidthInSvgUnits(el);
+    let hSvg = getRenderedHeightInSvgUnits(el);
+    if (!Number.isFinite(wSvg) || wSvg <= 0) wSvg = getLaneWidthAt(y) * 0.6;
+    if (!Number.isFinite(hSvg) || hSvg <= 0) hSvg = wSvg * 1.5;
 
+    // scale and place obstacle
+    const scale = proximityScale(Math.abs(vehY - y));
+    const left = x - wSvg / 2;
+    const top  = y - hSvg / 2;
 
-      const t = (y - ROAD_CONFIG.startY) / (ROAD_CONFIG.endY - ROAD_CONFIG.startY);
-      let x;
-      if (data.lane === 0) {
-        const leftEdge = 370 - (270 * t);
-        x = (leftEdge + ROAD_CONFIG.centerX) * 0.5 + 15;
-      } else {
-        const rightEdge = 630 + (270 * t);
-        x = (ROAD_CONFIG.centerX + rightEdge) * 0.5 - 15;
-      }
-
-      let wSvg = getRenderedWidthInSvgUnits(el);
-      let hSvg = getRenderedHeightInSvgUnits(el);
-      if (!Number.isFinite(wSvg) || wSvg <= 0) wSvg = getLaneWidthAt(y) * 0.6;
-      if (!Number.isFinite(hSvg) || hSvg <= 0) hSvg = wSvg * 1.5;
-
-      // hide if the obstacle would overlap the banner vertically
-      if (bannerY !== null) {
-const plateH = getCssNumber('--banner-plate-h', 180);
-const bannerTop = bannerY - (plateH * 0.9);
-const bannerBottom = bannerY + (plateH * 0.9);
-
-  const obstacleTop = y - hSvg / 2;
-  const obstacleBottom = y + hSvg / 2;
-
-  const overlapsBanner =
-    obstacleBottom > bannerTop &&
-    obstacleTop < bannerBottom;
-
-if (overlapsBanner) {
-  // kill this instance immediately so it NEVER overlaps the banner
-  data.visible = false;
-  el.style.display = 'none';
-
-  // schedule this same obstacle to respawn after 2–3 seconds
-  const now = performance.now();
-  const delayMs = 2000 + Math.random() * 1000; // 2–3s
-  data.nextSpawnAt = now + delayMs;
-
-  // ensure it’s not considered “hit” anymore
-  data.hit = false;
-
-  return;
-}
-      }
-
-      const scale = proximityScale(Math.abs(vehY - y));
-      const left = x - wSvg / 2;
-      const top  = y - hSvg / 2;
-      el.setAttribute('x', left);
-      el.setAttribute('y', top);
-      el.setAttribute('transform', `translate(${left + wSvg/2},${top + hSvg/2}) scale(${scale}) translate(${-left - wSvg/2},${-top - hSvg/2})`);
-
-      // show obstacle once it reaches the banner-min area, but keep it visible well past the bottom
-      el.style.display = (data.visible && y >= minY) ? '' : 'none';
-
-      // only check collision when obstacle is close to car vertically
-      if (y > vehY - 150) {
-        const activeVehicle = document.getElementById(selectedVehicle || '');
-        if (activeVehicle) {
-          const playerRect = activeVehicle.getBoundingClientRect();
-          const obstacleRect = el.getBoundingClientRect();
-          const padding = 4;
-          const isColliding =
-            playerRect.right - padding > obstacleRect.left &&
-            playerRect.left + padding < obstacleRect.right &&
-            playerRect.bottom - padding > obstacleRect.top &&
-            playerRect.top + padding < obstacleRect.bottom;
-
-          if (isColliding && !data.hit && data.visible) {
-            data.hit = true;
-
-// decrement 1 star on hit
-if (starsRemaining > 0) {
-  starsRemaining -= 1;
-  renderScoreboard();
-}
-
-// impact animation
-potholeImpact = 28;
-
-// hide this obstacle and reset its state later
-data.visible = false;
-el.style.display = 'none';
-setTimeout(() => { data.hit = false; }, 500);
-
-// 2–3s personal cooldown
-const now = performance.now();
-const delayMs = 2000 + Math.random() * 1000;
-data.nextSpawnAt = now + delayMs;
-
-// play hit sound (non-blocking; safe on most browsers post user-gesture)
-try {
-  const hitAudio = document.getElementById('hitAudio');
-  if (hitAudio) {
-    hitAudio.currentTime = 0;
-    hitAudio.play().catch(() => {});
-  }
-} catch (e) {}
-          }
-        }
-      }
-// respawn this obstacle independently once past bottom
-if (y > maxY + 300 && !data.restarting) {
-  data.visible = false;
-  data.hit = false;
-  const now = performance.now();
-  const delayMs = 2000 + Math.random() * 1000; 
-  data.nextSpawnAt = now + delayMs;            
-}
-    });
-
-if (potholeImpact > 0) potholeImpact *= 0.88;
-
-
-// throttle forced spawns so they can only fire once per second
-window.lastForcedSpawn = window.lastForcedSpawn || 0;
-const now = performance.now();
-
-// small cap on how many obstacles can be on screen together
-const activeCount = obstacles.reduce((n, o) => n + (o.visible && !o.restarting ? 1 : 0), 0);
-const MAX_CONCURRENT = 2; // keep it small for clean gameplay
-
-if (!bannerVisible && activeCount < MAX_CONCURRENT && (now - window.lastForcedSpawn > 1000)) {
-  if (now - lastObstacleSpawnTime >= MIN_OBSTACLE_GAP) {
-    window.lastForcedSpawn = now;
-
-    const candidates = obstacles.filter(d =>
-      !d.visible &&
-      !d.restarting &&
-      performance.now() >= (d.nextSpawnAt || 0) &&
-      canActivateObstacle(d)
+    el.setAttribute("x", left);
+    el.setAttribute("y", top);
+    el.setAttribute(
+      "transform",
+      `translate(${left + wSvg/2},${top + hSvg/2}) scale(${scale}) translate(${-left - wSvg/2},${-top - hSvg/2})`
     );
 
-    if (candidates.length > 0) {
-      const spare = candidates[Math.floor(Math.random() * candidates.length)];
-      spare.restarting = true;
+    el.style.display = (y >= minY) ? '' : 'none';
 
-      let newY = minY + (GAME_SPEED * 0.3);
-      if (bannerY !== null && Math.abs(newY - bannerY) < 140) {
-        newY += 300;
-      }
-
-      spare.initialY = newY;
-      spare.fixedX = getLaneX(0, spare.lane);
-      spare.visible = true;
-      spare.restarting = false;
-
-      lastObstacleSpawnTime = performance.now();
+    // Remove obstacle if off screen bottom
+    if (y > maxY + 400) {
+      data.visible = false;
+      el.style.display = 'none';
+      return;
     }
-  }
+
+    // Collision
+    if (y > vehY - 150) {
+      const activeVehicle = document.getElementById(selectedVehicle || '');
+      if (activeVehicle) {
+        const playerRect = activeVehicle.getBoundingClientRect();
+        const obstacleRect = el.getBoundingClientRect();
+        const padding = 4;
+
+        const isColliding =
+          playerRect.right - padding > obstacleRect.left &&
+          playerRect.left + padding < obstacleRect.right &&
+          playerRect.bottom - padding > obstacleRect.top &&
+          playerRect.top + padding < obstacleRect.bottom;
+
+        if (isColliding && !data.hit && data.visible) {
+          data.hit = true;
+
+          // reduce star
+          if (starsRemaining > 0) {
+            starsRemaining -= 1;
+            renderScoreboard();
+          }
+
+          potholeImpact = 28;
+
+          // hide this obstacle
+          data.visible = false;
+          el.style.display = 'none';
+          setTimeout(() => (data.hit = false), 300);
+
+          // play hit audio
+          try {
+            const hitAudio = document.getElementById('hitAudio');
+            if (hitAudio) {
+              hitAudio.currentTime = 0;
+              hitAudio.play().catch(() => {});
+            }
+          } catch (e) {}
+        }
+      }
+    }
+  });
+
+  if (potholeImpact > 0) potholeImpact *= 0.88;
 }
-  }
+// SIMPLE SPAWNER – spawns 1 obstacle every 2–3 seconds
+// SIMPLE SPAWNER – spawns 1 obstacle every 2–3 seconds
+let lastLane = null;
+function pickLane() {
+  const lane = (lastLane === 0) ? 1 : (lastLane === 1 ? 0 : (Math.random() < 0.5 ? 0 : 1));
+  lastLane = lane;
+  return lane;
+}
+
+function simpleSpawn() {
+  if (!gameStarted) return;
+
+  // only spawn if none visible (one-after-another)
+  const free = obstacles.filter(o => !o.visible);
+  if (free.length === 0) return;
+
+  const obs = free[Math.floor(Math.random() * free.length)];
+
+  obs.visible = true;
+  obs.hit = false;
+
+  // spawn just above the screen NOW (relative to current roadOffset)
+  const minY = getCssNumber('--banner-min-y', 800);
+  const spawnAhead = 350 + Math.random() * 200; // 350–550 px above top for variety
+  obs.initialY = (minY - spawnAhead) - roadOffset;
+
+  // choose lane (avoid repeating same lane back-to-back)
+  obs.lane = pickLane();
+}
+
+let spawnTimer = null;
+function scheduleNextSpawn() {
+  if (spawnTimer) clearTimeout(spawnTimer);
+
+  const delay = 3000 + Math.random() * 2000; 
+  spawnTimer = setTimeout(() => {
+    simpleSpawn();
+    scheduleNextSpawn();
+  }, delay);
+}
 
   function updateVehicleAndRoad() {
     const centerLine = document.getElementById('centerLine');
@@ -1852,7 +1715,6 @@ function showVehicle(vehicle) {
   document.getElementById('selectCarBtn').addEventListener('click', () => {
     selectedVehicle = 'car';
     vehicleOverlay.style.display = 'none';
-    body.classList.remove('hide-rotate');
     applyRotateOverlayState(); // re-check now that selection closed
     showVehicle('car');
     reclampVehicleX();
@@ -1862,7 +1724,6 @@ function showVehicle(vehicle) {
   document.getElementById('selectBikeBtn').addEventListener('click', () => {
     selectedVehicle = 'bike';
     vehicleOverlay.style.display = 'none';
-    body.classList.remove('hide-rotate');
     applyRotateOverlayState(); // re-check now that selection closed
     showVehicle('bike');
     reclampVehicleX();
@@ -1905,12 +1766,28 @@ function pauseGameForOrientation() {
 
   // ===== Show/Hide Rotate Overlay + event wiring =====
 function applyRotateOverlayState() {
-  const isMobileDevice = window.innerWidth <= 1024;
-  const isLandscapeMode = (FORCE_ROTATE || isMobileDevice) && isLandscape();
-  const selectingVehicle = isSelectingVehicle();
+  const isDesktop = window.innerWidth >= 1025;
+  if (isDesktop) {
+    // Desktop: never enforce rotate overlay; ensure game UI is interactive
+    rotateOverlay.style.display = 'none';
+    document.getElementById('gameRoot').style.pointerEvents = '';
+    // also make sure vehicle select (if open) is usable
+    if (vehicleOverlay) {
+      vehicleOverlay.style.pointerEvents = '';
+      vehicleOverlay.style.opacity = '1';
+    }
+    // Do not pause or reload on desktop
+    resumeGameFromOrientation();
+    return; // 🚫 Stop here for desktop
+  }
 
-  if (isLandscapeMode && !selectingVehicle) {
-    // 🚫 Block gameplay in landscape (but allow vehicle selection stage to proceed)
+  // Existing mobile/tablet logic
+  const isLandscapeMode = (FORCE_ROTATE || isTouchLike() || window.innerWidth <= 1024) && isLandscape();
+
+  // Do NOT skip rotate overlay just because we’re selecting vehicle
+  // (we want rotate overlay to be able to block even before selection)
+  if (isLandscapeMode) {
+    // Block gameplay and selection while in landscape
     rotateOverlay.style.display = 'flex';
     document.getElementById('gameRoot').style.pointerEvents = 'none';
 
@@ -1922,7 +1799,7 @@ function applyRotateOverlayState() {
       vehicleOverlay.style.opacity = '0.5';
     }
   } else {
-    // ✅ Portrait OR we are selecting a vehicle
+    // Portrait: allow interaction
     rotateOverlay.style.display = 'none';
     document.getElementById('gameRoot').style.pointerEvents = '';
 
@@ -1937,7 +1814,6 @@ function applyRotateOverlayState() {
       return;
     }
 
-    // Otherwise just resume the loop safely
     resumeGameFromOrientation();
   }
 }
@@ -1960,16 +1836,23 @@ function applyRotateOverlayState() {
 
   // ===== Initial setup =====
   window.addEventListener('DOMContentLoaded', () => {
-    vehicleOverlay.style.display = 'flex';
-    body.classList.add('hide-rotate'); // hide rotate overlay while selecting
     car.style.display = 'none';
     bike.style.display = 'none';
     quizBanners.forEach(b => b && (b.style.display = 'none'));
 
     wireOrientationListeners();
     applyRotateOverlayState();
-    renderScoreboard();
+  const isDesktop = window.innerWidth >= 1025;
+  const inLandscape = isLandscape();
+  if (isDesktop || !inLandscape) {
+    // Portrait mobile/tablet OR Desktop -> show selection
+    vehicleOverlay.style.display = 'flex';
+  } else {
+    // Landscape mobile/tablet -> keep selection hidden until rotated
+    vehicleOverlay.style.display = 'none';
+  }
 
+    renderScoreboard();
     seedObstacleInitialPositions();
     rafId = requestAnimationFrame(tick);
   });
