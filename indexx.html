@@ -14,7 +14,6 @@
       --sign-bg: #fff;
       --sign-border: #d32f2f;
       --sign-text: #d32f2f;
-
       /* Layout */
       --scene-height: 100dvh;
 
@@ -74,7 +73,12 @@
       --road-right-ty: 0px;    /* right road border */
       --vehicle-ty: 0px;       /* whole vehicle layer (parent of #car/#bike) */
     }
-
+#popupContent img {
+  display: block;
+  margin: 20px auto;
+  max-width: 70%;
+  height: auto;
+}
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
@@ -86,6 +90,22 @@
     .wrap { width: 100dvw; height: var(--scene-height); position: relative; }
     html, body {
   touch-action: manipulation;
+}
+/* ===== EHS Full-Width Banner ===== */
+
+.ehs-banner {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.ehs-banner img {
+  width: 100%;        
+  height: auto;      
+  display: block;     
+  object-fit: contain; 
 }
     .scene {
       width: 100dvw; /* MOBILE: edge-to-edge stays as-is */
@@ -422,10 +442,13 @@ image.cloud {
     --cloud3-y: 370px;
       }
       .wrap {
-        width: min(930px, 90vw);
+        width: min(760px, 80vw);
         margin: 0 auto;
       }
       .scene { width: 100%; }
+      body{
+        background-color: #ffffff;
+      }
       
 .rotate-overlay {
     display: none !important;
@@ -498,6 +521,37 @@ body.landscape-block .wrap { filter: blur(3px) brightness(.7); }
     #vehicleSelectOverlay .label {
       margin-top: 8px; font-weight: bold;
     }
+    /* ===== Vehicle Selection Overlay Responsive Styling ===== */
+
+
+/* Instruction text */
+#vehicleSelectOverlay .instruction-text {
+  margin: 20px 0;
+  color: #1976d2;
+  font-weight: 600;
+  font-size: clamp(1rem, 3.5vw, 1.5rem);
+}
+
+/* Logos container spacing */
+#vehicleSelectOverlay .ehs-logo,
+#vehicleSelectOverlay .abbott-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+/* Logo images responsive */
+#vehicleSelectOverlay .ehs-logo img,
+#vehicleSelectOverlay .abbott-logo img {
+  width: clamp(40px, 10vw, 70px);
+  height: auto;
+}
+
+/* Vehicle choice images responsive */
+#vehicleSelectOverlay .choices img {
+  width: clamp(80px, 18vw, 120px);
+  height: auto;
+}
     #selectCarBtn .label { color: #1976d2; }
     #selectBikeBtn .label { color: #43a047; }
 
@@ -528,6 +582,9 @@ body.landscape-block .wrap { filter: blur(3px) brightness(.7); }
   <!-- Vehicle Selection Overlay -->
   <div id="vehicleSelectOverlay" aria-modal="true" role="dialog">
     <div class="card">
+      <div class="ehs-logo">
+        <img src="SVG/ehs_logo.png" width="60" height="60" alt="ehs logo">
+      </div>
       <h2 style="margin-bottom:24px;color:#1976d2;font-size:2rem;">Choose Your Vehicle</h2>
       <div class="choices">
         <button id="selectCarBtn" type="button">
@@ -539,10 +596,17 @@ body.landscape-block .wrap { filter: blur(3px) brightness(.7); }
           <div class="label">Bike</div>
         </button>
       </div>
+      <p class="instruction-text">move vehicle left and right</p>
+      <div class="abbott-logo">
+        <img src="SVG/abbott_logo.png" alt="Abbott Logo">
+      </div>
     </div>
   </div>
 
   <div class="wrap" id="gameRoot">
+    <div class="ehs-banner">
+        <img src="SVG/ehs_logo_banner.png" alt="EHS banner">
+      </div>
     <div id="scoreBoard">⭐ Stars: <span id="starsCount">0</span></div>
 
     <!-- SVG Scene -->
@@ -594,7 +658,7 @@ body.landscape-block .wrap { filter: blur(3px) brightness(.7); }
         </g>
 
         <!-- Banners (outside road, positioned on sides) -->
-        <g class="quiz-banner" id="banner1" transform="translate(360, 700)">
+        <g class="quiz-banner" id="banner1" transform="translate(320, 700)">
           <rect class="sign-pole" x="-10" y="0" width="20" height="200" rx="10" ry="10"></rect>
           <rect class="sign-plate" x="-180" y="-160" width="360" height="180"></rect>
           <text class="sign-text title" x="0" y="-80" text-anchor="middle" font-size="60">QUIZ TIME</text>
@@ -604,7 +668,7 @@ body.landscape-block .wrap { filter: blur(3px) brightness(.7); }
           <rect class="sign-plate" x="-180" y="-160" width="360" height="180"></rect>
           <text class="sign-text title" x="0" y="-80" text-anchor="middle" font-size="60">QUIZ TIME</text>
         </g>
-        <g class="quiz-banner" id="banner3" transform="translate(360, -500)">
+        <g class="quiz-banner" id="banner3" transform="translate(320, -500)">
           <rect class="sign-pole" x="-10" y="0" width="20" height="200" rx="10" ry="10"></rect>
           <rect class="sign-plate" x="-180" y="-160" width="360" height="180"></rect>
           <text class="sign-text title" x="0" y="-80" text-anchor="middle" font-size="60">QUIZ TIME</text>
@@ -658,6 +722,20 @@ body.landscape-block .wrap { filter: blur(3px) brightness(.7); }
 const MIN_GAP_MS = 1000;
 const MAX_GAP_MS = 2000;
 
+function getAdaptiveGameSpeed() {
+  const width = window.innerWidth;
+
+  // Mobile
+  if (width <= 600) return 150;
+
+  // Tablet (iPad)
+  if (width <= 1024) return 170;
+
+  // Laptop / Desktop
+  return 210;
+}
+
+let GAME_SPEED = getAdaptiveGameSpeed();
 
 
   // --- Touch-like detection (real touch or emulated in DevTools) ---
@@ -813,7 +891,6 @@ function renderScoreboard() {
   let carBounce = 0;
   let potholeImpact = 0;
 
-  const GAME_SPEED = 180;
 
   const QUIZ_ARRIVAL_DELAY = 12;
   const bannerSides = [0, 1, 0, 1];
@@ -942,6 +1019,9 @@ function getTriggerOffset() {
       if (effectiveBottomY >= triggerLine && !hasPassedBanner) {
         hasPassedBanner = true;
         isMoving = false;
+        bannerStates[idx].active = false;
+        activeBannerIndex = -1;
+        bannerEl.style.display = 'none';
         openQuiz(idx + 1);
       }
     } else {
@@ -1251,6 +1331,7 @@ function showFinalScore() {
   finalOverlay.style.cssText = `
     position:fixed; inset:0; background:rgba(0,0,0,0.9);
     display:flex; align-items:center; justify-content:center; z-index:3000;
+    overflow-y:auto; padding:20px;
   `;
 
   const safeStars = Math.max(0, starsRemaining);
@@ -1259,26 +1340,137 @@ function showFinalScore() {
     .join('');
 
   finalOverlay.innerHTML = `
-    <div style="background:white;padding:50px;border-radius:16px;text-align:center;max-width:700px;width:92%;box-shadow:0 12px 40px rgba(0,0,0,0.3);">
-      <div style="font-size:4rem;margin-bottom:20px;">🏆</div>
-      <h2 style="color:#1976d2;font-size:2.2rem;margin-bottom:15px;">Congratulations!</h2>
-      <p style="font-size:1.1rem;color:#666;margin-bottom:30px;">You've completed all EHS Safety quizzes!</p>
-
-      <div style="background:linear-gradient(135deg,#1976d2,#42a5f5);color:white;padding:24px;border-radius:12px;margin-bottom:20px;">
-        <div style="font-size:1.1rem;margin-bottom:8px;">Final Stars</div>
-        <div style="font-size:2rem;font-weight:bold;">${safeStars} / ${totalStars} Stars</div>
+    <div class="final-popup-container">
+      <!-- Top EHS logo -->
+      <div class="final-ehs-logo">
+        <img src="SVG/ehs_logo.png" alt="EHS Logo">
       </div>
 
-      <div class="stars-strip">${starsHtml}</div>
+      <div class="final-popup-content">
+        <div class="trophy">🏆</div>
+        <h2>Congratulations!</h2>
+        <p>You've completed all EHS Safety quizzes!</p>
 
-      <div style="margin-top:28px;">
-        <button onclick="location.reload()" style="background:#4caf50;color:white;border:none;padding:15px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;cursor:pointer;">
-          Start Over
-        </button>
+        <div class="final-stars">
+          <div class="stars-label">Final Stars</div>
+          <div class="stars-count">${safeStars} / ${totalStars} Stars</div>
+        </div>
+
+        <div class="stars-strip">${starsHtml}</div>
+
+        <div class="final-btn">
+          <button onclick="location.reload()">Start Over</button>
+        </div>
+      </div>
+
+      <!-- Bottom Abbott logo -->
+      <div class="final-abbott-logo">
+        <img src="SVG/abbott_logo.png" alt="Abbott Logo">
       </div>
     </div>
   `;
+
   document.body.appendChild(finalOverlay);
+
+  // Optional: Add responsive CSS dynamically
+  const style = document.createElement('style');
+  style.innerHTML = `
+    .final-popup-container {
+      background:white;
+      border-radius:16px;
+      text-align:center;
+      max-width:700px;
+      width:100%;
+      box-shadow:0 12px 40px rgba(0,0,0,0.3);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      overflow:hidden;
+      padding:20px;
+    }
+    .final-popup-container img {
+      width: auto;
+      max-width: 120px;
+      height: auto;
+      display:block;
+      margin: 10px auto;
+    }
+    .final-popup-content {
+      padding: 20px;
+      width: 100%;
+    }
+    .trophy {
+      font-size:4rem;
+      margin-bottom:20px;
+    }
+    .final-popup-content h2 {
+      color:#1976d2;
+      font-size:2.2rem;
+      margin-bottom:15px;
+    }
+    .final-popup-content p {
+      font-size:1.1rem;
+      color:#666;
+      margin-bottom:30px;
+    }
+    .final-stars {
+      background:linear-gradient(135deg,#1976d2,#42a5f5);
+      color:white;
+      padding:24px;
+      border-radius:12px;
+      margin-bottom:20px;
+    }
+    .stars-label {
+      font-size:1.1rem;
+      margin-bottom:8px;
+    }
+    .stars-count {
+      font-size:2rem;
+      font-weight:bold;
+    }
+    .stars-strip {
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      justify-content:center;
+      max-width:720px;
+      margin:12px auto 0;
+    }
+    .star-icon {
+      font-size:28px;
+      color:#ffb300;
+      line-height:1;
+      text-shadow:0 1px 2px rgba(0,0,0,.15);
+    }
+    .final-btn button {
+      background:#4caf50;
+      color:white;
+      border:none;
+      padding:15px 40px;
+      border-radius:8px;
+      font-size:1.1rem;
+      font-weight:bold;
+      cursor:pointer;
+      margin-top:28px;
+    }
+    /* ===== RESPONSIVE ===== */
+    @media (max-width:767px){
+      .final-popup-container {
+        padding:15px;
+      }
+      .final-popup-container img {
+        max-width:80px;
+      }
+      .trophy { font-size:3rem; margin-bottom:15px; }
+      .final-popup-content h2 { font-size:1.8rem; margin-bottom:12px; }
+      .final-popup-content p { font-size:1rem; margin-bottom:20px; }
+      .final-stars { padding:16px; margin-bottom:15px; }
+      .stars-count { font-size:1.6rem; }
+      .star-icon { font-size:22px; }
+      .final-btn button { padding:12px 30px; font-size:1rem; margin-top:20px; }
+    }
+  `;
+  document.head.appendChild(style);
 }
   function startCountdownAndMove() {
     if (rotateOverlay.style.display === 'flex') return;
@@ -1576,7 +1768,10 @@ function pickLane() {
 function simpleSpawn() {
   if (!gameStarted) return;
 
-  // only spawn if none visible (one-after-another)
+  // 🚫 Do not spawn if ANY obstacle is already visible
+  const anyVisible = obstacles.some(o => o.visible);
+  if (anyVisible) return;
+
   const free = obstacles.filter(o => !o.visible);
   if (free.length === 0) return;
 
@@ -1585,12 +1780,10 @@ function simpleSpawn() {
   obs.visible = true;
   obs.hit = false;
 
-  // spawn just above the screen NOW (relative to current roadOffset)
   const minY = getCssNumber('--banner-min-y', 800);
-  const spawnAhead = 350 + Math.random() * 200; // 350–550 px above top for variety
+  const spawnAhead = 400 + Math.random() * 200; 
   obs.initialY = (minY - spawnAhead) - roadOffset;
 
-  // choose lane (avoid repeating same lane back-to-back)
   obs.lane = pickLane();
 }
 
@@ -1825,7 +2018,8 @@ function applyRotateOverlayState() {
       landscapeMql.addListener(applyRotateOverlayState); // older Safari
     }
     window.addEventListener('orientationchange', () => { reclampVehicleX(); applyRotateOverlayState(); });
-    window.addEventListener('resize', () => { reclampVehicleX(); applyRotateOverlayState(); });
+    window.addEventListener('resize', () => { reclampVehicleX(); applyRotateOverlayState(); GAME_SPEED = getAdaptiveGameSpeed();
+ });
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', applyRotateOverlayState);
     }
