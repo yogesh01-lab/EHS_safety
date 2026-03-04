@@ -2,10 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Road Runner - Mobile OK + iPad Portrait Reduced View</title>
+  <title>EHS Safety</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <link rel="preload" as="image" href="SVG/rotate.gif" />
   <style>
+    html{-webkit-text-size-adjust:100%}html:focus-within{scroll-behavior:smooth}body{-webkit-text-size-adjust:100%;-moz-text-size-adjust:100%;text-size-adjust:100%;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased;min-height:100vh;position:relative;text-rendering:optimizeSpeed;width:100%}*,:after,:before{box-sizing:border-box}a:not([class]){-webkit-text-decoration-skip:ink;text-decoration-skip-ink:auto}a,abbr,acronym,address,applet,article,aside,audio,b,big,blockquote,body,canvas,caption,center,cite,code,dd,del,details,dfn,div,dl,dt,em,embed,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,html,i,iframe,img,ins,kbd,label,legend,li,mark,menu,nav,object,ol,output,p,pre,q,ruby,s,samp,section,small,span,strike,strong,sub,summary,sup,table,tbody,td,tfoot,th,thead,time,tr,tt,u,ul,var,video{border:0;font-size:100%;font:inherit;margin:0;padding:0;vertical-align:baseline}:focus{outline:0}article,aside,details,figcaption,figure,footer,header,hgroup,main,menu,nav,section{display:block}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:after,blockquote:before,q:after,q:before{content:"";content:none}input,input:required{box-shadow:none}input:-webkit-autofill,input:-webkit-autofill:active,input:-webkit-autofill:focus,input:-webkit-autofill:hover{-webkit-box-shadow:inset 0 0 0 30px #fff}input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-search-decoration,input[type=search]::-webkit-search-results-button,input[type=search]::-webkit-search-results-decoration{-webkit-appearance:none;-moz-appearance:none}input[type=search]{-webkit-appearance:none;-moz-appearance:none}input:focus{outline:none}audio,canvas,video{display:inline-block;max-width:100%}audio:not([controls]){display:none;height:0}[hidden]{display:none}a:active,a:hover{outline:none}img{height:auto;max-width:100%;vertical-align:middle}img,picture{display:inline-block}button,input{line-height:normal}button,html input[type=button],input[type=reset],input[type=submit]{-webkit-appearance:button;background:transparent;border:0;cursor:pointer}button[disabled],html input[disabled]{cursor:default}[disabled]{pointer-events:none}input[type=checkbox],input[type=radio]{padding:0}input[type=search]{-webkit-appearance:textfield;box-sizing:content-box}input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-search-decoration{-webkit-appearance:none}button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}button{background:transparent;border:0}textarea{overflow:auto;resize:vertical;vertical-align:top}table{border-collapse:collapse;border-spacing:0;text-indent:0}hr{background:#000;border:0;box-sizing:content-box;height:1px;line-height:0;margin:0;overflow:visible;padding:0;page-break-after:always;width:100%}pre{font-family:monospace,monospace;font-size:100%}a{background-color:transparent}abbr[title]{border-bottom:none;text-decoration:none}code,kbd,pre,samp{font-family:monospace,monospace}small,sub,sup{font-size:75%}sub,sup{line-height:0;position:relative;vertical-align:baseline}sub{bottom:-5px}sup{top:-5px}button,input,optgroup,select,textarea{font-family:inherit;font-size:100%;line-height:1;margin:0;padding:0}button,input{overflow:visible}button,select{text-transform:none}[type=button],[type=reset],[type=submit],button{-webkit-appearance:button}[type=button]::-moz-focus-inner,[type=reset]::-moz-focus-inner,[type=submit]::-moz-focus-inner,button::-moz-focus-inner{border-style:none;outline:0;padding:0}legend{border:0;color:inherit;display:block;max-width:100%;white-space:normal;width:100%}fieldset{min-width:0}body:not(:-moz-handler-blocked) fieldset{display:block}progress{vertical-align:baseline}[type=number]::-webkit-inner-spin-button,[type=number]::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}[type=search]::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}template{display:none}
     :root {
       /* Theme */
       --bg: #87ceeb;
@@ -79,6 +80,7 @@
   max-width: 70%;
   height: auto;
 }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
@@ -93,7 +95,7 @@
 }
 /* ===== EHS Full-Width Banner ===== */
 
-.ehs-banner {
+/* .ehs-banner {
   width: 100%;
   display: flex;
   justify-content: center;
@@ -106,6 +108,41 @@
   height: auto;      
   display: block;     
   object-fit: contain; 
+} */
+ .ehs-banner {
+  position: relative;     /* make it a positioned element */
+  z-index: 10;            /* higher than the SVG’s z-index/stacking */
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;       /* keep if you want to clip child overflow */
+}
+
+.ehs-banner {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  height: auto;
+  background: url('SVG/ehs_banner.png') center/cover no-repeat;
+  background-attachment: scroll;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.ehs-banner .ehs-logo-img {
+  width: 45%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  position: relative;
+  top: auto;
+  left: auto;
+}
+.ehs-banner .ehs-banner-img {
+  display: none;
 }
     .scene {
       width: 100dvw; /* MOBILE: edge-to-edge stays as-is */
@@ -166,19 +203,44 @@ image.cloud {
 }
 
 
-    #scoreBoard {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      font-size: var(--score-fs);
-      font-weight: bold;
-      color: #1976d2;
-      background: rgba(255,255,255,0.9);
-      padding: var(--score-pad-y) var(--score-pad-x);
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      z-index: 100;
-    }
+    .ehs-banner {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  height: auto;
+  background: url('SVG/ehs_banner.png') center/cover no-repeat;
+  background-attachment: scroll;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  overflow: visible;
+  padding: 0 15px;
+}
+
+.ehs-banner .ehs-logo-img {
+  width: 45%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  position: relative;
+}
+.ehs-banner .ehs-banner-img {
+  display: none;
+}
+
+#scoreBoard {
+  position: absolute;
+  top: 0;
+  right: 15px;
+  font-size: var(--score-fs);
+  font-weight: bold;
+  color: #1976d2;
+  background: rgba(255,255,255,0.9);
+  padding: var(--score-pad-y) var(--score-pad-x);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  z-index: 100;
+}
     /* Safari/iPad transform reliability for SVG images */
     image.cloud {
       transform-box: fill-box;
@@ -311,7 +373,7 @@ image.cloud {
         --popup-pad: 20px;
         --cloud-speed: 38s;
         --banner-scale: 0.85;
-        --vehicle-scale: 2.0;
+        --vehicle-scale: 1.6;
         --banner-min-y: 900;
         --banner-max-y: 2000;
         --buildings-ty: 100px;
@@ -328,7 +390,7 @@ image.cloud {
         --centerline-ty: 0px;
         --road-left-ty: 0px;
         --road-right-ty: 0px;
-        --vehicle-ty: 0px;
+        --vehicle-ty: 75px;
     --cloud1-y: 120px;
     --cloud2-y: 200px;
     --cloud3-y: 300px;
@@ -346,12 +408,20 @@ image.cloud {
       .quiz-banner .sign-text[font-size="60"] { font-size: clamp(26px, 6vw, 42px) !important; }
       .quiz-banner .sign-text[font-size="36"] { font-size: clamp(18px, 4.5vw, 28px) !important; }
     }
+    .ehs-banner .ehs-logo-img{
+    width: 45%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+    position: relative;
+    }
+
 
     /* ========= iPAD PORTRAIT ONLY (769–1024px) — REDUCED VIEW ========= */
     @media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
       /* Reduce visible width and center the game area */
       .wrap {
-        width: min(768px, 100vw);
+        width: min(818px, 100dvw);
         margin: 0 auto;
       }
       /* Make scene follow the wrap width (instead of 100vw) */
@@ -368,10 +438,80 @@ image.cloud {
         --popup-pad: 22px;
         --cloud-speed: 42s;
         --banner-scale: 0.92;
-        --vehicle-scale: 1.6;    /* smaller so car fits comfortably */
+        --vehicle-scale: 1.3;    /* smaller so car fits comfortably */
         --banner-min-y: 900;
         --banner-max-y: 2000;
-        --buildings-ty: 90px;
+        --buildings-ty: 104px;
+        --ground-ty: 40px;
+        --greenery-display: none;
+        --obstacle-base-w-car: 220px;
+        --obstacle-base-h-car: 230px;
+        --obstacle-base-w-hole: 180px;
+        --obstacle-base-h-hole: 180px;
+        --banner-plate-w: 320;
+        --banner-plate-h: 160;
+        --banner-pole-h: 180;
+        --device-y-offset: 00px;
+        --road-ty:-60px;
+        --centerline-ty: -40px;
+        --road-left-ty: -60px;
+        --road-right-ty: -60px;
+        --vehicle-ty: -405px;
+    --cloud1-y: 500px;
+    --cloud2-y: 490px;
+    --cloud3-y: 340px;
+      }
+      svg image.obstacle[data-type="car"] {
+        width: var(--obstacle-base-w-car) !important;
+        height: var(--obstacle-base-h-car) !important;
+      }
+      svg image.obstacle[data-type="pothole"] {
+        width: var(--obstacle-base-w-hole) !important;
+        height: var(--obstacle-base-h-hole) !important;
+      }
+      .quiz-banner .sign-text[font-size="60"] { font-size: clamp(26px, 4.6vw, 40px) !important; }
+      .quiz-banner .sign-text[font-size="36"] { font-size: clamp(18px, 3.8vw, 26px) !important; }
+
+      #scoreBoard{
+        top:32px;
+      }
+      .ehs-banner .ehs-banner-img {
+        /* height: 11%; */
+      }
+          .ehs-banner .ehs-logo-img{
+    width: 37%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+    position: relative;
+    padding: 20px;
+    }
+    }
+
+    /* ========= DESKTOP (>=1025px) — SAME AS IPAD ========= */
+    @media (min-width: 1025px) {
+      .wrap {
+        width: min(818px, 100dvw);
+        height: 100dvh;
+        margin: 0 auto;
+      }
+      .scene {
+        width: 100%;
+        height: var(--scene-height);
+      }
+      :root {
+        --scene-height: 100dvh;
+        --score-fs: 1.2rem;
+        --score-pad-y: 8px;
+        --score-pad-x: 16px;
+        --popup-max-w: 92vw;
+        --popup-pad: 22px;
+        --cloud-speed: 42s;
+        --banner-scale: 0.92;
+        --vehicle-scale: 1.3;
+        --banner-min-y: 900;
+        --banner-max-y: 2000;
+        --buildings-ty: 144px;
         --ground-ty: 90px;
         --greenery-display: none;
         --obstacle-base-w-car: 220px;
@@ -386,10 +526,10 @@ image.cloud {
         --centerline-ty: 0px;
         --road-left-ty: -12px;
         --road-right-ty: -12px;
-        --vehicle-ty: -185px;
-    --cloud1-y: 305px;
-    --cloud2-y: 300px;
-    --cloud3-y: 290px;
+        --vehicle-ty: -405px;
+        --cloud1-y: 500px;
+        --cloud2-y: 490px;
+        --cloud3-y: 340px;
       }
       svg image.obstacle[data-type="car"] {
         width: var(--obstacle-base-w-car) !important;
@@ -401,59 +541,23 @@ image.cloud {
       }
       .quiz-banner .sign-text[font-size="60"] { font-size: clamp(26px, 4.6vw, 40px) !important; }
       .quiz-banner .sign-text[font-size="36"] { font-size: clamp(18px, 3.8vw, 26px) !important; }
-    }
-
-    /* ========= DESKTOP (>=1025px) ========= */
-    @media (min-width: 1025px) {
-      :root {
-        --score-fs: 1.6rem;
-        --popup-max-w: 800px;
-        --cloud-speed: 45s;
-        --banner-scale: 1;
-        --vehicle-scale: 1.5;
-        --banner-min-y: 800;
-        --banner-max-y: 2000;
-        --scene-cursor: crosshair;
-
-        --buildings-ty: 145px;
-        --ground-ty: 99px;
-        --greenery-display: none;
-
-        /* Desktop banner plate */
-        --banner-plate-w: 260;
-        --banner-plate-h: 130;
-        --banner-pole-h: 100;
-
-        /* Global Y offset remains 0 on desktop */
-        --device-y-offset: 0px;
-
-    --obstacle-base-w-car: 180;
-    --obstacle-base-h-car: 220;
-    --obstacle-base-w-hole: 100;
-    --obstacle-base-h-hole: 100;
-
-        --road-ty: 0px;
-        --centerline-ty: 0px;
-        --road-left-ty: 0px;
-        --road-right-ty: 0px;
-        --vehicle-ty: -370px;
-    --cloud1-y: 455px;
-    --cloud2-y: 400px;
-    --cloud3-y: 370px;
+      #scoreBoard{
+        top:22px;
       }
-      .wrap {
-        width: min(760px, 80vw);
-        margin: 0 auto;
+      .ehs-banner .ehs-logo-img{
+        width: 37%;
+        height: auto;
+        display: block;
+        object-fit: contain;
+        position: relative;
+        padding: 20px;
       }
-      .scene { width: 100%; }
       body{
         background-color: #ffffff;
       }
-      
-.rotate-overlay {
-    display: none !important;
-  }
-
+      .rotate-overlay {
+        display: none !important;
+      }
     }
    /* ======== ROTATE OVERLAY (controlled by body.landscape-block) ======== */
 .rotate-overlay {
@@ -467,7 +571,7 @@ image.cloud {
   text-align: center;
 }
 .rotate-overlay .gif {
-  width: min(240px, 60vw);
+  width: min(240px, 60dvw);
   height: auto;
   margin-bottom: 16px;
 }
@@ -510,7 +614,7 @@ body.landscape-block .wrap { filter: blur(3px) brightness(.7); }
       max-width: 90vw;
     }
     #vehicleSelectOverlay .choices {
-      display: flex; gap: 40px; justify-content: center; align-items: center; flex-wrap: wrap;
+      display: flex; gap: 40px; justify-content: center; align-items: center; flex-wrap: wrap;margin: 25px 0;
     }
     #vehicleSelectOverlay button {
       background: none; border: none; cursor: pointer; outline: none;
@@ -527,9 +631,10 @@ body.landscape-block .wrap { filter: blur(3px) brightness(.7); }
 /* Instruction text */
 #vehicleSelectOverlay .instruction-text {
   margin: 20px 0;
-  color: #1976d2;
+  color: #004f71;
   font-weight: 600;
-  font-size: clamp(1rem, 3.5vw, 1.5rem);
+  font-size: clamp(1.2rem, 3.5vw, 1.5rem);
+  line-height: 1.2;
 }
 
 /* Logos container spacing */
@@ -541,15 +646,19 @@ body.landscape-block .wrap { filter: blur(3px) brightness(.7); }
 }
 
 /* Logo images responsive */
-#vehicleSelectOverlay .ehs-logo img,
-#vehicleSelectOverlay .abbott-logo img {
-  width: clamp(40px, 10vw, 70px);
-  height: auto;
+#vehicleSelectOverlay .ehs-logo img {
+width: clamp(40px, 59vw, 250px);
+height: auto;
 }
 
+#vehicleSelectOverlay .abbott-logo img {
+width: clamp(40px, 50vw, 180px);
+height: auto;
+margin-top: 40px;
+}
 /* Vehicle choice images responsive */
 #vehicleSelectOverlay .choices img {
-  width: clamp(80px, 18vw, 120px);
+  width: clamp(120px, 18vw, 120px);
   height: auto;
 }
     #selectCarBtn .label { color: #1976d2; }
@@ -583,35 +692,41 @@ body.landscape-block .wrap { filter: blur(3px) brightness(.7); }
   <div id="vehicleSelectOverlay" aria-modal="true" role="dialog">
     <div class="card">
       <div class="ehs-logo">
-        <img src="SVG/ehs_logo.png" width="60" height="60" alt="ehs logo">
+        <img src="SVG/ehs-logo.png" width="60" height="60" alt="ehs logo">
       </div>
-      <h2 style="margin-bottom:24px;color:#1976d2;font-size:2rem;">Choose Your Vehicle</h2>
+      <h2 style="margin:24px 0;color:#004f71;font-size:1.4rem; text-transform: uppercase; text-align: center;line-height: 1.2;">Play to learn the 
+<br/>safety measures</h2>
       <div class="choices">
         <button id="selectCarBtn" type="button">
-          <img src="SVG/car.svg" width="120" height="120" alt="Car">
-          <div class="label">Car</div>
+          <img src="SVG/car.png" width="120" height="120" alt="Car">
+          
         </button>
         <button id="selectBikeBtn" type="button">
-          <img src="SVG/bike-icon.svg" width="120" height="120" alt="Bike">
-          <div class="label">Bike</div>
+          <img src="SVG/bike.png" width="120" height="120" alt="Bike">
+          
         </button>
       </div>
-      <p class="instruction-text">move vehicle left and right</p>
+      <p class="instruction-text" style="margin-bottom: 40px;">SELECT YOUR VEHICLE</p>
+      <p class="instruction-text">HOW TO PLAY:<br/>Hold your finger on the vehicle to move 
+right or left and watchout for the hurdles.Answer quiz questions correctly to earn stars. Be careful—each time you hit a hurdle, you will lose one star.</p>
       <div class="abbott-logo">
-        <img src="SVG/abbott_logo.png" alt="Abbott Logo">
+        <img src="SVG/abbott-logo.png" alt="Abbott Logo">
       </div>
     </div>
   </div>
 
   <div class="wrap" id="gameRoot">
     <div class="ehs-banner">
-        <img src="SVG/ehs_logo_banner.png" alt="EHS banner">
+        <!-- <img src="SVG/ehs_banner.png" alt="EHS Logo" class="ehs-banner-img"> -->
+        <img src="SVG/ehs_banner_logo.png" alt="EHS Banner" class=" ehs-logo-img">
       </div>
     <div id="scoreBoard">⭐ Stars: <span id="starsCount">0</span></div>
 
     <!-- SVG Scene -->
     <svg id="scene" class="scene" viewBox="0 0 1000 2100" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Third person racing view" xmlns:xlink="http://www.w3.org/1999/xlink">
+      
       <defs>
+        
         <!-- Road & grass textures -->
         <pattern id="roadTexture" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
           <rect width="40" height="40" fill="#63666a"/>
@@ -658,7 +773,7 @@ body.landscape-block .wrap { filter: blur(3px) brightness(.7); }
         </g>
 
         <!-- Banners (outside road, positioned on sides) -->
-        <g class="quiz-banner" id="banner1" transform="translate(320, 700)">
+        <g class="quiz-banner" id="banner1" transform="translate(260, 700)">
           <rect class="sign-pole" x="-10" y="0" width="20" height="200" rx="10" ry="10"></rect>
           <rect class="sign-plate" x="-180" y="-160" width="360" height="180"></rect>
           <text class="sign-text title" x="0" y="-80" text-anchor="middle" font-size="60">QUIZ TIME</text>
@@ -668,7 +783,7 @@ body.landscape-block .wrap { filter: blur(3px) brightness(.7); }
           <rect class="sign-plate" x="-180" y="-160" width="360" height="180"></rect>
           <text class="sign-text title" x="0" y="-80" text-anchor="middle" font-size="60">QUIZ TIME</text>
         </g>
-        <g class="quiz-banner" id="banner3" transform="translate(320, -500)">
+        <g class="quiz-banner" id="banner3" transform="translate(260, -500)">
           <rect class="sign-pole" x="-10" y="0" width="20" height="200" rx="10" ry="10"></rect>
           <rect class="sign-plate" x="-180" y="-160" width="360" height="180"></rect>
           <text class="sign-text title" x="0" y="-80" text-anchor="middle" font-size="60">QUIZ TIME</text>
@@ -726,10 +841,10 @@ function getAdaptiveGameSpeed() {
   const width = window.innerWidth;
 
   // Mobile
-  if (width <= 600) return 150;
+  if (width <= 600) return 200;
 
   // Tablet (iPad)
-  if (width <= 1024) return 170;
+  if (width <= 1024) return 180;
 
   // Laptop / Desktop
   return 210;
@@ -753,20 +868,121 @@ let GAME_SPEED = getAdaptiveGameSpeed();
     vehicleOverlay && getComputedStyle(vehicleOverlay).display !== 'none';
 
   // Landscape detection (multiple signals for iOS/iPadOS reliability)
-  const landscapeMql = matchMedia('(orientation: landscape)');
-  function isLandscape() {
-    try {
-      if (landscapeMql && typeof landscapeMql.matches === 'boolean') {
-        return landscapeMql.matches;
+  // const landscapeMql = matchMedia('(orientation: landscape)');
+  // function isLandscape() {
+  //   try {
+  //     if (landscapeMql && typeof landscapeMql.matches === 'boolean') {
+  //       return landscapeMql.matches;
+  //     }
+  //   } catch {}
+  //   try {
+  //     if (screen.orientation && screen.orientation.type) {
+  //       return screen.orientation.type.includes('landscape');
+  //     }
+  //   } catch {}
+  //   return window.innerWidth > window.innerHeight;
+  // }
+  // --- Orientation & iPad handling ---
+
+// Media query for orientation
+const landscapeMql = matchMedia('(orientation: landscape)');
+
+// iPad detection: iPad in UA or "Macintosh" with touch points (iPadOS 13+)
+const isiPad = /iPad|Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1;
+
+/**
+ * Returns true if the device is in landscape orientation.
+ * Prioritizes iPad-specific checks, then falls back to standard APIs.
+ */
+function isLandscape() {
+  // Prefer media query when available
+  try {
+    if (landscapeMql && typeof landscapeMql.matches === 'boolean') {
+      return landscapeMql.matches;
+    }
+  } catch {}
+
+  // iPad-specific handling (covers iPadOS quirks)
+  try {
+    if (isiPad) {
+      // On iPad, matchMedia is reliable; fallback to dimension check if needed
+      const ipadMql = window.matchMedia && window.matchMedia('(orientation: landscape)');
+      if (ipadMql && typeof ipadMql.matches === 'boolean') {
+        return ipadMql.matches;
       }
-    } catch {}
-    try {
-      if (screen.orientation && screen.orientation.type) {
-        return screen.orientation.type.includes('landscape');
-      }
-    } catch {}
-    return window.innerWidth > window.innerHeight;
+      return window.innerWidth > window.innerHeight;
+    }
+  } catch {}
+
+  // Screen Orientation API
+  try {
+    if (screen.orientation && screen.orientation.type) {
+      return screen.orientation.type.includes('landscape');
+    }
+  } catch {}
+
+  // Final fallback: compare viewport dimensions
+  return window.innerWidth > window.innerHeight;
+}
+
+/**
+ * Call this when orientation might have changed.
+ * It runs your existing logic if the device is now landscape.
+ */
+function handleOrientationMaybeChanged() {
+  const landscapeNow = isLandscape();
+
+  if (landscapeNow) {
+    // 👉 Replace this with your already-written function
+    runMyLandscapeLogic();
+
+    // Optional iPad notification (only when iPad *and* landscape)
+    if (isiPad) {
+      // Comment out the next line if you don't want an alert
+      alert('iPad is in Landscape mode');
+    }
   }
+}
+
+// --- Event wiring for robust detection across browsers ---
+// 1) Media Query listener (modern browsers)
+try {
+  if (landscapeMql && typeof landscapeMql.addEventListener === 'function') {
+    landscapeMql.addEventListener('change', handleOrientationMaybeChanged);
+  } else if (landscapeMql && typeof landscapeMql.addListener === 'function') {
+    // Legacy
+    landscapeMql.addListener(handleOrientationMaybeChanged);
+  }
+} catch {}
+
+// 2) Screen Orientation API (where supported)
+try {
+  if (screen.orientation && typeof screen.orientation.addEventListener === 'function') {
+    screen.orientation.addEventListener('change', handleOrientationMaybeChanged);
+  } else {
+    // Legacy fallback
+    window.addEventListener('orientationchange', handleOrientationMaybeChanged);
+  }
+} catch {
+  window.addEventListener('orientationchange', handleOrientationMaybeChanged);
+}
+
+// 3) Resize as a final safety net
+window.addEventListener('resize', handleOrientationMaybeChanged);
+
+// 4) Fire once on load to capture initial state
+handleOrientationMaybeChanged();
+
+
+// --- Your existing function ---
+// Replace this with your actual implementation.
+function runMyLandscapeLogic() {
+  // Your already written function's code goes here.
+  // Example:
+  // startVideoPlayerFullscreen();
+  // rearrangeLayoutForWideMode();
+  console.log('Landscape detected — running existing logic...');
+}
 
   function restartGameCompletely() {
   try {
@@ -799,25 +1015,38 @@ const QUIZ_QUESTIONS = [
     q: 'What should you AVOID doing while driving to minimize distraction?',
     a: ['A. Adjusting mirrors before driving', 'B. Using hands free calling only when necessary', 'C. Checking notifications on your phone', 'D. Maintaining a safe following distance'],
     correct: 2,
-    imgs: ['img/quiz1-1.jpg', 'img/quiz1-2.jpg']   // <-- replace with your real paths
+    
+ info: `
+      <p>Distractions while driving is one of the prime causes of crashes. All keep your attention on the road & anticipate hazards to drive defensively to avoid crashes saving oneself & the other road users from serious injuries.</p>
+    `,
+
+    imgs: ['SVG/quiz-1-info.jpg']
   },
   {
     q: 'What is the safest way to lift heavy objects?',
     a: ['A. Bend at your waist and pull quickly', 'B. Keep your back straight and lift using your legs', 'C. Twist while lifting to save time', 'D. Lift alone even if the load is heavy'],
     correct: 1,
-    imgs: ['img/quiz2-1.jpg', 'img/quiz2-2.jpg']   // <-- replace
+     info: `
+      <p>Ergonomics aims to make work <b>comfortable, safe, and efficient</b> by reducing physical strain and preventing injuries. This includes, but not limited to, lifting weights, postures while sitting & driving vehicles. Please pay attention to your body & take required actions like correcting your postures and stretching your body in timely intervals to avoid Musculo skeletal disorders. Contact your healthcare professional and follow their medical guidance always.</p>
+    `,
+    imgs: ['SVG/quiz-1-info.jpg']
   },
   {
     q: 'What is essential inside cath labs?',
     a: ['A. Wearing headphones', 'B. Lead aprons, thyroid shields, lead caps, and proper radiation PPE', 'C. Casual clothing', 'D. Working without breaks'],
     correct: 1,
-    imgs: ['img/quiz3-1.jpg', 'img/quiz3-2.jpg']   // <-- replace
+    info: `
+      <p>Prolonged exposure to radiation in cath labs can lead to serious health risks. Always protect yourself by using high quality personal protective equipment (PPE). Employees who are pregnant or suspect they may be pregnant should inform their managers at the earliest and avoid entering cath labs to prevent potential harm to the developing fetus.</p>
+    `
   },
   {
     q: 'What is the best first step when you notice an unsafe condition?',
     a: ['A. Ignore it', 'B. Fix it silently', 'C. Report it immediately to a supervisor or safety team', 'D. Wait for someone else'],
     correct: 2,
-    imgs: ['img/quiz4-1.jpg', 'img/quiz4-2.jpg']   // <-- replace
+    info: `
+      <p>Reporting incidents including an unsafe condition, unsafe act, near miss helps Abbott in analyzing the root cause & develop an action plan to avoid the recurrence of similar incidents. Keep the affiliate specific incident reporting QR code handy to ensure timely reporting.</p>
+    `
+
   }
 ];
   const quizBanners = quizBannersAll.slice(0, MAX_QUIZZES);
@@ -892,7 +1121,7 @@ function renderScoreboard() {
   let potholeImpact = 0;
 
 
-  const QUIZ_ARRIVAL_DELAY = 12;
+  const QUIZ_ARRIVAL_DELAY = 10;
   const bannerSides = [0, 1, 0, 1];
 
   const bannerStates = quizBanners.map(() => ({ active: false, initialY: 0 }));
@@ -1047,8 +1276,8 @@ function showQuizQuestions(quizNumber) {
     <div id="quizDialog" role="dialog" aria-modal="true"
          style="background:#fff; padding:24px; border-radius:12px; width:min(560px, 92vw); max-height:85vh; box-shadow:0 10px 32px rgba(0,0,0,.25); display:flex; flex-direction:column;">
       <h2 id="quizTitle" style="color:#1976d2; text-align:center; margin-bottom:14px;">Quiz ${quizNumber}</h2>
-      <div id="quizBody" style="overflow:auto;"></div>
-      <div id="quizFooter" style="display:flex; gap:10px; justify-content:center; margin-top:16px;"></div>
+      <div id="quizBody" style="flex:1; overflow-y:auto; margin-bottom:16px;"></div>
+      <div id="quizFooter" style="display:flex; gap:10px; justify-content:center; padding-top:16px; border-top:1px solid #e0e0e0;"></div>
     </div>
   `;
   document.body.appendChild(modal);
@@ -1128,7 +1357,7 @@ function renderQuestion() {
 
       opt.style.background = '#e3f2fd';
       opt.style.borderColor = '#1976d2';
-      opt.style.transform = 'scale(1.03)';
+      opt.style.transform = 'scale(1)';
 
       submitBtn.disabled = false;
       submitBtn.style.background = '#1976d2';
@@ -1148,23 +1377,23 @@ function renderQuestion() {
     if (selectedIndex === data.correct) {
       answeredCorrectly = true;
 
-      options[selectedIndex].style.background = '#c8e6c9';
-      options[selectedIndex].style.borderColor = '#2e7d32';
-      options[selectedIndex].style.transform = 'scale(1.05)';
+      options[selectedIndex].style.background = '#00b140';
+      options[selectedIndex].style.borderColor = '#00b140';
+      options[selectedIndex].style.transform = 'scale(1)';
 
       msg.style.color = '#2e7d32';
       msg.textContent = "That's Correct!";
     } else {
       answeredCorrectly = false;
 
-      options[selectedIndex].style.background = '#ffcdd2';
-      options[selectedIndex].style.borderColor = '#d32f2f';
+      options[selectedIndex].style.background = '#e4002b';
+      options[selectedIndex].style.borderColor = '#e4002b';
 
-      options[data.correct].style.background = '#c8e6c9';
-      options[data.correct].style.borderColor = '#2e7d32';
-      options[data.correct].style.transform = 'scale(1.05)';
+      options[data.correct].style.background = '#00b140';
+      options[data.correct].style.borderColor = '#00b140';
+      options[data.correct].style.transform = 'scale(1)';
 
-      msg.style.color = '#d32f2f';
+      msg.style.color = '#e4002b';
       msg.innerHTML = `
         That's Incorrect! <br>
         Correct Answer: <b>${data.a[data.correct]}</b>
@@ -1180,16 +1409,23 @@ function renderQuestion() {
 function renderInformationScreen() {
   modal.querySelector('#quizTitle').textContent = "Information";
 
+  // Check if this quiz has images (only first 2 quizzes)
+  const hasImages = data.imgs && data.imgs.length > 0 && quizNumber <= 2;
+
   bodyEl.innerHTML = `
-    <div style="font-size:16px;color:#555;line-height:1.6;">
-      Please remember to always follow safety rules while driving.
-      Make responsible decisions and stay alert at all times.
+    <div style="font-size:20px;line-height:1.6;margin-bottom:20px;">
+      ${data.info || 'Please remember to always follow safety rules.'}
     </div>
+    ${hasImages ? `
+      <div style="text-align:center;margin-top:20px;">
+        <img src="${data.imgs[0]}" alt="Safety Information" style="max-width:100%;height:auto;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);" />
+      </div>
+    ` : ''}
   `;
 
   footerEl.innerHTML = `
     <button id="continueBtn"
-      style="background:#1976d2;color:white;padding:12px 22px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">
+      style="background:#1976d2;color:white;padding:12px 22px;border:none;border-radius:8px;font-weight:bold;cursor:pointer; font-size:16px">
       Click to Continue
     </button>
   `;
@@ -1343,7 +1579,7 @@ function showFinalScore() {
     <div class="final-popup-container">
       <!-- Top EHS logo -->
       <div class="final-ehs-logo">
-        <img src="SVG/ehs_logo.png" alt="EHS Logo">
+        <img src="SVG/ehs-logo.png" alt="EHS Logo">
       </div>
 
       <div class="final-popup-content">
@@ -1365,7 +1601,7 @@ function showFinalScore() {
 
       <!-- Bottom Abbott logo -->
       <div class="final-abbott-logo">
-        <img src="SVG/abbott_logo.png" alt="Abbott Logo">
+        <img src="SVG/abbott-logo.png" alt="Abbott Logo">
       </div>
     </div>
   `;
@@ -1414,7 +1650,7 @@ function showFinalScore() {
       margin-bottom:30px;
     }
     .final-stars {
-      background:linear-gradient(135deg,#1976d2,#42a5f5);
+      background:linear-gradient(135deg,#004f71,#5bc2e7);
       color:white;
       padding:24px;
       border-radius:12px;
@@ -1704,15 +1940,10 @@ function updateObstaclesAndCollisions() {
 
     el.style.display = (y >= minY) ? '' : 'none';
 
-    // Remove obstacle if off screen bottom
-    if (y > maxY + 400) {
-      data.visible = false;
-      el.style.display = 'none';
-      return;
-    }
-
-    // Collision
-    if (y > vehY - 150) {
+    // Collision detection BEFORE off-screen check - trigger when obstacle approaches
+    const collisionRangeAbove = hSvg * 2.5;
+    const collisionRangeBelow = hSvg * 0.8;
+    if (y > vehY - collisionRangeAbove && y < vehY + collisionRangeBelow && !data.hit) {
       const activeVehicle = document.getElementById(selectedVehicle || '');
       if (activeVehicle) {
         const playerRect = activeVehicle.getBoundingClientRect();
@@ -1725,8 +1956,12 @@ function updateObstaclesAndCollisions() {
           playerRect.bottom - padding > obstacleRect.top &&
           playerRect.top + padding < obstacleRect.bottom;
 
-        if (isColliding && !data.hit && data.visible) {
+        if (isColliding && data.visible) {
           data.hit = true;
+          data.visible = false;
+          el.style.display = 'none';
+          el.style.opacity = '0';
+          el.setAttribute('visibility', 'hidden');
 
           // reduce star
           if (starsRemaining > 0) {
@@ -1735,10 +1970,6 @@ function updateObstaclesAndCollisions() {
           }
 
           potholeImpact = 28;
-
-          // hide this obstacle
-          data.visible = false;
-          el.style.display = 'none';
           setTimeout(() => (data.hit = false), 300);
 
           // play hit audio
@@ -1751,6 +1982,13 @@ function updateObstaclesAndCollisions() {
           } catch (e) {}
         }
       }
+    }
+
+    // Remove obstacle if off screen bottom AFTER collision check
+    if (y > maxY + 100) {
+      data.visible = false;
+      el.style.display = 'none';
+      return;
     }
   });
 
@@ -1767,7 +2005,6 @@ function pickLane() {
 
 function simpleSpawn() {
   if (!gameStarted) return;
-
   // 🚫 Do not spawn if ANY obstacle is already visible
   const anyVisible = obstacles.some(o => o.visible);
   if (anyVisible) return;
@@ -1791,7 +2028,7 @@ let spawnTimer = null;
 function scheduleNextSpawn() {
   if (spawnTimer) clearTimeout(spawnTimer);
 
-  const delay = 3000 + Math.random() * 2000; 
+  const delay = 600 + Math.random() * 300; // obs delay 
   spawnTimer = setTimeout(() => {
     simpleSpawn();
     scheduleNextSpawn();
@@ -1822,10 +2059,11 @@ function scheduleNextSpawn() {
     if (activeVehicle) {
       const vehScale = getCssNumber('--vehicle-scale', 2.2);
       const vehY = ROAD_CONFIG.endY - 300;
+      const bikeScale = selectedVehicle === 'bike' ? 0.75 : 1;
 
       activeVehicle.setAttribute(
         'transform',
-        `translate(${currentCarX + engineVibration}, ${vehY + carBounce + potholeImpact}) scale(${vehScale})`
+        `translate(${currentCarX + engineVibration}, ${vehY + carBounce + potholeImpact}) scale(${vehScale * bikeScale})`
       );
     }
   }
